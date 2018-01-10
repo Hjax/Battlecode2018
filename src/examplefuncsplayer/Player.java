@@ -1,7 +1,10 @@
+package examplefuncsplayer;
+
+
 // import the API.
 // See xxx for the javadocs.
+
 import bc.*;
-package starter;
 
 public class Player {
     public static void main(String[] args) {

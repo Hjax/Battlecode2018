@@ -1,1 +1,9 @@
 /bin/
+Battlecode_Client_2018
+.classpath
+.project
+LICENSE
+README.md
+replay.bc18
+run.bat
+run.sh
