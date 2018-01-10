@@ -4,9 +4,9 @@ import bc.*;
 
 public class game {
 	private static GameController gc;
-	private static Direction[] directions;
-	private static VecUnit allies;
-	private static VecUnit enemies;
+	public static Direction[] directions;
+	public static VecUnit allies;
+	public static VecUnit enemies;
 	public static final int INFINITY = 99999999;
 	static {
         gc = new GameController();
@@ -465,6 +465,18 @@ public class game {
 	
 	public static void unload(int structure, Direction direction) {
 		gc.unload(structure, direction);
+	}
+	
+	public static boolean onMap(MapLocation loc, Planet p) {
+		return startingMap(p).onMap(loc);
+	}
+	
+	public static long initialKarboniteAt(MapLocation loc) {
+		return startingMap(loc.getPlanet()).initialKarboniteAt(loc);
+	}
+	
+	public static boolean isPassableTerrainAt(MapLocation loc) {
+		return startingMap(loc.getPlanet()).isPassableTerrainAt(loc) > 0;
 	}
 }
 
