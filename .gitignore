@@ -6,4 +6,4 @@ LICENSE
 README.md
 replay.bc18
 run.bat
-run.sh
+src/run.sh
