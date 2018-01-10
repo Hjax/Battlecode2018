@@ -24,13 +24,14 @@ public class Pathfinding {
 		 Queue<MapLocation> open = new LinkedList<>();
 		 Set<MapLocation> closed = new HashSet<>();
 		 open.add(dest);
+		 current_map.put(dest, 0);
 		 while (open.size() > 0) {
 			 MapLocation current = open.poll();
 			 for (MapLocation loc: around(current)) {
 				 if (closed.contains(loc)) {
 					 current_map.put(loc, Math.min(current_map.get(current) + 1, current_map.get(loc)));
 				 } else {
-					 current_map.put(loc, current_map.get(loc));
+					 current_map.put(loc, current_map.get(current) + 1);
 				 }
 				 if (!open.contains(loc)) {
 					 open.add(loc);
