@@ -302,6 +302,170 @@ public class game {
 		gc.writeTeamArray(index, value);
 	}
 	
+	public static void attack(int robot, int target) {
+		gc.attack(robot, target);
+	}
+	
+	public static void beginSnipe(int ranger, MapLocation location) {
+		gc.beginSnipe(ranger, location);
+	}
+	
+	public static void blink(int mage, MapLocation location) {
+		gc.blink(mage, location);
+	}
+	
+	public static void blueprint(int worker, UnitType structure, Direction direction) {
+		gc.blueprint(worker, structure, direction);
+	}
+	
+	public static void build(int worker, int blueprint) {
+		gc.build(worker, blueprint);
+	}
+	
+	public static boolean canAttack(int robot, int target) {
+		return gc.canAttack(robot, target);
+	}
+	
+	public static boolean canBeginSnipe(int ranger, MapLocation location) {
+		return gc.canBeginSnipe(ranger, location);
+	}
+	
+	public static boolean canBlink(int mage, MapLocation location) {
+		return gc.canBlink(mage, location);
+	}
+	
+	public static boolean canBlueprint(int worker, UnitType structure, Direction direction) { 
+		return gc.canBlueprint(worker, structure, direction);
+	}
+	
+	public static boolean canBuild(int worker, int structure) {
+		return gc.canBuild(worker, structure);
+	}
+	
+	public static boolean canHarvest(int worker, Direction direction) {
+		return gc.canHarvest(worker, direction);
+	}
+	
+	public static boolean canHeal(int healer, int target) {
+		return gc.canHeal(healer, target);
+	}
+	
+	public static boolean canJavelin(int knight, int target) {
+		return gc.canJavelin(knight, target);
+	}
+	
+	public static boolean canLaunchRocket(int rocket, MapLocation destination) {
+		return gc.canLaunchRocket(rocket, destination);
+	}
+	
+	public static boolean canLoad(int structure, int robot) {
+		return gc.canLoad(structure, robot);
+	}
+	
+	public static boolean canMove(int robot, Direction direction) {
+		return gc.canMove(robot, direction);
+	}
+	
+	public static boolean canOvercharge(int healer, int target) {
+		return gc.canOvercharge(healer, target);
+	}
+	
+	public static boolean canProduceRobot(int factory, UnitType robotType) {
+		return gc.canProduceRobot(factory, robotType);
+	}
+	
+	public static boolean canRepair(int worker, int structure) {
+		return gc.canRepair(worker, structure);
+	}
+	
+	public static boolean canReplicate(int worker, Direction direction) {
+		return gc.canReplicate(worker, direction);
+	}
+	
+	public static boolean canSenseUnit(int unit) {
+		return gc.canSenseUnit(unit);
+	}
+	
+	public static boolean canUnload(int structure, Direction direction) {
+		return gc.canUnload(structure, direction);
+	}
+	
+	public static void disintegrateUnit(int unit) {
+		gc.disintegrateUnit(unit);
+	}
+	
+	public static void harvest(int worker, Direction direction) {
+		gc.harvest(worker, direction);
+	}
+	
+	public static void heal(int healer, int target) {
+		gc.heal(healer, target);
+	}
+	
+	public static boolean isAttackReady(int unit) {
+		return gc.isAttackReady(unit);
+	}
+	
+	public static boolean isBeginSnipeReady(int ranger) {
+		return gc.isBeginSnipeReady(ranger);
+	}
+	
+	public static boolean isBlinkReady(int mage) {
+		return gc.isBlinkReady(mage);
+	}
+	
+	public static boolean isHealReady(int healer) {
+		return gc.isHealReady(healer);
+	}
+	
+	public static boolean isJavelinReady(int knight) {
+		return gc.isJavelinReady(knight);
+	}
+	
+	public static boolean isMoveReady(int unit) {
+		return gc.isMoveReady(unit);
+	}
+	
+	public static boolean isOverchargeReady(int unit) {
+		return gc.isOverchargeReady(unit);
+	}
+	
+	public static void javelin(int knight, int target) {
+		gc.javelin(knight, target);
+	}
+	
+	public static void launchRocket(int rocket, MapLocation location) {
+		gc.launchRocket(rocket, location);
+	}
+	
+	public static void load(int structure, int unit) {
+		gc.load(structure, unit);
+	}
+	
+	public static void moveRobot(int robot, Direction direction) {
+		gc.moveRobot(robot, direction);
+	}
+
+	
+	public static void overcharge(int healer, int target) {
+		gc.overcharge(healer, target);
+	}
+	
+	public static void produceRobot(int factory, UnitType type) {
+		gc.produceRobot(factory, type);
+	}
+	
+	public static void repair(int worker, int structure) {
+		gc.repair(worker, structure);
+	}
+	
+	public static void replicate(int worker, Direction direction) {
+		gc.replicate(worker, direction);
+	}
+	
+	public static void unload(int structure, Direction direction) {
+		gc.unload(structure, direction);
+	}
 }
 
 
