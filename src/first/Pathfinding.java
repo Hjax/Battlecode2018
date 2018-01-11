@@ -16,13 +16,10 @@ public class Pathfinding {
 		CONST3 = (int) Math.pow(2, 6) - 1;
 	}
 	
-	
-	
-	
 	private static List<MapLocation> around(MapLocation target) {
 		List<MapLocation> result = new ArrayList<>();
-		for (Direction direction: game.directions) {
-			if (game.onMap(target.add(direction), target.getPlanet()) && game.isPassableTerrainAt(target.add(direction))) {
+		for (Direction direction: Game.directions) {
+			if (Game.onMap(target.add(direction), target.getPlanet()) && Game.isPassableTerrainAt(target.add(direction))) {
 				result.add(target.add(direction));
 			}
 		}
@@ -30,7 +27,7 @@ public class Pathfinding {
 	}
 
 	private static int serialize(MapLocation loc) {
-		return loc.getX() * CONST1 + loc.getY() * CONST2 + (game.planet() == Planet.Earth ? 1 : 0);
+		return loc.getX() * CONST1 + loc.getY() * CONST2 + (Game.planet() == Planet.Earth ? 1 : 0);
 	}
 	
 	private static MapLocation deserialize(int loc) {
@@ -89,8 +86,8 @@ public class Pathfinding {
 			return Direction.Center;
 		}
 		Direction best = Direction.Center;
-		for (Direction direction: game.directions) {
-			if (game.isPassableTerrainAt(source.add(direction))) {
+		for (Direction direction: Game.directions) {
+			if (Game.isPassableTerrainAt(source.add(direction))) {
 				if (get(cache.get(serialize(dest)), source.add(best)) > get(cache.get(serialize(dest)), source.add(direction))) {
 					best = direction;
 				}

@@ -10,11 +10,11 @@ public class Player
     	
         while (true) 
         {
-        	game.startTurn();
-            System.out.println("Current round: "+ game.round());
+        	Game.startTurn();
+            System.out.println("Current round: "+ Game.round());
 
             Worker.run();
-            game.nextTurn();
+            Game.nextTurn();
         }
     }
 }

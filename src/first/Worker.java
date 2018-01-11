@@ -8,9 +8,9 @@ public class Worker
 	private static class workerDistanceTuple
 	{
 		public int rushDistance;
-		public Unit worker;
+		public Robot worker;
 		
-		workerDistanceTuple(int dist, Unit work)
+		workerDistanceTuple(int dist, Robot work)
 		{
 			rushDistance = dist;
 			worker = work;
@@ -25,13 +25,13 @@ public class Worker
 		workerDistanceTuple closeWorker = new workerDistanceTuple(-1, null);
 		workerDistanceTuple farWorker = new workerDistanceTuple(Constants.INFINITY, null);
 		
-		Unit[] startingUnits = game.getInitialUnits();
-		Unit[] startingAllies = new Unit[startingUnits.length/2];
-		Unit[] startingEnemies = new Unit[startingAllies.length];
+		Robot[] startingRobots = Game.getInitialUnits();
+		Robot[] startingAllies = new Robot[startingRobots.length/2];
+		Robot[] startingEnemies = new Robot[startingAllies.length];
 		
-		for (Unit ally:startingAllies)
+		for (Robot ally:startingAllies)
 		{
-			for (Unit enemy:startingEnemies)
+			for (Robot enemy:startingEnemies)
 			{
 				pathDistance = Pathfinding.pathLength(ally.location().mapLocation(), enemy.location().mapLocation());
 				if (pathDistance > max)

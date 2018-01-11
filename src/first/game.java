@@ -3,20 +3,15 @@ package first;
 import bc.*;
 import java.util.*;
 
-public class game {
-	private static GameController gc;
+public class Game {
+	public static GameController gc;
 	public static Direction[] directions;
-	public static VecUnit allies;
-	public static VecUnit enemies;
 	public static final int INFINITY = 99999999;
 	static {
         gc = new GameController();
         directions = Direction.values();
     }
 	public static void startTurn() {
-		allies = gc.myUnits();
-		// TODO update when theres a way to find the enemy team
-		enemies = gc.senseNearbyUnitsByTeam(new MapLocation(gc.planet(), 0, 0), INFINITY, gc.team());
 	}
 
 	public static VecMapLocation allLocationsWithin(MapLocation location, long radis_squared) {
@@ -203,10 +198,10 @@ public class game {
 		gc.moveRobot(robot.id(), direction);
 	}
 	
-	public static Unit[] myUnits() {
-		Unit[] units = new Unit[(int) gc.myUnits().size()];
+	public static Robot[] myUnits() {
+		Robot[] units = new Robot[(int) gc.myUnits().size()];
 		for (int i = 0; i < gc.myUnits().size(); i++) {
-			units[i] = gc.myUnits().get(i);
+			units[i] = new Robot(gc.myUnits().get(i));
 		}
 		return units;
 	}
@@ -259,62 +254,62 @@ public class game {
 		return gc.round();
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, long radius) {
+	public static Robot[] senseNearbyUnits(MapLocation location, long radius) {
 		VecUnit result = gc.senseNearbyUnits(location, radius);
-		Unit[] units = new Unit[(int) result.size()];
+		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = result.get(i);
+			units[i] = new Robot(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, long radius, Team team) {
+	public static Robot[] senseNearbyUnits(MapLocation location, long radius, Team team) {
 		VecUnit result = gc.senseNearbyUnitsByTeam(location, radius, team);
-		Unit[] units = new Unit[(int) result.size()];
+		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = result.get(i);
+			units[i] = new Robot(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, long radius, UnitType type) {
+	public static Robot[] senseNearbyUnits(MapLocation location, long radius, UnitType type) {
 		VecUnit result = gc.senseNearbyUnitsByType(location, radius, type);
-		Unit[] units = new Unit[(int) result.size()];
+		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = result.get(i);
+			units[i] = new Robot(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, long radius, UnitType type, Team team) {
+	public static Robot[] senseNearbyUnits(MapLocation location, long radius, UnitType type, Team team) {
 		VecUnit result = gc.myUnits();
-		List<Unit> units = new ArrayList<Unit>(); 
+		List<Robot> units = new ArrayList<Robot>(); 
 		for (int i = 0; i < result.size(); i++) {
 			if (result.get(i).unitType().equals(type) && result.get(i).team().equals(team)) {
-				units.add(result.get(i));
+				units.add(new Robot(result.get(i)));
 			}
 		}
-		return units.toArray(new Unit[0]);
+		return units.toArray(new Robot[0]);
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, UnitType type, Team team) {
+	public static Robot[] senseNearbyUnits(MapLocation location, UnitType type, Team team) {
 		return senseNearbyUnits(location, INFINITY, type, team);
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, Team team) {
+	public static Robot[] senseNearbyUnits(MapLocation location, Team team) {
 		return senseNearbyUnits(location, INFINITY, team);
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location, UnitType type) {
+	public static Robot[] senseNearbyUnits(MapLocation location, UnitType type) {
 		return senseNearbyUnits(location, INFINITY, type);
 	}
 	
-	public static Unit[] senseNearbyUnits(MapLocation location) {
+	public static Robot[] senseNearbyUnits(MapLocation location) {
 		return senseNearbyUnits(location, INFINITY);
 	}
 	
-	public static Unit senseUnitAtLocation(MapLocation location) {
-		return gc.senseUnitAtLocation(location);
+	public static Robot senseUnitAtLocation(MapLocation location) {
+		return new Robot(gc.senseUnitAtLocation(location));
 	}
 	
 	public static PlanetMap startingMap(Planet planet) {
@@ -325,16 +320,26 @@ public class game {
 		return gc.team();
 	}
 	
-	public static Unit unit(int id) {
-		return gc.unit(id);
+	public static Robot unit(int id) {
+		return new Robot(gc.unit(id));
 	}
 	
-	public static VecUnit units() {
-		return gc.units();
+	public static Robot[] units() {
+		VecUnit result = gc.units();
+		Robot[] units = new Robot[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = new Robot(result.get(i));
+		}
+		return units;
 	}
 	
-	public static VecUnit unitsInSpace() {
-		return gc.unitsInSpace();
+	public static Robot[] unitsInSpace() {
+		VecUnit result = gc.unitsInSpace();
+		Robot[] units = new Robot[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = new Robot(result.get(i));
+		}
+		return units;
 	}
 	
 	public static void unload(Unit structure, Direction direction) {
@@ -525,11 +530,11 @@ public class game {
 		return startingMap(loc.getPlanet()).isPassableTerrainAt(loc) > 0;
 	}
 	
-	public static Unit[] getInitialUnits() {
+	public static Robot[] getInitialUnits() {
 		VecUnit result = startingMap(Planet.Earth).getInitial_units();
-		Unit[] units = new Unit[(int) result.size()];
+		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = result.get(i);
+			units[i] = new Robot(result.get(i));
 		}
 		return units;
 	}
