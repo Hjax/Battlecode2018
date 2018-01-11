@@ -17,13 +17,10 @@ public class Pathfinding {
 	}
 	
 	private static List<MapLocation> around(MapLocation target) {
-		List<MapLocation> result = new ArrayList<>();
-		for (Direction direction: Game.directions) {
-			if (direction.equals(Direction.Center)) {
-				continue;
-			}
-			if (Game.onMap(target.add(direction), target.getPlanet()) && Game.isPassableTerrainAt(target.add(direction))) {
-				result.add(target.add(direction));
+		List<MapLocation> result = new ArrayList<>(8);
+		for (int i = 0; i < 8; i++) {
+			if (Game.onMap(target.add(Game.moveDirections[i]), target.getPlanet()) && Game.isPassableTerrainAt(target.add(Game.moveDirections[i]))) {
+				result.add(target.add(Game.moveDirections[i]));
 			}
 		}
 		return result;
@@ -65,16 +62,20 @@ public class Pathfinding {
 		 Set<Integer> closed = new HashSet<>();
 		 
 		 put(open, dest);
+		 put(closed, dest);
 		 put(current_map, dest, 0);
 		 while (open.size() > 0) {
-			 MapLocation current = pop(open);
-			 for (MapLocation loc: around(current)) {
-				 if (!contains(open, loc) && !contains(closed, loc)) {
-					 put(open, loc);
-					 put(current_map, loc, get(current_map, current) + 1);
-				 }
-			 }
-			 put(closed, current);
+			MapLocation current = pop(open);
+			// for each direction 
+			for (int i = 0; i < 8; i++) {
+				if (!contains(closed, current.add(Game.moveDirections[i]))) {
+					if (Game.onMap(current.add(Game.moveDirections[i]), current.getPlanet()) && Game.isPassableTerrainAt(current.add(Game.moveDirections[i]))) {
+						 put(open, current.add(Game.moveDirections[i]));
+						 put(closed, current.add(Game.moveDirections[i]));
+						 put(current_map, current.add(Game.moveDirections[i]), get(current_map, current) + 1);
+					}
+				}
+			}
 		 }
 		 cache.put(serialize(dest), current_map);
 	}
@@ -99,7 +100,9 @@ public class Pathfinding {
 	
 	public static int pathLength(MapLocation source, MapLocation dest) {
 		if (!contains(cache.keySet(), dest) && !contains(cache.keySet(), source)) {
+			long start = System.nanoTime();
 			bfs(dest);
+			System.out.println((System.nanoTime() - start) / 1000000.0);
 		}
 		if (contains(cache.keySet(), dest)) {
 			if (!contains(cache.get(serialize(dest)).keySet(), source)) {
