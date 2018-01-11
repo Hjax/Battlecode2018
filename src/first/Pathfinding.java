@@ -99,7 +99,7 @@ public class Pathfinding {
 		return best;
 	}
 	
-	public static int path_length(MapLocation source, MapLocation dest) {
+	public static int pathLength(MapLocation source, MapLocation dest) {
 		if (!contains(cache.keySet(), dest)) {
 			long start = System.nanoTime();
 			bfs(dest);
