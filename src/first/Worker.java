@@ -45,11 +45,14 @@ public class Worker
 			}
 			if (max < closeWorker.rushDistance)
 			{
-				closeWorker = new workerDistanceTuple(max, ally);
+				closeWorker.rushDistance = max;
+				closeWorker.worker = ally;
 			}
 			if (min > farWorker.rushDistance)
 			{
-				farWorker = new workerDistanceTuple(min, ally);
+				
+				farWorker.rushDistance = min;
+				farWorker.worker = ally;
 			}
 		}
 		if (closeWorker.rushDistance < Constants.RUSHTHRESHOLD)
