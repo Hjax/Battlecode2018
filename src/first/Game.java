@@ -282,10 +282,10 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(MapLocation location, long radius, UnitType type, Team team) {
-		VecUnit result = gc.myUnits();
+		VecUnit result =  gc.senseNearbyUnitsByType(location, radius, type);
 		List<Robot> units = new ArrayList<Robot>(); 
 		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).unitType().equals(type) && result.get(i).team().equals(team)) {
+			if (result.get(i).team().equals(team)) {
 				units.add(new Robot(result.get(i)));
 			}
 		}
