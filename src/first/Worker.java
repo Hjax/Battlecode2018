@@ -5,25 +5,25 @@ import bc.*;
 public class Worker 
 {
 	
-	private static class workerDistanceTuple
+	private static class WorkerDistanceTuple
 	{
 		public int rushDistance;
 		public Robot worker;
 		
-		workerDistanceTuple(int dist, Robot work)
+		WorkerDistanceTuple(int dist, Robot work)
 		{
 			rushDistance = dist;
 			worker = work;
 		}
 	}
 	
-	private static workerDistanceTuple bestWorker()
+	private static WorkerDistanceTuple bestWorker()
 	{
 		int min = Constants.INFINITY;
 		int max = -1;
 		int pathDistance = -1;
-		workerDistanceTuple closeWorker = new workerDistanceTuple(-1, null);
-		workerDistanceTuple farWorker = new workerDistanceTuple(Constants.INFINITY, null);
+		WorkerDistanceTuple closeWorker = new WorkerDistanceTuple(-1, null);
+		WorkerDistanceTuple farWorker = new WorkerDistanceTuple(Constants.INFINITY, null);
 		
 		Robot[] startingRobots = Game.getInitialUnits();
 		Robot[] startingAllies = new Robot[startingRobots.length/2];
