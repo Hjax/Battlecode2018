@@ -524,6 +524,15 @@ public class game {
 	public static boolean isPassableTerrainAt(MapLocation loc) {
 		return startingMap(loc.getPlanet()).isPassableTerrainAt(loc) > 0;
 	}
+	
+	public static Unit[] getInitialUnits() {
+		VecUnit result = startingMap(Planet.Earth).getInitial_units();
+		Unit[] units = new Unit[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = result.get(i);
+		}
+		return units;
+	}
 }
 
 
