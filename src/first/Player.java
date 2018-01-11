@@ -5,7 +5,7 @@ import bc.*;
 
 public class Player {
     public static void main(String[] args) {
-
+    	
         while (true) {
         	game.startTurn();
             System.out.println("Current round: "+ game.round());
@@ -16,7 +16,11 @@ public class Player {
 
                 // Most methods on gc take unit IDs, instead of the unit objects themselves.
                 if (game.isMoveReady(unit) && game.canMove(unit, Direction.Northwest)) {
-                    game.moveRobot(unit, Direction.Northwest);
+                	Direction dir = Pathfinding.path(unit.location().mapLocation(), new MapLocation(Planet.Earth, 8, 8));
+                	if (!(dir == Direction.Center)) {
+                		game.moveRobot(unit, dir);
+                	}
+                    
                 }
             }
             // Submit the actions we've done, and wait for our next turn.

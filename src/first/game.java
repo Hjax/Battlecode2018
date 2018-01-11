@@ -445,7 +445,6 @@ public class game {
 	public static void moveRobot(int robot, Direction direction) {
 		gc.moveRobot(robot, direction);
 	}
-
 	
 	public static void overcharge(int healer, int target) {
 		gc.overcharge(healer, target);
