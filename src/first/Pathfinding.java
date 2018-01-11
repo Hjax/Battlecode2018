@@ -19,6 +19,9 @@ public class Pathfinding {
 	private static List<MapLocation> around(MapLocation target) {
 		List<MapLocation> result = new ArrayList<>();
 		for (Direction direction: Game.directions) {
+			if (direction.equals(Direction.Center)) {
+				continue;
+			}
 			if (Game.onMap(target.add(direction), target.getPlanet()) && Game.isPassableTerrainAt(target.add(direction))) {
 				result.add(target.add(direction));
 			}
@@ -78,9 +81,7 @@ public class Pathfinding {
 	
 	public static Direction path(MapLocation source, MapLocation dest) {
 		if (!contains(cache.keySet(), dest)) {
-			long start = System.nanoTime();
 			bfs(dest);
-			System.out.println((System.nanoTime() - start) / 1000000.0);
 		}
 		if (!contains(cache.get(serialize(dest)).keySet(), source)) {
 			return Direction.Center;
@@ -98,9 +99,7 @@ public class Pathfinding {
 	
 	public static int pathLength(MapLocation source, MapLocation dest) {
 		if (!contains(cache.keySet(), dest) && !contains(cache.keySet(), source)) {
-			long start = System.nanoTime();
 			bfs(dest);
-			System.out.println((System.nanoTime() - start) / 1000000.0);
 		}
 		if (contains(cache.keySet(), dest)) {
 			if (!contains(cache.get(serialize(dest)).keySet(), source)) {
