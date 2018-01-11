@@ -53,4 +53,16 @@ public class Utilities
 			return start;
 		}
 	}
+	
+	public static Direction findOccupiableDir(MapLocation start)
+	{
+		for (Direction dir: Game.directions)
+		{
+			if (Game.isOccupiable(offsetInDirection(start, dir, 1)) > 0)
+			{
+				return dir;
+			}
+		}
+		return Direction.Center;
+	}
 }

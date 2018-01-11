@@ -6,6 +6,26 @@ import bc.*;
 
 public class GameInfoCache 
 {
+	public static ArrayList<MapLocation> karboniteDeposits;
+	
+	static
+	{
+		MapLocation checkLocation;
+		for (int x = 0; x < Game.startingMap(Game.planet()).getWidth(); x++)
+		{
+			for (int y = 0; y < Game.startingMap(Game.planet()).getHeight(); y++)
+			{
+				checkLocation = new MapLocation(Game.planet(), x, y);
+				System.out.printf("checklocation has x %d\n", checkLocation.getX());
+				if (Game.initialKarboniteAt(checkLocation) > 0)
+				{
+					karboniteDeposits.add(checkLocation);
+				}
+			}
+		}
+	}
+	
+	
 	public static ArrayList<Robot> allyWorkers = new ArrayList<Robot>();
 	public static ArrayList<Robot> allyKnights = new ArrayList<Robot>();
 	public static ArrayList<Robot> allyRangers = new ArrayList<Robot>();
