@@ -17,9 +17,9 @@ public class Player
         	Game.startTurn();
   
         	
-            //System.out.println("Current round: "+ Game.round());
+            System.out.println("Current round: "+ Game.round());
 
-            //Worker.run();
+            Worker.run();
             Game.nextTurn();
         }
     }

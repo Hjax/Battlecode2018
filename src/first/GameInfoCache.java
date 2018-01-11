@@ -6,7 +6,7 @@ import bc.*;
 
 public class GameInfoCache 
 {
-	public static ArrayList<Tile> karboniteDeposits;
+	public static ArrayList<Tile> karboniteDeposits = new ArrayList<Tile>();
 	
 	static
 	{
@@ -16,7 +16,6 @@ public class GameInfoCache
 			for (int y = 0; y < Game.startingMap(Game.planet()).getHeight(); y++)
 			{
 				checkLocation = Tile.getInstance(Game.planet(), x, y);
-				System.out.printf("checklocation has x %d\n", checkLocation.getX());
 				if (Game.initialKarboniteAt(checkLocation) > 0)
 				{
 					karboniteDeposits.add(checkLocation);

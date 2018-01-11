@@ -146,7 +146,7 @@ public class Worker
 		private void score(Tile deposit)
 		{
 			score = 20;
-			score += 1000/Game.karbonite();
+			score += 1000/(Game.karbonite()+1);
 			for (Robot worker:idleWorkers)
 			{
 				score += 200/Pathfinding.pathLength(worker.tile(), location);
