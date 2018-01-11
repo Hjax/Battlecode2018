@@ -86,11 +86,20 @@ public class Worker
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
-			System.out.printf("\t\tAttempting to build Factory\n", bestWorker.worker.id());
-			Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
-			idleWorkers.remove(bestWorker.worker);
-			currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1)));
-			System.out.printf("\t\t factory ID is %d\n", currentBlueprints.iterator().next().id());
+			buildDir = Utilities.findNearestPassableDir(bestWorker.worker.tile(), buildDir);
+			if (buildDir != Direction.Center)
+			{
+				System.out.printf("\t\tAttempting to build Factory\n", bestWorker.worker.id());
+				Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
+				idleWorkers.remove(bestWorker.worker);
+				currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1)));
+				System.out.printf("\t\t factory ID is %d\n", currentBlueprints.iterator().next().id());
+			}
+			else
+			{
+				//TODO: HANDLE OUR BEST WORKER BEING TRAPPED
+			}
+			
 		}
 	}
 	
@@ -138,6 +147,7 @@ public class Worker
 		private void score(Robot blueprint)
 		{
 			score = 100;
+			score = Constants.INFINITY;
 			score += Game.karbonite() / 20f;
 			score += blueprint.health()/blueprint.maxHealth() * 100f;
 			for (Robot worker:idleWorkers)
@@ -226,6 +236,7 @@ public class Worker
 		WorkerTarget max = new WorkerTarget(-1, null, -1);
 		while (idleWorkers.size() > 0)
 		{
+			System.out.printf("\t\tsize of idleWorker is %d\n", idleWorkers.size());
 			for (int count = 0; count < targets.length; count++)
 			{
 				if (targets[count].score > max.score)
