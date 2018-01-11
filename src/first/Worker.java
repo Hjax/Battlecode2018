@@ -86,9 +86,11 @@ public class Worker
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
-			System.out.printf("bestWorker id is %d\n", bestWorker.worker.id());
+			System.out.printf("\t\tAttempting to build Factory\n", bestWorker.worker.id());
 			Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
+			idleWorkers.remove(bestWorker.worker);
 			currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1)));
+			System.out.printf("\t\t factory ID is %d\n", currentBlueprints.iterator().next().id());
 		}
 	}
 	
@@ -140,7 +142,7 @@ public class Worker
 			score += blueprint.health()/blueprint.maxHealth() * 100f;
 			for (Robot worker:idleWorkers)
 			{
-				score += 200/Pathfinding.pathLength(worker.tile(), location);
+				score += 200/(1+Pathfinding.pathLength(worker.tile(), location));
 			}
 		}
 		private void score(Tile deposit)
@@ -149,15 +151,15 @@ public class Worker
 			score += 1000/(Game.karbonite()+1);
 			for (Robot worker:idleWorkers)
 			{
-				score += 200/Pathfinding.pathLength(worker.tile(), location);
+				score += 200/(1+Pathfinding.pathLength(worker.tile(), location));
 			}
 			for (Robot factory:GameInfoCache.allyFactories)
 			{
-				score += 200/Pathfinding.pathLength(factory.tile(), location);
+				score += 200/(1+Pathfinding.pathLength(factory.tile(), location));
 			}
 			for (Robot factory:GameInfoCache.enemyFactories)
 			{
-				score -= 400/Pathfinding.pathLength(factory.tile(), location);
+				score -= 400/(1+Pathfinding.pathLength(factory.tile(), location));
 			}
 		}
 	
@@ -174,12 +176,12 @@ public class Worker
 		}
 		private void descoreBlueprint(Robot worker, Robot blueprint)
 		{
-			score -= 200/Pathfinding.pathLength(worker.tile(), location);
+			score -= 200/(1+Pathfinding.pathLength(worker.tile(), location));
 		}
 	
 		private void descoreDeposit(Robot worker, Tile deposit)
 		{
-			score -= 200/Pathfinding.pathLength(worker.tile(), location);
+			score -= 200/(1+Pathfinding.pathLength(worker.tile(), location));
 		}
 	}
 	
@@ -208,7 +210,7 @@ public class Worker
 	
 	private static void giveWorkersOrders()
 	{
-		
+		System.out.printf("\t\tGiving orders to workers\n");
 		WorkerTarget[] targets = new WorkerTarget[currentBlueprints.size() + GameInfoCache.karboniteDeposits.size()];
 		int targetIndex = 0;
 		for (Robot structure:currentBlueprints)
@@ -218,7 +220,7 @@ public class Worker
 		}
 		for (Tile deposit:GameInfoCache.karboniteDeposits)
 		{
-			targets[targetIndex] = new WorkerTarget(0, deposit, 0);
+			targets[targetIndex] = new WorkerTarget(0, deposit, 1);
 			targets[targetIndex++].score(deposit);
 		}
 		WorkerTarget max = new WorkerTarget(-1, null, -1);
