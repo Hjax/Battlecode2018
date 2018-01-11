@@ -25,15 +25,11 @@ public class Worker
 		WorkerDistanceTuple closeWorker = new WorkerDistanceTuple(-1, null);
 		WorkerDistanceTuple farWorker = new WorkerDistanceTuple(Constants.INFINITY, null);
 		
-		Robot[] startingRobots = Game.getInitialUnits();
-		Robot[] startingAllies = new Robot[startingRobots.length/2];
-		Robot[] startingEnemies = new Robot[startingAllies.length];
-		
-		for (Robot ally:startingAllies)
+		for (int ally = 0; ally < Constants.startingAlliesLocation.length; ally++)
 		{
-			for (Robot enemy:startingEnemies)
+			for (int enemy = 0; enemy < Constants.startingEnemiesLocation.length; enemy++)
 			{
-				pathDistance = Pathfinding.pathLength(ally.location().mapLocation(), enemy.location().mapLocation());
+				pathDistance = Pathfinding.pathLength(Constants.startingAlliesLocation[ally], Constants.startingEnemiesLocation[enemy]);
 				if (pathDistance > max)
 					{
 						max = pathDistance;
@@ -46,13 +42,13 @@ public class Worker
 			if (max < closeWorker.rushDistance)
 			{
 				closeWorker.rushDistance = max;
-				closeWorker.worker = ally;
+				closeWorker.worker = Constants.startingAllies[ally];
 			}
 			if (min > farWorker.rushDistance)
 			{
 				
 				farWorker.rushDistance = min;
-				farWorker.worker = ally;
+				farWorker.worker = Constants.startingAllies[ally];
 			}
 		}
 		if (closeWorker.rushDistance < Constants.RUSHTHRESHOLD)
@@ -65,6 +61,9 @@ public class Worker
 	
 	public static void run() 
 	{
+		WorkerDistanceTuple bestWorker = bestWorker();
+		WorkerDistanceTuple nearestEnemy = new WorkerDistanceTuple(Constants.INFINITY, null);
 
+		
 	}
 }
