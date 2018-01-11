@@ -11,7 +11,9 @@ public class Game {
         gc = new GameController();
         directions = Direction.values();
     }
-	public static void startTurn() {
+	public static void startTurn() 
+	{
+		GameInfoCache.updateCache();
 	}
 
 	public static VecMapLocation allLocationsWithin(MapLocation location, long radis_squared) {
