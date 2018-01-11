@@ -4,93 +4,46 @@ import bc.*;
 import java.util.*;
 
 public class Pathfinding {
-	private static Map<Integer, Map<Integer, Integer>> cache;
-	private static final int CONST1; 
-	private static final int CONST2;
-	private static final int CONST3;
+	private static Map<Tile, Map<Tile, Integer>> cache;
 	static {
 		cache = new HashMap<>();
-		// magic constants for serialize / deserialize
-		CONST1 = (int) Math.pow(2, 20);
-		CONST2 = (int) Math.pow(2, 10);
-		CONST3 = (int) Math.pow(2, 6) - 1;
 	}
 	
-	private static List<MapLocation> around(MapLocation target) {
-		List<MapLocation> result = new ArrayList<>(8);
-		for (int i = 0; i < 8; i++) {
-			if (Game.onMap(target.add(Game.moveDirections[i]), target.getPlanet()) && Game.isPassableTerrainAt(target.add(Game.moveDirections[i]))) {
-				result.add(target.add(Game.moveDirections[i]));
-			}
-		}
-		return result;
-	}
+	private static void bfs(Tile dest) {
 
-	private static int serialize(MapLocation loc) {
-		return loc.getX() * CONST1 + loc.getY() * CONST2 + (Game.planet() == Planet.Earth ? 1 : 0);
-	}
-	
-	private static MapLocation deserialize(int loc) {
-		return new MapLocation((loc & 1) == 1 ? Planet.Earth : Planet.Mars, (loc / CONST1) & CONST3, (loc / CONST2) & CONST3);
-	}
-	
-	// methods for serialized maplocations
-	private static void put(Collection<Integer> a, MapLocation b) {
-		a.add(serialize(b));
-	}
-	
-	private static boolean contains(Collection<Integer> a, MapLocation b) {
-		return a.contains(serialize(b));
-	}
-	
-	private static MapLocation pop(Queue<Integer> a) {
-		return deserialize(a.poll());
-	}
-	
-	private static void put(Map<Integer, Integer> a, MapLocation b, int c) {
-		a.put(serialize(b), c);
-	}
-	
-	private static int get(Map<Integer, Integer> a, MapLocation b) {
-		return a.get(serialize(b));
-	}
-	
-	private static void bfs(MapLocation dest) {
-
-		 Map<Integer, Integer> current_map = new HashMap<>();
-		 Queue<Integer> open = new LinkedList<>();
-		 Set<Integer> closed = new HashSet<>();
+		 Map<Tile, Integer> current_map = new HashMap<>();
+		 Queue<Tile> open = new LinkedList<>();
+		 Set<Tile> closed = new HashSet<>();
 		 
-		 put(open, dest);
-		 put(closed, dest);
-		 put(current_map, dest, 0);
+		 open.add(dest);
+		 closed.add(dest);
+		 current_map.put(dest, 0);
 		 while (open.size() > 0) {
-			MapLocation current = pop(open);
+			Tile current = open.poll();
 			// for each direction 
 			for (int i = 0; i < 8; i++) {
-				if (!contains(closed, current.add(Game.moveDirections[i]))) {
-					if (Game.onMap(current.add(Game.moveDirections[i]), current.getPlanet()) && Game.isPassableTerrainAt(current.add(Game.moveDirections[i]))) {
-						 put(open, current.add(Game.moveDirections[i]));
-						 put(closed, current.add(Game.moveDirections[i]));
-						 put(current_map, current.add(Game.moveDirections[i]), get(current_map, current) + 1);
-					}
+				Tile test = current.add(Game.moveDirections[i]);
+				if (!closed.contains(test) && Game.isPassableTerrainAt(test)) {
+					open.add(test);
+					closed.add(test);
+					current_map.put(test, current_map.get(current) + 1);
 				}
 			}
 		 }
-		 cache.put(serialize(dest), current_map);
+		 cache.put(dest, current_map);
 	}
 	
-	public static Direction path(MapLocation source, MapLocation dest) {
-		if (!contains(cache.keySet(), dest)) {
+	public static Direction path(Tile source, Tile dest) {
+		if (cache.containsKey(dest)) {
 			bfs(dest);
 		}
-		if (!contains(cache.get(serialize(dest)).keySet(), source)) {
+		if (!cache.get(dest).containsKey(source)) {
 			return Direction.Center;
 		}
 		Direction best = Direction.Center;
 		for (Direction direction: Game.directions) {
 			if (Game.isPassableTerrainAt(source.add(direction))) {
-				if (get(cache.get(serialize(dest)), source.add(best)) > get(cache.get(serialize(dest)), source.add(direction))) {
+				if (cache.get(dest).get(source.add(best)) > cache.get(dest).get(source.add(direction))) {
 					best = direction;
 				}
 			}
@@ -98,22 +51,22 @@ public class Pathfinding {
 		return best;
 	}
 	
-	public static int pathLength(MapLocation source, MapLocation dest) {
-		if (!contains(cache.keySet(), dest) && !contains(cache.keySet(), source)) {
+	public static int pathLength(Tile source, Tile dest) {
+		if (!cache.containsKey(dest) && !cache.containsKey(source)) {
 			long start = System.nanoTime();
 			bfs(dest);
 			System.out.println((System.nanoTime() - start) / 1000000.0);
 		}
-		if (contains(cache.keySet(), dest)) {
-			if (!contains(cache.get(serialize(dest)).keySet(), source)) {
+		if (cache.containsKey(dest)) {
+			if (!cache.get(dest).containsKey(source)) {
 				return -1;
 			}
-			return get(cache.get(serialize(dest)), source);
+			return cache.get(dest).get(source);
 		} else {
-			if (!contains(cache.get(serialize(source)).keySet(), dest)) {
+			if (!cache.get(source).containsKey(dest)) {
 				return -1;
 			}
-			return get(cache.get(serialize(source)), dest);
+			return cache.get(source).get(dest);
 		}
 	}
 	

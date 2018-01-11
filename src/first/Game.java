@@ -6,18 +6,37 @@ import java.util.*;
 public class Game {
 	public static GameController gc;
 	public static Direction[] directions;
+	public static Direction[] moveDirections;
+	public static Set<Tile> passable = new HashSet<>();
+	
 	public static final int INFINITY = 99999999;
 	static {
         gc = new GameController();
         directions = Direction.values();
+        moveDirections = new Direction[8];
+        int i = 0;
+        for (Direction d: directions) {
+        	if (!d.equals(Direction.Center)) {
+        		moveDirections[i++] = d;
+        	}
+        }
+        for (int x = 0; x < gc.startingMap(gc.planet()).getWidth(); x++) {
+        	for (int y = 0; y < gc.startingMap(gc.planet()).getHeight(); y++) {
+            	if (gc.startingMap(gc.planet()).onMap(new MapLocation(gc.planet(), x, y))) {
+            		if (gc.startingMap(gc.planet()).isPassableTerrainAt(new MapLocation(gc.planet(), x, y)) > 0) {
+                		passable.add(Tile.getInstance(gc.planet(), x, y));
+                	}
+            	}
+            }
+        }
     }
 	public static void startTurn() 
 	{
 		GameInfoCache.updateCache();
 	}
 
-	public static VecMapLocation allLocationsWithin(MapLocation location, long radis_squared) {
-		return gc.allLocationsWithin(location, radis_squared);
+	public static VecMapLocation allLocationsWithin(Tile location, long radis_squared) {
+		return gc.allLocationsWithin(location.location, radis_squared);
 	}
 	
 	public static AsteroidPattern asteroidPattern() {
@@ -28,12 +47,12 @@ public class Game {
 		gc.attack(robot.id(), target.id());
 	}
 	
-	public static void beginSnipe(Robot ranger, MapLocation location) {
-		gc.beginSnipe(ranger.id(), location);
+	public static void beginSnipe(Robot ranger, Tile location) {
+		gc.beginSnipe(ranger.id(), location.location);
 	}
 	
-	public static void blink(Robot mage, MapLocation location) {
-		gc.blink(mage.id(), location);
+	public static void blink(Robot mage, Tile location) {
+		gc.blink(mage.id(), location.location);
 	}
 	
 	public static void blueprint(Robot worker, UnitType structure, Direction direction) {
@@ -48,12 +67,12 @@ public class Game {
 		return gc.canAttack(robot.id(), target.id());
 	}
 	
-	public static boolean canBeginSnipe(Robot ranger, MapLocation location) {
-		return gc.canBeginSnipe(ranger.id(), location);
+	public static boolean canBeginSnipe(Robot ranger, Tile location) {
+		return gc.canBeginSnipe(ranger.id(), location.location);
 	}
 	
-	public static boolean canBlink(Robot mage, MapLocation location) {
-		return gc.canBlink(mage.id(), location);
+	public static boolean canBlink(Robot mage, Tile location) {
+		return gc.canBlink(mage.id(), location.location);
 	}
 	
 	public static boolean canBlueprint(Robot worker, UnitType structure, Direction direction) { 
@@ -76,8 +95,8 @@ public class Game {
 		return gc.canJavelin(knight.id(), target.id());
 	}
 	
-	public static boolean canLaunchRocket(Robot rocket, MapLocation destination) {
-		return gc.canLaunchRocket(rocket.id(), destination);
+	public static boolean canLaunchRocket(Robot rocket, Tile destination) {
+		return gc.canLaunchRocket(rocket.id(), destination.location);
 	}
 	
 	public static boolean canLoad(Robot structure, Robot robot) {
@@ -104,8 +123,8 @@ public class Game {
 		return gc.canReplicate(worker.id(), direction);
 	}
 	
-	public static boolean canSenseLocation(MapLocation location) {
-		return gc.canSenseLocation(location);
+	public static boolean canSenseLocation(Tile location) {
+		return gc.canSenseLocation(location.location);
 	}
 	
 	public static boolean canSenseUnit(Robot unit) {
@@ -132,8 +151,8 @@ public class Game {
 		gc.harvest(worker.id(), direction);
 	}
 	
-	public static boolean hasUnitAtLocation(MapLocation location) {
-		return gc.hasUnitAtLocation(location);
+	public static boolean hasUnitAtLocation(Tile location) {
+		return gc.hasUnitAtLocation(location.location);
 	}
 	
 	public static void heal(Robot healer, Robot target) {
@@ -164,8 +183,8 @@ public class Game {
 		return gc.isMoveReady(unit.id());
 	}
 	
-	public static short isOccupiable(MapLocation location) {
-		return gc.isOccupiable(location);
+	public static short isOccupiable(Tile location) {
+		return gc.isOccupiable(location.location);
 	}
 	
 	public static boolean isOver() {
@@ -184,12 +203,12 @@ public class Game {
 		return gc.karbonite();
 	}
 	
-	public static long karboniteAt(MapLocation location) {
-		return gc.karboniteAt(location);
+	public static long karboniteAt(Tile location) {
+		return gc.karboniteAt(location.location);
 	}
 	
-	public static void launchRocket(Robot rocket, MapLocation location) {
-		gc.launchRocket(rocket.id(), location);
+	public static void launchRocket(Robot rocket, Tile location) {
+		gc.launchRocket(rocket.id(), location.location);
 	}
 	
 	public static void load(Robot structure, Robot unit) {
@@ -203,7 +222,7 @@ public class Game {
 	public static Robot[] myUnits() {
 		Robot[] units = new Robot[(int) gc.myUnits().size()];
 		for (int i = 0; i < gc.myUnits().size(); i++) {
-			units[i] = new Robot(gc.myUnits().get(i));
+			units[i] = Robot.getInstance(gc.myUnits().get(i));
 		}
 		return units;
 	}
@@ -256,62 +275,62 @@ public class Game {
 		return gc.round();
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, long radius) {
-		VecUnit result = gc.senseNearbyUnits(location, radius);
+	public static Robot[] senseNearbyUnits(Tile location, long radius) {
+		VecUnit result = gc.senseNearbyUnits(location.location, radius);
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, long radius, Team team) {
-		VecUnit result = gc.senseNearbyUnitsByTeam(location, radius, team);
+	public static Robot[] senseNearbyUnits(Tile location, long radius, Team team) {
+		VecUnit result = gc.senseNearbyUnitsByTeam(location.location, radius, team);
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, long radius, UnitType type) {
-		VecUnit result = gc.senseNearbyUnitsByType(location, radius, type);
+	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type) {
+		VecUnit result = gc.senseNearbyUnitsByType(location.location, radius, type);
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, long radius, UnitType type, Team team) {
-		VecUnit result =  gc.senseNearbyUnitsByType(location, radius, type);
+	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type, Team team) {
+		VecUnit result =  gc.senseNearbyUnitsByType(location.location, radius, type);
 		List<Robot> units = new ArrayList<Robot>(); 
 		for (int i = 0; i < result.size(); i++) {
 			if (result.get(i).team().equals(team)) {
-				units.add(new Robot(result.get(i)));
+				units.add(Robot.getInstance(result.get(i)));
 			}
 		}
 		return units.toArray(new Robot[0]);
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, UnitType type, Team team) {
+	public static Robot[] senseNearbyUnits(Tile location, UnitType type, Team team) {
 		return senseNearbyUnits(location, INFINITY, type, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, Team team) {
+	public static Robot[] senseNearbyUnits(Tile location, Team team) {
 		return senseNearbyUnits(location, INFINITY, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location, UnitType type) {
+	public static Robot[] senseNearbyUnits(Tile location, UnitType type) {
 		return senseNearbyUnits(location, INFINITY, type);
 	}
 	
-	public static Robot[] senseNearbyUnits(MapLocation location) {
+	public static Robot[] senseNearbyUnits(Tile location) {
 		return senseNearbyUnits(location, INFINITY);
 	}
 	
-	public static Robot senseUnitAtLocation(MapLocation location) {
-		return new Robot(gc.senseUnitAtLocation(location));
+	public static Robot senseUnitAtLocation(Tile location) {
+		return Robot.getInstance(gc.senseUnitAtLocation(location.location));
 	}
 	
 	public static PlanetMap startingMap(Planet planet) {
@@ -323,14 +342,14 @@ public class Game {
 	}
 	
 	public static Robot unit(int id) {
-		return new Robot(gc.unit(id));
+		return Robot.getInstance(gc.unit(id));
 	}
 	
 	public static Robot[] units() {
 		VecUnit result = gc.units();
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
 	}
@@ -339,7 +358,7 @@ public class Game {
 		VecUnit result = gc.unitsInSpace();
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
 	}
@@ -360,12 +379,12 @@ public class Game {
 		gc.attack(robot, target);
 	}
 	
-	public static void beginSnipe(int ranger, MapLocation location) {
-		gc.beginSnipe(ranger, location);
+	public static void beginSnipe(int ranger, Tile location) {
+		gc.beginSnipe(ranger, location.location);
 	}
 	
-	public static void blink(int mage, MapLocation location) {
-		gc.blink(mage, location);
+	public static void blink(int mage, Tile location) {
+		gc.blink(mage, location.location);
 	}
 	
 	public static void blueprint(int worker, UnitType structure, Direction direction) {
@@ -380,12 +399,12 @@ public class Game {
 		return gc.canAttack(robot, target);
 	}
 	
-	public static boolean canBeginSnipe(int ranger, MapLocation location) {
-		return gc.canBeginSnipe(ranger, location);
+	public static boolean canBeginSnipe(int ranger, Tile location) {
+		return gc.canBeginSnipe(ranger, location.location);
 	}
 	
-	public static boolean canBlink(int mage, MapLocation location) {
-		return gc.canBlink(mage, location);
+	public static boolean canBlink(int mage, Tile location) {
+		return gc.canBlink(mage, location.location);
 	}
 	
 	public static boolean canBlueprint(int worker, UnitType structure, Direction direction) { 
@@ -408,8 +427,8 @@ public class Game {
 		return gc.canJavelin(knight, target);
 	}
 	
-	public static boolean canLaunchRocket(int rocket, MapLocation destination) {
-		return gc.canLaunchRocket(rocket, destination);
+	public static boolean canLaunchRocket(int rocket, Tile destination) {
+		return gc.canLaunchRocket(rocket, destination.location);
 	}
 	
 	public static boolean canLoad(int structure, int robot) {
@@ -488,8 +507,8 @@ public class Game {
 		gc.javelin(knight, target);
 	}
 	
-	public static void launchRocket(int rocket, MapLocation location) {
-		gc.launchRocket(rocket, location);
+	public static void launchRocket(int rocket, Tile location) {
+		gc.launchRocket(rocket, location.location);
 	}
 	
 	public static void load(int structure, int unit) {
@@ -520,25 +539,36 @@ public class Game {
 		gc.unload(structure, direction);
 	}
 	
-	public static boolean onMap(MapLocation loc, Planet p) {
-		return startingMap(p).onMap(loc);
+	public static boolean onMap(Tile loc, Planet p) {
+		return startingMap(p).onMap(loc.location);
 	}
 	
-	public static long initialKarboniteAt(MapLocation loc) {
-		return startingMap(loc.getPlanet()).initialKarboniteAt(loc);
+	public static long initialKarboniteAt(Tile loc) {
+		return startingMap(loc.location.getPlanet()).initialKarboniteAt(loc.location);
 	}
 	
-	public static boolean isPassableTerrainAt(MapLocation loc) {
-		return startingMap(loc.getPlanet()).isPassableTerrainAt(loc) > 0;
+	public static boolean isPassableTerrainAt(Tile loc) {
+		return passable.contains(loc);
 	}
 	
 	public static Robot[] getInitialUnits() {
 		VecUnit result = startingMap(Planet.Earth).getInitial_units();
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(result.get(i));
+			units[i] = Robot.getInstance(result.get(i));
 		}
 		return units;
+	}
+	
+	public static Tile getRandomLocation(Planet p) {
+		Random rand = new Random();
+		int x = 0;
+		int y = 0;
+		do {
+			 x = rand.nextInt((int) startingMap(p).getWidth());
+			 y = rand.nextInt((int) startingMap(p).getHeight());
+		} while (startingMap(p).isPassableTerrainAt(new MapLocation(p, x, y)) == 0);
+		return Tile.getInstance(new MapLocation(p, x, y));
 	}
 }
 

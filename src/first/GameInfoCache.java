@@ -6,16 +6,16 @@ import bc.*;
 
 public class GameInfoCache 
 {
-	public static ArrayList<MapLocation> karboniteDeposits;
+	public static ArrayList<Tile> karboniteDeposits;
 	
 	static
 	{
-		MapLocation checkLocation;
+		Tile checkLocation;
 		for (int x = 0; x < Game.startingMap(Game.planet()).getWidth(); x++)
 		{
 			for (int y = 0; y < Game.startingMap(Game.planet()).getHeight(); y++)
 			{
-				checkLocation = new MapLocation(Game.planet(), x, y);
+				checkLocation = Tile.getInstance(Game.planet(), x, y);
 				System.out.printf("checklocation has x %d\n", checkLocation.getX());
 				if (Game.initialKarboniteAt(checkLocation) > 0)
 				{
@@ -88,7 +88,7 @@ public class GameInfoCache
 	
 	private static void updateType(UnitType type, ArrayList<Robot> allyCache, ArrayList<Robot> enemyCache, ArrayList<Robot> allCache)
 	{
-		for (Robot bot:Game.senseNearbyUnits(new MapLocation(Planet.Earth, 0, 0), type))
+		for (Robot bot:Game.senseNearbyUnits(Tile.getInstance(Planet.Earth, 0, 0), type))
 			{
 				allCache.add(bot);
 				if (bot.team() == Game.team())

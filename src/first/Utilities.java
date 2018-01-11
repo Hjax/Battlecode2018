@@ -29,32 +29,32 @@ public class Utilities
 		}
 	}
 	
-	public static MapLocation offsetInDirection(MapLocation start, Direction dir, int offset)
+	public static Tile offsetInDirection(Tile start, Direction dir, int offset)
 	{
 		switch (dir)
 		{
 		case East:
-			return new MapLocation(start.getPlanet(), start.getX() + offset, start.getY());
+			return Tile.getInstance(start.getPlanet(), start.getX() + offset, start.getY());
 		case West:
-			return new MapLocation(start.getPlanet(), start.getX() - offset, start.getY());
+			return Tile.getInstance(start.getPlanet(), start.getX() - offset, start.getY());
 		case North:
-			return new MapLocation(start.getPlanet(), start.getX(), start.getY() + offset);
+			return Tile.getInstance(start.getPlanet(), start.getX(), start.getY() + offset);
 		case South:
-			return new MapLocation(start.getPlanet(), start.getX(), start.getY() - offset);
+			return Tile.getInstance(start.getPlanet(), start.getX(), start.getY() - offset);
 		case Northeast:
-			return new MapLocation(start.getPlanet(), start.getX() + offset, start.getY() + offset);
+			return Tile.getInstance(start.getPlanet(), start.getX() + offset, start.getY() + offset);
 		case Northwest:
-			return new MapLocation(start.getPlanet(), start.getX() - offset, start.getY() + offset);
+			return Tile.getInstance(start.getPlanet(), start.getX() - offset, start.getY() + offset);
 		case Southeast:
-			return new MapLocation(start.getPlanet(), start.getX() + offset, start.getY() - offset);
+			return Tile.getInstance(start.getPlanet(), start.getX() + offset, start.getY() - offset);
 		case Southwest:
-			return new MapLocation(start.getPlanet(), start.getX() - offset, start.getY() - offset);
+			return Tile.getInstance(start.getPlanet(), start.getX() - offset, start.getY() - offset);
 		default:
 			return start;
 		}
 	}
 	
-	public static Direction findOccupiableDir(MapLocation start)
+	public static Direction findOccupiableDir(Tile start)
 	{
 		for (Direction dir: Game.directions)
 		{

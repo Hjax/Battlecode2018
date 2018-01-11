@@ -8,9 +8,9 @@ public class Constants {
 	public static final Robot[] startingAllies = new Robot[startingRobots.length/2];
 	public static final Robot[] startingEnemies = new Robot[startingAllies.length];
 	
-	public static final MapLocation[] startingRobotLocation = new MapLocation[startingRobots.length];
-	public static final MapLocation[] startingAlliesLocation = new MapLocation[startingAllies.length];
-	public static final MapLocation[] startingEnemiesLocation = new MapLocation[startingEnemies.length];
+	public static final Tile[] startingRobotLocation = new Tile[startingRobots.length];
+	public static final Tile[] startingAlliesLocation = new Tile[startingAllies.length];
+	public static final Tile[] startingEnemiesLocation = new Tile[startingEnemies.length];
 	
 	static
 	{
@@ -18,15 +18,15 @@ public class Constants {
 		int enemyIndex = 0;
 		for (Robot worker:startingRobots)
 		{
-			startingRobotLocation[allyIndex+enemyIndex] = worker.mapLocation();
+			startingRobotLocation[allyIndex+enemyIndex] = worker.tile();
 			if (worker.team() == Game.team())
 			{
-				startingAlliesLocation[allyIndex] = worker.mapLocation();
+				startingAlliesLocation[allyIndex] = worker.tile();
 				startingAllies[allyIndex++] = worker;
 			}
 			else
 			{
-				startingEnemiesLocation[enemyIndex] = worker.mapLocation();
+				startingEnemiesLocation[enemyIndex] = worker.tile();
 				startingEnemies[enemyIndex++] = worker;
 			}
 		}

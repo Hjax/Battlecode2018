@@ -103,9 +103,9 @@ public class Robot {
 		update();
 		return unit.location();
 	}
-	MapLocation mapLocation() {
+	Tile tile() {
 		update();
-		return unit.location().mapLocation();
+		return Tile.getInstance(unit.location().mapLocation());
 	}
 	long maxHealth() {
 		update();

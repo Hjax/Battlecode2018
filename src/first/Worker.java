@@ -72,23 +72,23 @@ public class Worker
 		if (Game.round() == 1)
 		{
 			WorkerDistanceTuple bestWorker = bestWorker();
-			MapLocation nearestEnemy = Constants.startingEnemiesLocation[0];
+			Tile nearestEnemy = Constants.startingEnemiesLocation[0];
 
-			for (MapLocation enemy:Constants.startingEnemiesLocation)
+			for (Tile enemy:Constants.startingEnemiesLocation)
 			{
-				if (Pathfinding.pathLength(bestWorker.worker.mapLocation(), enemy) < Pathfinding.pathLength(bestWorker.worker.mapLocation(), nearestEnemy))
+				if (Pathfinding.pathLength(bestWorker.worker.tile(), enemy) < Pathfinding.pathLength(bestWorker.worker.tile(), nearestEnemy))
 				{
 					nearestEnemy = enemy;
 				}
 			}
-			Direction buildDir = Pathfinding.path(bestWorker.worker.mapLocation(), nearestEnemy);;
+			Direction buildDir = Pathfinding.path(bestWorker.worker.tile(), nearestEnemy);;
 			if (bestWorker.rushDistance > Constants.RUSHTHRESHOLD)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
 			System.out.printf("bestWorker id is %d\n", bestWorker.worker.id());
 			Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
-			currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.mapLocation(), buildDir, 1)));
+			currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1)));
 		}
 	}
 	
@@ -105,7 +105,7 @@ public class Worker
 		{
 			if (worker.location().isOnMap())
 			{
-				Direction replicateDir = Utilities.findOccupiableDir(worker.mapLocation());
+				Direction replicateDir = Utilities.findOccupiableDir(worker.tile());
 				if (Game.canReplicate(worker, replicateDir))
 				{
 					Game.replicate(worker, replicateDir);
@@ -119,14 +119,14 @@ public class Worker
 	private static class WorkerTarget
 	{
 		public float score;
-		public MapLocation location;
+		public Tile location;
 		public int targetType;
 		/*target types:
 		 * 0 = blueprint
 		 * 1 = karbonite deposit
 		 */
 		
-		WorkerTarget(float SCORE, MapLocation LOCATION, int TYPE)
+		WorkerTarget(float SCORE, Tile LOCATION, int TYPE)
 		{
 			score = SCORE;
 			location = LOCATION;
@@ -140,24 +140,24 @@ public class Worker
 			score += blueprint.health()/blueprint.maxHealth() * 100f;
 			for (Robot worker:idleWorkers)
 			{
-				score += 200/Pathfinding.pathLength(worker.mapLocation(), location);
+				score += 200/Pathfinding.pathLength(worker.tile(), location);
 			}
 		}
-		private void score(MapLocation deposit)
+		private void score(Tile deposit)
 		{
 			score = 20;
 			score += 1000/Game.karbonite();
 			for (Robot worker:idleWorkers)
 			{
-				score += 200/Pathfinding.pathLength(worker.mapLocation(), location);
+				score += 200/Pathfinding.pathLength(worker.tile(), location);
 			}
 			for (Robot factory:GameInfoCache.allyFactories)
 			{
-				score += 200/Pathfinding.pathLength(factory.mapLocation(), location);
+				score += 200/Pathfinding.pathLength(factory.tile(), location);
 			}
 			for (Robot factory:GameInfoCache.enemyFactories)
 			{
-				score -= 400/Pathfinding.pathLength(factory.mapLocation(), location);
+				score -= 400/Pathfinding.pathLength(factory.tile(), location);
 			}
 		}
 	
@@ -174,34 +174,34 @@ public class Worker
 		}
 		private void descoreBlueprint(Robot worker, Robot blueprint)
 		{
-			score -= 200/Pathfinding.pathLength(worker.mapLocation(), location);
+			score -= 200/Pathfinding.pathLength(worker.tile(), location);
 		}
 	
-		private void descoreDeposit(Robot worker, MapLocation deposit)
+		private void descoreDeposit(Robot worker, Tile deposit)
 		{
-			score -= 200/Pathfinding.pathLength(worker.mapLocation(), location);
+			score -= 200/Pathfinding.pathLength(worker.tile(), location);
 		}
 	}
 	
 	
 	private static void handleWorkerTarget(Robot worker, WorkerTarget target)
 	{
-		if (worker.mapLocation().isAdjacentTo(target.location))
+		if (worker.tile().isAdjacentTo(target.location))
 			{
 				if (target.targetType == 0 && Game.canBuild(worker, Game.senseUnitAtLocation(target.location)))
 				{
 					Game.build(worker, Game.senseUnitAtLocation(target.location));
 				}
-				if (target.targetType == 1 && Game.canHarvest(worker, Pathfinding.path(worker.mapLocation(), target.location)))
+				if (target.targetType == 1 && Game.canHarvest(worker, Pathfinding.path(worker.tile(), target.location)))
 				{
-					Game.harvest(worker, Pathfinding.path(worker.mapLocation(), target.location));
+					Game.harvest(worker, Pathfinding.path(worker.tile(), target.location));
 				}
 			}
 		else
 		{
-			if (Game.canMove(worker, Pathfinding.path(worker.mapLocation(), target.location)))
+			if (Game.canMove(worker, Pathfinding.path(worker.tile(), target.location)))
 			{
-				Game.moveRobot(worker, Pathfinding.path(worker.mapLocation(), target.location));
+				Game.moveRobot(worker, Pathfinding.path(worker.tile(), target.location));
 			}
 		}
 	}
@@ -213,10 +213,10 @@ public class Worker
 		int targetIndex = 0;
 		for (Robot structure:currentBlueprints)
 		{
-			targets[targetIndex] = new WorkerTarget(0, structure.mapLocation(), 0);
+			targets[targetIndex] = new WorkerTarget(0, structure.tile(), 0);
 			targets[targetIndex++].score(structure);
 		}
-		for (MapLocation deposit:GameInfoCache.karboniteDeposits)
+		for (Tile deposit:GameInfoCache.karboniteDeposits)
 		{
 			targets[targetIndex] = new WorkerTarget(0, deposit, 0);
 			targets[targetIndex++].score(deposit);
@@ -239,7 +239,7 @@ public class Worker
 			Robot closestWorker = idleWorkers.iterator().next();
 			for (Robot worker:idleWorkers)
 			{
-				if (Pathfinding.pathLength(worker.mapLocation(), max.location) < Pathfinding.pathLength(closestWorker.mapLocation(), max.location))
+				if (Pathfinding.pathLength(worker.tile(), max.location) < Pathfinding.pathLength(closestWorker.tile(), max.location))
 				{
 					closestWorker = worker;
 				}
