@@ -38,7 +38,6 @@ public class Pathfinding {
 	}
 	
 	// methods for serialized maplocations
-	
 	private static void put(Collection<Integer> a, MapLocation b) {
 		a.add(serialize(b));
 	}

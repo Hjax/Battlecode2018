@@ -1,6 +1,7 @@
 package first;
 
 import bc.*;
+import java.util.*;
 
 public class game {
 	private static GameController gc;
@@ -202,8 +203,12 @@ public class game {
 		gc.moveRobot(robot.id(), direction);
 	}
 	
-	public static VecUnit myUnits() {
-		return gc.myUnits();
+	public static Unit[] myUnits() {
+		Unit[] units = new Unit[(int) gc.myUnits().size()];
+		for (int i = 0; i < gc.myUnits().size(); i++) {
+			units[i] = gc.myUnits().get(i);
+		}
+		return units;
 	}
 	
 	public static void nextTurn() {
@@ -254,16 +259,58 @@ public class game {
 		return gc.round();
 	}
 	
-	public static VecUnit senseNearbyUnits(MapLocation location, long radius) {
-		return gc.senseNearbyUnits(location, radius);
+	public static Unit[] senseNearbyUnits(MapLocation location, long radius) {
+		VecUnit result = gc.senseNearbyUnits(location, radius);
+		Unit[] units = new Unit[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = result.get(i);
+		}
+		return units;
 	}
 	
-	public static VecUnit senseNearbyUnitsByTeam(MapLocation location, long radius, Team team) {
-		return gc.senseNearbyUnitsByTeam(location, radius, team);
+	public static Unit[] senseNearbyUnits(MapLocation location, long radius, Team team) {
+		VecUnit result = gc.senseNearbyUnitsByTeam(location, radius, team);
+		Unit[] units = new Unit[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = result.get(i);
+		}
+		return units;
 	}
 	
-	public static VecUnit senseNearbyUnitsByType(MapLocation location, long radius, UnitType type) {
-		return gc.senseNearbyUnitsByType(location, radius, type);
+	public static Unit[] senseNearbyUnits(MapLocation location, long radius, UnitType type) {
+		VecUnit result = gc.senseNearbyUnitsByType(location, radius, type);
+		Unit[] units = new Unit[(int) result.size()];
+		for (int i = 0; i < result.size(); i++) {
+			units[i] = result.get(i);
+		}
+		return units;
+	}
+	
+	public static Unit[] senseNearbyUnits(MapLocation location, long radius, UnitType type, Team team) {
+		VecUnit result = gc.myUnits();
+		List<Unit> units = new ArrayList<Unit>(); 
+		for (int i = 0; i < result.size(); i++) {
+			if (result.get(i).unitType().equals(type) && result.get(i).team().equals(team)) {
+				units.add(result.get(i));
+			}
+		}
+		return units.toArray(new Unit[0]);
+	}
+	
+	public static Unit[] senseNearbyUnits(MapLocation location, UnitType type, Team team) {
+		return senseNearbyUnits(location, INFINITY, type, team);
+	}
+	
+	public static Unit[] senseNearbyUnits(MapLocation location, Team team) {
+		return senseNearbyUnits(location, INFINITY, team);
+	}
+	
+	public static Unit[] senseNearbyUnits(MapLocation location, UnitType type) {
+		return senseNearbyUnits(location, INFINITY, type);
+	}
+	
+	public static Unit[] senseNearbyUnits(MapLocation location) {
+		return senseNearbyUnits(location, INFINITY);
 	}
 	
 	public static Unit senseUnitAtLocation(MapLocation location) {
