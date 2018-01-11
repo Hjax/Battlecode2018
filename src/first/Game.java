@@ -104,7 +104,7 @@ public class Game {
 	}
 	
 	public static boolean canMove(Robot robot, Direction direction) {
-		return gc.canMove(robot.id(), direction);
+		return isMoveReady(robot) && gc.canMove(robot.id(), direction);
 	}
 	
 	public static boolean canOvercharge(Robot healer, Robot target) {
