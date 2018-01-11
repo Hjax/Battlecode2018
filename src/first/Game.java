@@ -436,7 +436,7 @@ public class Game {
 	}
 	
 	public static boolean canMove(int robot, Direction direction) {
-		return gc.canMove(robot, direction);
+		return isMoveReady(robot) && gc.canMove(robot, direction);
 	}
 	
 	public static boolean canOvercharge(int healer, int target) {
@@ -560,15 +560,15 @@ public class Game {
 		return units;
 	}
 	
-	public static Tile getRandomLocation(Planet p) {
+	public static Tile getRandomLocation() {
 		Random rand = new Random();
 		int x = 0;
 		int y = 0;
 		do {
-			 x = rand.nextInt((int) startingMap(p).getWidth());
-			 y = rand.nextInt((int) startingMap(p).getHeight());
-		} while (startingMap(p).isPassableTerrainAt(new MapLocation(p, x, y)) == 0);
-		return Tile.getInstance(new MapLocation(p, x, y));
+			 x = rand.nextInt((int) startingMap(planet()).getWidth());
+			 y = rand.nextInt((int) startingMap(planet()).getHeight());
+		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(planet(), x, y))));
+		return Tile.getInstance(new MapLocation(planet(), x, y));
 	}
 }
 
