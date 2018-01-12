@@ -339,6 +339,21 @@ public class Game {
 		return Robot.getInstance(gc.senseUnitAtLocation(location.location));
 	}
 	
+	public static Robot[] senseCombatUnits(Tile location, long radius, Team team) {
+		VecUnit result =  gc.senseNearbyUnitsByTeam(location.location, radius, team);
+		List<Robot> units = new ArrayList<Robot>(); 
+		for (int i = 0; i < result.size(); i++) {
+			if (result.get(i).unitType() != UnitType.Worker && result.get(i).unitType() != UnitType.Factory && result.get(i).unitType() != UnitType.Rocket) {
+				units.add(Robot.getInstance(result.get(i)));
+			}
+		}
+		return units.toArray(new Robot[0]);
+	}
+	
+	public static Robot[] senseCombatUnits(Team team) {
+		return senseCombatUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, team);
+	}
+	
 	public static PlanetMap startingMap(Planet planet) {
 		return gc.startingMap(planet);
 	}
