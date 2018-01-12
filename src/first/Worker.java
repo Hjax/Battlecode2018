@@ -165,7 +165,6 @@ public class Worker
 					{
 						if (GameInfoCache.karboniteDeposits.get(test).size() > 0)
 						{
-							System.out.printf("from quadrant %d to quadrant %d\n",startingQuadrant, test);
 							return test;
 						}
 						 open.add(test);
