@@ -28,7 +28,7 @@ public class Pathfinding {
 			for (int i = 0; i < 8; i++) {
 				Integer test = current + directions[i];
 				if (!closed.contains(test) && !open.contains(test)) {
-					if (test >= 0 && test < size && Game.pathMap[test]) {
+					if (Math.abs(test % Constants.WIDTH - current % Constants.WIDTH) <= 1 && test >= 0 && test < size && Game.pathMap[test]) {
 						 open.add(test);
 						 current_map.put(test, current_map.get(current) + 1);
 					}
@@ -61,41 +61,51 @@ public class Pathfinding {
 				}
 			}
 		}
+		//System.out.printf("Pathing from (%d,%d) to (%d,%d) using direction ", source.getX(), source.getY(), dest.getX(), dest.getY());
 		
 		if (best == 1)
 		{
+			//System.out.printf("East\n");
 			return Direction.East;
 		}
 		else if (best == 1 - Constants.WIDTH)
 		{
+			//System.out.printf("Southeast\n");
 			return Direction.Southeast;
 		}
 		else if (best == -1 * Constants.WIDTH)
 		{
+			//System.out.printf("South\n");
 			return Direction.South;
 		}
 		else if (best == -1 - Constants.WIDTH)
 		{
+			//System.out.printf("Southwest\n");
 			return Direction.Southwest;
 		}
 		else if (best == -1)
 		{
+			//System.out.printf("West\n");
 			return Direction.West;
 		}
 		else if (best == Constants.WIDTH - 1)
 		{
+			//System.out.printf("Northwest\n");
 			return Direction.Northwest;
 		}
 		else if (best == Constants.WIDTH)
 		{
+			//System.out.printf("North\n");
 			return Direction.North;
 		}
 		else if (best == Constants.WIDTH+1)
 		{
+			//System.out.printf("Northeast\n");
 			return Direction.Northeast;
 		}
 		else
 		{
+			//System.out.printf("Center\n");
 			return Direction.Center;
 		}
 	}

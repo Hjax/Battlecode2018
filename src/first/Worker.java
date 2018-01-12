@@ -161,10 +161,11 @@ public class Worker
 			for (int i = 0; i < 8; i++) {
 				Integer test = current + directions[i];
 				if (!closed.contains(test) && !open.contains(test)) {
-					if (test >= 0 && test < size && GameInfoCache.karboniteDeposits.get(test).size() > 0) 
+					if (Math.abs(test % Constants.QUADRANTROWSIZE - current % Constants.QUADRANTCOLUMNSIZE) <= 1 && test >= 0 && test < size && GameInfoCache.karboniteDeposits.get(test).size() > 0) 
 					{
 						if (GameInfoCache.karboniteDeposits.get(test).size() > 0)
 						{
+							System.out.printf("from quadrant %d to quadrant %d\n",startingQuadrant, test);
 							return test;
 						}
 						 open.add(test);
