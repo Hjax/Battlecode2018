@@ -35,7 +35,7 @@ public class Constants {
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 10;
-	public static final int WORKERLIMIT = 20;
+	public static final int WORKERLIMIT = 5;
 	public static final int BUILDRANGE = 5;
 	
 	public static final int WIDTH = (int) Game.startingMap(Game.planet()).getWidth();
