@@ -12,7 +12,6 @@ public class Pathfinding {
 	private static int[] directions = {1, 1 - Constants.WIDTH, -1 * Constants.WIDTH, -1 - Constants.WIDTH, -1, Constants.WIDTH - 1, Constants.WIDTH, Constants.WIDTH + 1};
 	
 	private static void bfs(Tile dest) {
-		long time = System.nanoTime();
 		Map<Integer, Integer> current_map = new HashMap<>();
 		Queue<Integer> open = new LinkedList<>();
 		Set<Integer> closed = new HashSet<>();
@@ -38,7 +37,6 @@ public class Pathfinding {
 			}
 		}
 		cache.put(destination, current_map);
-		System.out.printf("bfs took %d miliseconds\n", (System.nanoTime() - time)/1000000);
 	}
 	
 	public static Direction path(Tile source, Tile dest) 

@@ -116,6 +116,7 @@ public class GameInfoCache
 				{
 					enemyCache.add(bot);
 				}
+				
 			}
 	}
 	

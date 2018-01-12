@@ -1,5 +1,6 @@
 package first;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import bc.*;
@@ -8,7 +9,6 @@ public class Worker
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
 	private static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
-	private static WorkerTarget[] targets = new WorkerTarget[currentBlueprints.size() + GameInfoCache.karboniteDeposits.size()];
 	
 	public static void startTurn()
 	{
@@ -139,145 +139,65 @@ public class Worker
 		}
 	}
 	
-	
-	private static class WorkerTarget
-	{
-		public float score;
-		public Tile location;
-		public int targetType;
-		/*target types:
-		 * 0 = blueprint
-		 * 1 = karbonite deposit
-		 */
-		
-		WorkerTarget(float SCORE, Tile LOCATION, int TYPE)
-		{
-			score = SCORE;
-			location = LOCATION;
-			targetType = TYPE;
-		}
-		
-		private void score(Robot blueprint)
-		{
-			score = 100;
-			score += Game.karbonite() / 20f;
-			score += 400/(1+GameInfoCache.allyFactories.size());
-			score += blueprint.health()/blueprint.maxHealth() * 100f;
-			for (Robot worker:idleWorkers)
-			{
-				score += 200/(1+Pathfinding.pathLength(worker.tile(), location));
-			}
-		}
-		private void score(Tile deposit)
-		{
-			score = 20;
-			score += 1000/(Game.karbonite()+1);
-			for (Robot worker:idleWorkers)
-			{
-				score += 200/(1+Pathfinding.pathLength(worker.tile(), location));
-			}
-			for (Robot factory:GameInfoCache.allyFactories)
-			{
-				score += 200/(1+Pathfinding.pathLength(factory.tile(), location));
-			}
-			for (Robot factory:GameInfoCache.enemyFactories)
-			{
-				score -= 400/(1+Pathfinding.pathLength(factory.tile(), location));
-			}
-		}
-	
-		public void descore(Robot worker)
-		{
-			if (targetType == 0)
-			{
-				descoreBlueprint(worker, Game.senseUnitAtLocation(location));
-			}
-			else if (targetType == 1)
-			{
-				descoreDeposit(worker, location);
-			}
-		}
-		private void descoreBlueprint(Robot worker, Robot blueprint)
-		{
-			score -= 200/(1+Pathfinding.pathLength(worker.tile(), location));
-		}
-	
-		private void descoreDeposit(Robot worker, Tile deposit)
-		{
-			score -= 200/(1+Pathfinding.pathLength(worker.tile(), location));
-		}
-	}
-	
-	
-	private static void handleWorkerTarget(Robot worker, WorkerTarget target)
-	{
-		if (Pathfinding.pathLength(worker.tile(), target.location) <=1)
-			{
-				if (target.targetType == 0 && Game.canBuild(worker, Game.senseUnitAtLocation(target.location)))
-				{
-					Game.build(worker, Game.senseUnitAtLocation(target.location));
-				}
-				if (target.targetType == 1 && Game.canHarvest(worker, Pathfinding.path(worker.tile(), target.location)))
-				{
-					Game.harvest(worker, Pathfinding.path(worker.tile(), target.location));
-				}
-			}
-		else
-		{
-			if (Game.canMove(worker, Pathfinding.path(worker.tile(), target.location)))
-			{
-				Game.moveRobot(worker, Pathfinding.path(worker.tile(), target.location));
-			}
-		}
-	}
-	
 	private static void giveWorkersOrders()
 	{
-		WorkerTarget[] targets = new WorkerTarget[currentBlueprints.size() + GameInfoCache.karboniteDeposits.size()];
-		System.out.printf("\t\tGiving orders to workers\n");
-		int targetIndex = 0;
-		for (Robot structure:currentBlueprints)
+		workerLabel: for (Robot worker:GameInfoCache.allyWorkers)
 		{
-			targets[targetIndex] = new WorkerTarget(0, structure.tile(), 0);
-			targets[targetIndex++].score(structure);
-		}
-		for (Tile deposit:GameInfoCache.karboniteDeposits)
-		{
-			targets[targetIndex] = new WorkerTarget(0, deposit, 1);
-			targets[targetIndex++].score(deposit);
-		}
-		WorkerTarget max = new WorkerTarget(-1, null, -1);
-		while (idleWorkers.size() > 0)
-		{
-			for (int count = 0; count < targets.length; count++)
+			for (Robot structure:currentBlueprints)
 			{
-				if (targets[count].score > max.score)
+				if (Pathfinding.pathLength(structure.tile(), worker.tile()) < Constants.BUILDRANGE)
 				{
-					max = targets[count];
+					Direction moveDir = Pathfinding.path(worker.tile(), structure.tile());
+					if (Game.canMove(worker, moveDir))
+					{
+						Game.moveRobot(worker, moveDir);
+					}
+					if (Pathfinding.pathLength(structure.tile(), worker.tile()) <= 1)
+					{
+						if (Game.canBuild(worker, structure))
+						{
+							Game.build(worker, structure);
+						}
+					}
+					continue workerLabel;
 				}
 			}
-			if (max.score < 0)
+			Tile closest = null;
+			int minDistance = Constants.INFINITY;
+			int distance;
+			for (Tile deposit:GameInfoCache.karboniteDeposits)
 			{
-				break;
+				distance = Pathfinding.pathLength(deposit, worker.tile());
+				
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					closest = deposit;
+				}
+				
+			}
+			if (closest != null)
+			{
+				Direction moveDir = Pathfinding.path(worker.tile(), closest);
+				if (Game.canMove(worker, moveDir))
+				{
+					Game.moveRobot(worker, moveDir);
+				}
+				if (Pathfinding.pathLength(worker.tile(), closest) <= 1)
+				{
+					if (Game.canHarvest(worker, Pathfinding.path(worker.tile(), closest)))
+					{
+						Game.harvest(worker, Pathfinding.path(worker.tile(), closest));
+					}
+				}
 			}
 			
-			Robot closestWorker = idleWorkers.iterator().next();
-			for (Robot worker:idleWorkers)
-			{
-				if (Pathfinding.pathLength(worker.tile(), max.location) < Pathfinding.pathLength(closestWorker.tile(), max.location))
-				{
-					closestWorker = worker;
-				}
-			}
-			handleWorkerTarget(closestWorker, max);
-			idleWorkers.remove(closestWorker);
-			for (WorkerTarget target:targets)
-			{
-				target.descore(closestWorker);
-			}
+			
+			
+			
+			
 		}
 	}
-	
 	
 	public static void run() 
 	{
@@ -296,5 +216,8 @@ public class Worker
 			replicateWorkers();
 		}
 	}
+	
+	
+	
 	
 }
