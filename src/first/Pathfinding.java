@@ -12,8 +12,6 @@ public class Pathfinding {
 	private static int[] directions = {1, 1 - Constants.WIDTH, -1 * Constants.WIDTH, -1 - Constants.WIDTH, -1, Constants.WIDTH - 1, Constants.WIDTH, Constants.WIDTH + 1};
 	
 	private static void bfs(Tile dest) {
-		long time = System.nanoTime();
-
 		Map<Integer, Integer> current_map = new HashMap<>();
 		Queue<Integer> open = new LinkedList<>();
 		Set<Integer> closed = new HashSet<>();
@@ -39,8 +37,6 @@ public class Pathfinding {
 			}
 		}
 		cache.put(destination, current_map);
-		time = (System.nanoTime() - time)/1000;
-		System.out.printf("\tbfs Time: %d\n", time);
 	}
 	
 	public static Direction path(Tile source, Tile dest) 
@@ -56,7 +52,7 @@ public class Pathfinding {
 		int best = 0;
 		for (int direction: directions) {
 			int test = sourceInt + direction;
-			if (test >= 0 && test <= Constants.WIDTH * Constants.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Constants.WIDTH, (test)/Constants.WIDTH)) > 0) {
+			if (Math.abs(test % Constants.WIDTH - sourceInt % Constants.WIDTH) <= 1 && test >= 0 && test <= Constants.WIDTH * Constants.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Constants.WIDTH, (test)/Constants.WIDTH)) > 0) {
 				if (best == 0 && (cache.get(destInt).get(sourceInt + best)) >= cache.get(destInt).get(test)) {
 					best = direction;
 				}

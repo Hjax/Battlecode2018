@@ -124,31 +124,12 @@ public class Worker
 	
 	private static void replicateWorkers()
 	{
-		WorkerTarget max = new WorkerTarget(-1, null, -1);
 		for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			if (worker.location().isOnMap())
 			{
-				for (int count = 0; count < targets.length; count++)
-				{
-					System.out.printf("\tmax score is %f\n", max.score);
-					System.out.printf("\tcount is %d\n", count);
-					System.out.printf("\ttargets.length = %d\n", targets.length);
-					System.out.printf("\ttargets[count].score is %f\n", targets[count].score);
-					if (targets[count].score > max.score)
-					{
-						max = targets[count];
-					}
-				}
 				Direction replicateDir;
-				if (max.score < 0)
-				{
-					replicateDir = Utilities.findOccupiableDir(worker.tile());
-				}
-				else
-				{
-					replicateDir = Utilities.findNearestPassableDir(worker.tile(), Pathfinding.path(worker.tile(), max.location));
-				}
+				replicateDir = Utilities.findOccupiableDir(worker.tile());
 				if (Game.canReplicate(worker, replicateDir))
 				{
 					Game.replicate(worker, replicateDir);
@@ -243,6 +224,7 @@ public class Worker
 			}
 		else
 		{
+			System.out.printf("My location is (%d,%d) and my target is (%d,%d)\n", worker.tile().getX(), worker.tile().getY(), target.location.getX(), target.location.getY());
 			if (Game.canMove(worker, Pathfinding.path(worker.tile(), target.location)))
 			{
 				Game.moveRobot(worker, Pathfinding.path(worker.tile(), target.location));
@@ -295,7 +277,6 @@ public class Worker
 				target.descore(closestWorker);
 			}
 		}
-		System.out.printf("targets[0] = %f\n", targets[0].score);
 	}
 	
 	
