@@ -1,7 +1,12 @@
 package first;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import bc.*;
 
@@ -20,7 +25,6 @@ public class Worker
 			}
 		}
 	}
-	
 	
 	private static class WorkerDistanceTuple
 	{
@@ -139,6 +143,40 @@ public class Worker
 		}
 	}
 	
+	private static int findKarboniteQuadrant(int startingQuadrant)
+	{
+		Map<Integer, Integer> current_map = new HashMap<>();
+		Queue<Integer> open = new LinkedList<>();
+		Set<Integer> closed = new HashSet<>();
+		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
+	
+		int size = Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE;
+		 
+		open.add(startingQuadrant);
+		closed.add(startingQuadrant);
+		current_map.put(startingQuadrant, 0);
+		while (open.size() > 0) {
+			Integer current = open.poll();
+			// for each direction 
+			for (int i = 0; i < 8; i++) {
+				Integer test = current + directions[i];
+				if (!closed.contains(test) && !open.contains(test)) {
+					if (test >= 0 && test < size && GameInfoCache.karboniteDeposits.get(test).size() > 0) 
+					{
+						if (GameInfoCache.karboniteDeposits.get(test).size() > 0)
+						{
+							return test;
+						}
+						 open.add(test);
+						 current_map.put(test, current_map.get(current) + 1);
+					}
+				}
+				closed.add(current);
+			}
+		}
+		return -1;
+	}
+	
 	private static void giveWorkersOrders()
 	{
 		workerLabel: for (Robot worker:GameInfoCache.allyWorkers)
@@ -167,7 +205,12 @@ public class Worker
 				Tile closest = null;
 				int minDistance = Constants.INFINITY;
 				int distance;
-				for (Tile deposit:GameInfoCache.karboniteDeposits)
+				int destinationQuadrant = findKarboniteQuadrant(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE);
+				if (destinationQuadrant == -1)
+				{
+					continue;
+				}
+				for (Tile deposit:GameInfoCache.karboniteDeposits.get(destinationQuadrant))
 				{
 					distance = Pathfinding.pathLength(deposit, worker.tile());
 					
@@ -186,11 +229,7 @@ public class Worker
 						Game.moveRobot(worker, moveDir);
 					}
 				}
-			}
-			
-			
-			
-			
+			}	
 			
 			
 		}
