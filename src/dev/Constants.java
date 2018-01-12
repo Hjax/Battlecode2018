@@ -41,4 +41,8 @@ public class Constants {
 	public static final int WIDTH = (int) Game.startingMap(Game.planet()).getWidth();
 	public static final int HEIGHT = (int) Game.startingMap(Game.planet()).getHeight();
 	
+	public static final int QUADRANTSIZE = 4;
+	public static final int QUADRANTROWSIZE = (int) Math.ceil(WIDTH / (double) QUADRANTSIZE);
+	public static final int QUADRANTCOLUMNSIZE = (int) Math.ceil(HEIGHT / (double) QUADRANTSIZE);
+	
 }
