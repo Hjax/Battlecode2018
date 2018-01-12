@@ -15,6 +15,7 @@ public class GameInfoCache
 		{
 			karboniteDeposits.add(new HashSet<Tile>());
 		}
+		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
 		Tile checkLocation;
 		for (int x = 0; x < Game.startingMap(Game.planet()).getWidth(); x++)
 		{
@@ -23,7 +24,17 @@ public class GameInfoCache
 				checkLocation = Tile.getInstance(Game.planet(), x, y);
 				if (Game.initialKarboniteAt(checkLocation) > 0)
 				{
-					karboniteDeposits.get(x/Constants.QUADRANTSIZE + y/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).add(checkLocation);
+					int loc = x/Constants.QUADRANTSIZE + y/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE;
+					karboniteDeposits.get(loc).add(checkLocation);
+					for (int dir:directions)
+					{
+						int test = loc + dir;
+						if ((Math.abs(test % Constants.WIDTH - loc % Constants.WIDTH) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && Game.pathMap[test]))
+						{
+							karboniteDeposits.get(test).add(checkLocation);
+						}
+						
+					}
 				}
 			}
 		}

@@ -35,13 +35,13 @@ public class Constants {
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 10;
-	public static final int WORKERLIMIT = 5;
+	public static final int WORKERLIMIT = 20;
 	public static final int BUILDRANGE = 5;
 	
 	public static final int WIDTH = (int) Game.startingMap(Game.planet()).getWidth();
 	public static final int HEIGHT = (int) Game.startingMap(Game.planet()).getHeight();
 	
-	public static final int QUADRANTSIZE = 5;
+	public static final int QUADRANTSIZE = 4;
 	public static final int QUADRANTROWSIZE = (int) Math.ceil(WIDTH / (double) QUADRANTSIZE);
 	public static final int QUADRANTCOLUMNSIZE = (int) Math.ceil(HEIGHT / (double) QUADRANTSIZE);
 	
