@@ -1,4 +1,4 @@
-package first;
+package workerCentric;
 
 import bc.*;
 import java.util.*;
@@ -9,8 +9,11 @@ public class Game {
 	public static Direction[] moveDirections;
 	public static Set<Tile> passable = new HashSet<>();
 	
+	public static boolean[] pathMap;
+	
 	public static final int INFINITY = 99999999;
 	static {
+	
         gc = new GameController();
         directions = Direction.values();
         moveDirections = new Direction[8];
@@ -20,12 +23,14 @@ public class Game {
         		moveDirections[i++] = d;
         	}
         }
+        pathMap = new boolean[(int) (gc.startingMap(gc.planet()).getWidth() * gc.startingMap(gc.planet()).getHeight())];
         for (int x = 0; x < gc.startingMap(gc.planet()).getWidth(); x++) {
         	for (int y = 0; y < gc.startingMap(gc.planet()).getHeight(); y++) {
             	if (gc.startingMap(gc.planet()).onMap(new MapLocation(gc.planet(), x, y))) {
             		if (gc.startingMap(gc.planet()).isPassableTerrainAt(new MapLocation(gc.planet(), x, y)) > 0) {
                 		passable.add(Tile.getInstance(gc.planet(), x, y));
                 	}
+            		pathMap[x + Constants.WIDTH * y] = gc.startingMap(gc.planet()).isPassableTerrainAt(new MapLocation(gc.planet(), x, y)) > 0;
             	}
             }
         }
@@ -314,20 +319,20 @@ public class Game {
 		return units.toArray(new Robot[0]);
 	}
 	
-	public static Robot[] senseNearbyUnits(UnitType type, Team team) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type, team);
+	public static Robot[] senseNearbyUnits(Tile location, UnitType type, Team team) {
+		return senseNearbyUnits(location, INFINITY, type, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(Team team) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, team);
+	public static Robot[] senseNearbyUnits(Tile location, Team team) {
+		return senseNearbyUnits(location, INFINITY, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(UnitType type) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type);
+	public static Robot[] senseNearbyUnits(Tile location, UnitType type) {
+		return senseNearbyUnits(location, INFINITY, type);
 	}
 	
-	public static Robot[] senseNearbyUnits() {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY);
+	public static Robot[] senseNearbyUnits(Tile location) {
+		return senseNearbyUnits(location, INFINITY);
 	}
 	
 	public static Robot senseUnitAtLocation(Tile location) {

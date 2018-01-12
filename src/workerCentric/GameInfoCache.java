@@ -1,4 +1,4 @@
-package first;
+package workerCentric;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -91,7 +91,6 @@ public class GameInfoCache
 			{
 				if (Game.karboniteAt(deposit) == 0)
 				{
-					System.out.printf("\t\t\t\tdeleting deposit\n");
 					depletedDeposits.add(deposit);
 				}
 			}
@@ -105,7 +104,7 @@ public class GameInfoCache
 	
 	private static void updateType(UnitType type, ArrayList<Robot> allyCache, ArrayList<Robot> enemyCache, ArrayList<Robot> allCache)
 	{
-		for (Robot bot:Game.senseNearbyUnits(type))
+		for (Robot bot:Game.senseNearbyUnits(Tile.getInstance(Planet.Earth, 0, 0), type))
 			{
 				allCache.add(bot);
 				if (bot.team() == Game.team())

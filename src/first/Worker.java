@@ -8,7 +8,20 @@ import bc.*;
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
-	private static ArrayList<Robot> currentBlueprints = new ArrayList<Robot>();
+	private static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
+	private static WorkerTarget[] targets = new WorkerTarget[currentBlueprints.size() + GameInfoCache.karboniteDeposits.size()];
+	
+	public static void startTurn()
+	{
+		for (Robot structure:currentBlueprints)
+		{
+			if (structure.structureIsBuilt() == 1)
+			{
+				currentBlueprints.remove(structure);
+			}
+		}
+	}
+	
 	
 	private static class WorkerDistanceTuple
 	{
@@ -112,11 +125,31 @@ public class Worker
 	
 	private static void replicateWorkers()
 	{
+		WorkerTarget max = new WorkerTarget(-1, null, -1);
 		for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			if (worker.location().isOnMap())
 			{
-				Direction replicateDir = Utilities.findOccupiableDir(worker.tile());
+				for (int count = 0; count < targets.length; count++)
+				{
+					System.out.printf("\tmax score is %f\n", max.score);
+					System.out.printf("\tcount is %d\n", count);
+					System.out.printf("\ttargets.length = %d\n", targets.length);
+					System.out.printf("\ttargets[count].score is %f\n", targets[count].score);
+					if (targets[count].score > max.score)
+					{
+						max = targets[count];
+					}
+				}
+				Direction replicateDir;
+				if (max.score < 0)
+				{
+					replicateDir = Utilities.findOccupiableDir(worker.tile());
+				}
+				else
+				{
+					replicateDir = Utilities.findNearestPassableDir(worker.tile(), Pathfinding.path(worker.tile(), max.location));
+				}
 				if (Game.canReplicate(worker, replicateDir))
 				{
 					Game.replicate(worker, replicateDir);
@@ -147,8 +180,8 @@ public class Worker
 		private void score(Robot blueprint)
 		{
 			score = 100;
-			score = Constants.INFINITY;
 			score += Game.karbonite() / 20f;
+			score += 400/(1+GameInfoCache.allyFactories.size());
 			score += blueprint.health()/blueprint.maxHealth() * 100f;
 			for (Robot worker:idleWorkers)
 			{
@@ -198,7 +231,7 @@ public class Worker
 	
 	private static void handleWorkerTarget(Robot worker, WorkerTarget target)
 	{
-		if (worker.tile().isAdjacentTo(target.location))
+		if (Pathfinding.pathLength(worker.tile(), target.location) <=1)
 			{
 				if (target.targetType == 0 && Game.canBuild(worker, Game.senseUnitAtLocation(target.location)))
 				{
@@ -220,8 +253,8 @@ public class Worker
 	
 	private static void giveWorkersOrders()
 	{
-		System.out.printf("\t\tGiving orders to workers\n");
 		WorkerTarget[] targets = new WorkerTarget[currentBlueprints.size() + GameInfoCache.karboniteDeposits.size()];
+		System.out.printf("\t\tGiving orders to workers\n");
 		int targetIndex = 0;
 		for (Robot structure:currentBlueprints)
 		{
@@ -236,7 +269,6 @@ public class Worker
 		WorkerTarget max = new WorkerTarget(-1, null, -1);
 		while (idleWorkers.size() > 0)
 		{
-			System.out.printf("\t\tsize of idleWorker is %d\n", idleWorkers.size());
 			for (int count = 0; count < targets.length; count++)
 			{
 				if (targets[count].score > max.score)
@@ -264,9 +296,7 @@ public class Worker
 				target.descore(closestWorker);
 			}
 		}
-		
-		
-		
+		System.out.printf("targets[0] = %f\n", targets[0].score);
 	}
 	
 	
@@ -281,12 +311,11 @@ public class Worker
 		{
 			buildOrder();
 		}
+		giveWorkersOrders();
 		if (shouldReplicate())
 		{
 			replicateWorkers();
 		}
-		
-		giveWorkersOrders();
 	}
 	
 	

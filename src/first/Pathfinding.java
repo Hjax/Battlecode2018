@@ -10,6 +10,7 @@ public class Pathfinding {
 	}
 	
 	private static void bfs(Tile dest) {
+		long time = System.nanoTime();
 
 		 Map<Tile, Integer> current_map = new HashMap<>();
 		 Queue<Tile> open = new LinkedList<>();
@@ -31,8 +32,10 @@ public class Pathfinding {
 				}
 				closed.add(current);
 			}
-		 }
-		 cache.put(dest, current_map);
+		}
+		cache.put(dest, current_map);
+		time = (System.nanoTime() - time)/1000000;
+		System.out.printf("\t\tWorker Time: %d\n", time);
 	}
 	
 	public static Direction path(Tile source, Tile dest) {
