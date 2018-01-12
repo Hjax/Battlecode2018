@@ -5,21 +5,20 @@ import bc.*;
 
 public class Player 
 {
-    public static void main(String[] args) 
-    {
-    	if (Game.planet() == Planet.Earth) {
-        	System.out.println(Pathfinding.pathLength(Tile.getInstance(Planet.Earth, 6, 2), Tile.getInstance(Planet.Earth, 6, 18)));
-        	//System.out.println(Pathfinding.pathLength(new MapLocation(Planet.Earth, 6, 2), new MapLocation(Planet.Earth, 6, 2)));
-        	System.out.println(Pathfinding.pathLength(Tile.getInstance(Planet.Earth, 6, 2), Tile.getInstance(Planet.Earth, 6, 3)));
-    	}
+    public static void main(String[] args) {
         while (true) 
         {
         	Game.startTurn();
   
-        	
             System.out.println("Current round: "+ Game.round());
-
-            Worker.run();
+            if (Game.planet() == Planet.Earth) {
+                long start = System.nanoTime();
+                Worker.run();
+                Factory.run();
+                Micro.run();
+                System.out.println("Time: " + (System.nanoTime() - start) / 1000000.0);
+            }
+            
             Game.nextTurn();
         }
     }

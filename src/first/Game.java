@@ -342,6 +342,13 @@ public class Game {
 		return gc.team();
 	}
 	
+	public static Team enemy() {
+		if (team() == Team.Red) {
+			return Team.Blue;
+		}
+		return Team.Red;
+	}
+	
 	public static Robot unit(int id) {
 		return Robot.getInstance(gc.unit(id));
 	}

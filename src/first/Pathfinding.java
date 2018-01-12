@@ -40,7 +40,9 @@ public class Pathfinding {
 	
 	public static Direction path(Tile source, Tile dest) {
 		if (!cache.containsKey(dest)) {
+			long start = System.nanoTime();
 			bfs(dest);
+			System.out.println("BFS took: " + (System.nanoTime() - start) / 1000000.0);
 		}
 		if (!cache.get(dest).containsKey(source)) {
 			return Direction.Center;
@@ -61,7 +63,9 @@ public class Pathfinding {
 	
 	public static int pathLength(Tile source, Tile dest) {
 		if (!((cache.containsKey(dest) && cache.get(dest).containsKey(source)) || (cache.containsKey(source) && cache.get(source).containsKey(dest)))) {
+			long start = System.nanoTime();
 			bfs(dest);
+			System.out.println("BFS took: " + (System.nanoTime() - start) / 1000000.0);
 		}
 		if (cache.containsKey(dest)) {
 			if (!cache.get(dest).containsKey(source)) {

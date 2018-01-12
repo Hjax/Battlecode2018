@@ -26,8 +26,12 @@ public class Robot {
 	
 	public void update() {
 		if (round != Game.round()) {
-			round = Game.round();
-			this.unit = Game.gc.unit(unit.id());
+			try {
+				this.unit = Game.gc.unit(unit.id());
+				round = Game.round();
+			} catch (Exception e) {
+				
+			}
 		}
 	}
 	long abilityCooldown()  {
