@@ -162,32 +162,28 @@ public class Worker
 					continue workerLabel;
 				}
 			}
-			Tile closest = null;
-			int minDistance = Constants.INFINITY;
-			int distance;
-			for (Tile deposit:GameInfoCache.karboniteDeposits)
+			if (Game.isMoveReady(worker))
 			{
-				distance = Pathfinding.pathLength(deposit, worker.tile());
-				
-				if (distance < minDistance)
+				Tile closest = null;
+				int minDistance = Constants.INFINITY;
+				int distance;
+				for (Tile deposit:GameInfoCache.karboniteDeposits)
 				{
-					minDistance = distance;
-					closest = deposit;
-				}
-				
-			}
-			if (closest != null)
-			{
-				Direction moveDir = Pathfinding.path(worker.tile(), closest);
-				if (Game.canMove(worker, moveDir))
-				{
-					Game.moveRobot(worker, moveDir);
-				}
-				if (Pathfinding.pathLength(worker.tile(), closest) <= 1)
-				{
-					if (Game.canHarvest(worker, Pathfinding.path(worker.tile(), closest)))
+					distance = Pathfinding.pathLength(deposit, worker.tile());
+					
+					if (distance < minDistance)
 					{
-						Game.harvest(worker, Pathfinding.path(worker.tile(), closest));
+						minDistance = distance;
+						closest = deposit;
+					}
+					
+				}
+				if (closest != null)
+				{
+					Direction moveDir = Pathfinding.path(worker.tile(), closest);
+					if (Game.canMove(worker, moveDir))
+					{
+						Game.moveRobot(worker, moveDir);
 					}
 				}
 			}
@@ -196,6 +192,21 @@ public class Worker
 			
 			
 			
+			
+		}
+	}
+	
+	private static void harvest()
+	{
+		for (Robot worker:idleWorkers)
+		{
+			for (Direction dir: Game.directions)
+			{
+				if (Game.canHarvest(worker, dir))
+				{
+					Game.harvest(worker, dir);
+				}
+			}
 		}
 	}
 	
@@ -215,6 +226,7 @@ public class Worker
 		{
 			replicateWorkers();
 		}
+		harvest();
 	}
 	
 	
