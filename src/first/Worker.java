@@ -1,8 +1,9 @@
 package first;
 
+import java.util.HashSet;
+
 import bc.*;
 
-<<<<<<< Updated upstream
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
@@ -314,31 +315,6 @@ public class Worker
 		{
 			replicateWorkers();
 		}
-=======
-public class Worker {
-	public static void run() {
-		for (Robot worker:GameInfoCache.allyWorkers) {
-			if (GameInfoCache.allyFactories.size() < 1) {
-				for (Direction d: Game.moveDirections) {
-					if (Game.karbonite() > 100 && Game.canBlueprint(worker, UnitType.Factory, d)) {
-						Game.blueprint(worker, UnitType.Factory, d);
-						break;
-					}
-				}
-			}
-			for (Robot factory: GameInfoCache.allyFactories) {
-				if (Pathfinding.pathLength(factory.tile(), worker.tile()) == 1) {
-					if (Game.canBuild(worker, factory)) {
-						Game.build(worker, factory);
-					}
-				}
-			}
-		}
-		
->>>>>>> Stashed changes
 	}
-	
-	
-	
 	
 }

@@ -1,82 +1,125 @@
 package first;
 
 import bc.*;
+
 import java.util.*;
 
 public class Pathfinding {
-	private static Map<Tile, Map<Tile, Integer>> cache;
+	private static Map<Integer, Map<Integer, Integer>> cache;
 	static {
 		cache = new HashMap<>();
 	}
+	private static int[] directions = {1, 1 - Constants.WIDTH, -1 * Constants.WIDTH, -1 - Constants.WIDTH, -1, Constants.WIDTH - 1, Constants.WIDTH, Constants.WIDTH + 1};
 	
 	private static void bfs(Tile dest) {
 		long time = System.nanoTime();
 
-		 Map<Tile, Integer> current_map = new HashMap<>();
-		 Queue<Tile> open = new LinkedList<>();
-		 Set<Tile> closed = new HashSet<>();
+		Map<Integer, Integer> current_map = new HashMap<>();
+		Queue<Integer> open = new LinkedList<>();
+		Set<Integer> closed = new HashSet<>();
 		 
-		 open.add(dest);
-		 closed.add(dest);
-		 current_map.put(dest, 0);
-		 while (open.size() > 0) {
-			Tile current = open.poll();
+		Integer destination = dest.getX() + dest.getY() * Constants.WIDTH;
+		int size = Constants.WIDTH * Constants.HEIGHT;
+		 
+		open.add(destination);
+		closed.add(destination);
+		current_map.put(destination, 0);
+		while (open.size() > 0) {
+			Integer current = open.poll();
 			// for each direction 
 			for (int i = 0; i < 8; i++) {
-				Tile test = current.add(Game.moveDirections[i]);
+				Integer test = current + directions[i];
 				if (!closed.contains(test) && !open.contains(test)) {
-					if (Game.onMap(test, current.getPlanet()) && Game.isPassableTerrainAt(test)) {
+					if (test >= 0 && test < size && Game.pathMap[test]) {
 						 open.add(test);
-						 current_map.put(current.add(Game.moveDirections[i]), current_map.get(current) + 1);
+						 current_map.put(test, current_map.get(current) + 1);
 					}
 				}
 				closed.add(current);
 			}
 		}
-		cache.put(dest, current_map);
-		time = (System.nanoTime() - time)/1000000;
-		System.out.printf("\t\tWorker Time: %d\n", time);
+		cache.put(destination, current_map);
+		time = (System.nanoTime() - time)/1000;
+		System.out.printf("\tbfs Time: %d\n", time);
 	}
 	
-	public static Direction path(Tile source, Tile dest) {
-		if (!cache.containsKey(dest)) {
-			long start = System.nanoTime();
+	public static Direction path(Tile source, Tile dest) 
+	{
+		Integer sourceInt = source.getX() + source.getY() * Constants.WIDTH;
+		Integer destInt = dest.getX() + dest.getY() * Constants.WIDTH;
+		if (!cache.containsKey(destInt)) {
 			bfs(dest);
-			System.out.println("BFS took: " + (System.nanoTime() - start) / 1000000.0);
 		}
-		if (!cache.get(dest).containsKey(source)) {
+		if (!cache.get(destInt).containsKey(sourceInt)) {
 			return Direction.Center;
 		}
-		Direction best = Direction.Center;
-		for (Direction direction: Game.directions) {
-			if (Game.isPassableTerrainAt(source.add(direction)) && Game.isOccupiable(source.add(direction)) > 0) {
-				if (best == Direction.Center && (cache.get(dest).get(source.add(best)) >= cache.get(dest).get(source.add(direction)))) {
+		int best = 0;
+		for (int direction: directions) {
+			int test = sourceInt + direction;
+			if (test >= 0 && test <= Constants.WIDTH * Constants.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Constants.WIDTH, (test)/Constants.WIDTH)) > 0) {
+				if (best == 0 && (cache.get(destInt).get(sourceInt + best)) >= cache.get(destInt).get(test)) {
 					best = direction;
 				}
-				else if (cache.get(dest).get(source.add(best)) > cache.get(dest).get(source.add(direction))) {
+				else if (cache.get(destInt).get(sourceInt + best) > cache.get(destInt).get(test)) {
 					best = direction;
 				}
 			}
 		}
-		return best;
+		
+		if (best == 1)
+		{
+			return Direction.East;
+		}
+		else if (best == 1 - Constants.WIDTH)
+		{
+			return Direction.Southeast;
+		}
+		else if (best == -1 * Constants.WIDTH)
+		{
+			return Direction.South;
+		}
+		else if (best == -1 - Constants.WIDTH)
+		{
+			return Direction.Southwest;
+		}
+		else if (best == -1)
+		{
+			return Direction.West;
+		}
+		else if (best == Constants.WIDTH - 1)
+		{
+			return Direction.Northwest;
+		}
+		else if (best == Constants.WIDTH)
+		{
+			return Direction.North;
+		}
+		else if (best == Constants.WIDTH+1)
+		{
+			return Direction.Northeast;
+		}
+		else
+		{
+			return Direction.Center;
+		}
 	}
 	
 	public static int pathLength(Tile source, Tile dest) {
-		if (!((cache.containsKey(dest) && cache.get(dest).containsKey(source)) || (cache.containsKey(source) && cache.get(source).containsKey(dest)))) {
-			long start = System.nanoTime();
+		Integer sourceInt = source.getX() + source.getY() * Constants.WIDTH;
+		Integer destInt = dest.getX() + dest.getY() * Constants.WIDTH;
+		if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
 			bfs(dest);
-			System.out.println("BFS took: " + (System.nanoTime() - start) / 1000000.0);
 		}
-		if (cache.containsKey(dest)) {
-			if (!cache.get(dest).containsKey(source)) {
+		if (cache.containsKey(destInt)) {
+			if (!cache.get(destInt).containsKey(sourceInt)) {
 				return -1;
 			}
-			return cache.get(dest).get(source);
+			return cache.get(destInt).get(sourceInt);
 		} else {
-			if (!cache.get(source).containsKey(dest)) {
+			if (!cache.get(sourceInt).containsKey(destInt)) {
 				return -1;
 			}
-			return cache.get(source).get(dest);
+			return cache.get(sourceInt).get(destInt);
 		}
 	}
 	
