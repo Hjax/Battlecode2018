@@ -40,6 +40,7 @@ public class GameInfoCache
 		}
 	}
 	
+	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
 	
 	public static ArrayList<Robot> allyWorkers = new ArrayList<Robot>();
 	public static ArrayList<Robot> allyKnights = new ArrayList<Robot>();
@@ -91,6 +92,8 @@ public class GameInfoCache
 		allFactories = new ArrayList<Robot>();
 		allRockets = new ArrayList<Robot>();
 		
+		currentBlueprints = new HashSet<Robot>();
+		
 		updateType(UnitType.Worker, allyWorkers, enemyWorkers, allWorkers);
 		updateType(UnitType.Knight, allyKnights, enemyKnights, allKnights);
 		updateType(UnitType.Ranger, allyRangers, enemyRangers, allRangers);
@@ -127,6 +130,10 @@ public class GameInfoCache
 		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
+				if (type == UnitType.Factory && bot.structureIsBuilt() != 1)
+				{
+					currentBlueprints.add(bot);
+				}
 				if (bot.team() == Game.team())
 				{
 					allyCache.add(bot);

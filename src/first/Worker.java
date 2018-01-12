@@ -13,18 +13,7 @@ import bc.*;
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
-	private static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
-	
-	public static void startTurn()
-	{
-		for (Robot structure:currentBlueprints)
-		{
-			if (structure.structureIsBuilt() == 1)
-			{
-				currentBlueprints.remove(structure);
-			}
-		}
-	}
+	private static HashSet<Tile> factoryPlacements = new HashSet<Tile>(); 
 	
 	private static class WorkerDistanceTuple
 	{
@@ -105,11 +94,8 @@ public class Worker
 			buildDir = Utilities.findNearestPassableDir(bestWorker.worker.tile(), buildDir);
 			if (buildDir != Direction.Center)
 			{
-				System.out.printf("\t\tAttempting to build Factory\n", bestWorker.worker.id());
 				Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
 				idleWorkers.remove(bestWorker.worker);
-				currentBlueprints.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1)));
-				System.out.printf("\t\t factory ID is %d\n", currentBlueprints.iterator().next().id());
 			}
 			else
 			{
@@ -145,7 +131,6 @@ public class Worker
 	
 	private static int findKarboniteQuadrant(int startingQuadrant)
 	{
-		Map<Integer, Integer> current_map = new HashMap<>();
 		Queue<Integer> open = new LinkedList<>();
 		Set<Integer> closed = new HashSet<>();
 		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
@@ -154,21 +139,19 @@ public class Worker
 		 
 		open.add(startingQuadrant);
 		closed.add(startingQuadrant);
-		current_map.put(startingQuadrant, 0);
 		while (open.size() > 0) {
 			Integer current = open.poll();
 			// for each direction 
 			for (int i = 0; i < 8; i++) {
 				Integer test = current + directions[i];
 				if (!closed.contains(test) && !open.contains(test)) {
-					if (Math.abs(test % Constants.QUADRANTROWSIZE - current % Constants.QUADRANTCOLUMNSIZE) <= 1 && test >= 0 && test < size && GameInfoCache.karboniteDeposits.get(test).size() > 0) 
+					if (Math.abs(test % Constants.QUADRANTROWSIZE - current % Constants.QUADRANTCOLUMNSIZE) <= 1 && test >= 0 && test < size) 
 					{
 						if (GameInfoCache.karboniteDeposits.get(test).size() > 0)
 						{
 							return test;
 						}
 						 open.add(test);
-						 current_map.put(test, current_map.get(current) + 1);
 					}
 				}
 				closed.add(current);
@@ -179,9 +162,9 @@ public class Worker
 	
 	private static void giveWorkersOrders()
 	{
-		workerLabel: for (Robot worker:GameInfoCache.allyWorkers)
+		workerLabel: for (Robot worker:idleWorkers)
 		{
-			for (Robot structure:currentBlueprints)
+			for (Robot structure:GameInfoCache.currentBlueprints)
 			{
 				if (Pathfinding.pathLength(structure.tile(), worker.tile()) < Constants.BUILDRANGE)
 				{
