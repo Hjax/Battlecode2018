@@ -7,10 +7,14 @@ import bc.*;
 
 public class GameInfoCache 
 {
-	public static HashSet<Tile> karboniteDeposits = new HashSet<Tile>();
+	public static ArrayList<HashSet<Tile>> karboniteDeposits = new ArrayList<HashSet<Tile>>(Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE);
 	
 	static
 	{
+		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
+		{
+			karboniteDeposits.add(new HashSet<Tile>());
+		}
 		Tile checkLocation;
 		for (int x = 0; x < Game.startingMap(Game.planet()).getWidth(); x++)
 		{
@@ -19,7 +23,7 @@ public class GameInfoCache
 				checkLocation = Tile.getInstance(Game.planet(), x, y);
 				if (Game.initialKarboniteAt(checkLocation) > 0)
 				{
-					karboniteDeposits.add(checkLocation);
+					karboniteDeposits.get(x/Constants.QUADRANTSIZE + y/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).add(checkLocation);
 				}
 			}
 		}
@@ -85,21 +89,25 @@ public class GameInfoCache
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
 		
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
-		for (Tile deposit: karboniteDeposits)
+		for (HashSet<Tile> quadrant:karboniteDeposits)
 		{
-			if (Game.canSenseLocation(deposit))
+			for (Tile deposit: quadrant)
 			{
-				if (Game.karboniteAt(deposit) == 0)
+				if (Game.canSenseLocation(deposit))
 				{
-					System.out.printf("\t\t\t\tdeleting deposit\n");
-					depletedDeposits.add(deposit);
+					if (Game.karboniteAt(deposit) == 0)
+					{
+						System.out.printf("\t\t\t\tdeleting deposit\n");
+						depletedDeposits.add(deposit);
+					}
 				}
 			}
+			for (Tile deposit: depletedDeposits)
+			{
+				quadrant.remove(deposit);
+			}
 		}
-		for (Tile deposit: depletedDeposits)
-		{
-			karboniteDeposits.remove(deposit);
-		}
+		
 		
 	}
 	
