@@ -5,47 +5,39 @@ import java.util.*;
 
 public class Pathfinding {
 	private static Map<Tile, Map<Tile, Integer>> cache;
-	private static Map<Tile, Queue<Tile>> open;
-	private static Map<Tile, Set<Tile>> closed;
 	static {
 		cache = new HashMap<>();
-		open = new HashMap<>();
-		closed = new HashMap<>();
 	}
 	
-	private static void bfs(Tile source, Tile dest) {
+	private static void bfs(Tile dest) {
 
-		 if (!cache.containsKey(dest)) {
-			 open.put(dest, new LinkedList<>());
-			 closed.put(dest, new HashSet<>());
-			 cache.put(dest, new HashMap<>());
-			 
-		 }
+		 Map<Tile, Integer> current_map = new HashMap<>();
+		 Queue<Tile> open = new LinkedList<>();
+		 Set<Tile> closed = new HashSet<>();
 		 
-		 open.get(dest).add(dest);
-		 closed.get(dest).add(dest);
-		 cache.get(dest).put(dest, 0);
-
-		 while (open.get(dest).size() > 0) {
-			Tile current = open.get(dest).poll();
+		 open.add(dest);
+		 closed.add(dest);
+		 current_map.put(dest, 0);
+		 while (open.size() > 0) {
+			Tile current = open.poll();
 			// for each direction 
 			for (int i = 0; i < 8; i++) {
 				Tile test = current.add(Game.moveDirections[i]);
-				if (!closed.get(dest).contains(test) && Game.isPassableTerrainAt(test)) {
-					open.get(dest).add(test);
-					closed.get(dest).add(test);
-					cache.get(dest).put(test, cache.get(dest).get(current) + 1);
+				if (!closed.contains(test) && !open.contains(test)) {
+					if (Game.onMap(test, current.getPlanet()) && Game.isPassableTerrainAt(test)) {
+						 open.add(test);
+						 current_map.put(current.add(Game.moveDirections[i]), current_map.get(current) + 1);
+					}
 				}
-			}
-			if (current == source) {
-				return;
+				closed.add(current);
 			}
 		 }
+		 cache.put(dest, current_map);
 	}
 	
 	public static Direction path(Tile source, Tile dest) {
-		if (!(cache.containsKey(dest) && cache.get(dest).containsKey(source))) {
-			bfs(source, dest);
+		if (!cache.containsKey(dest)) {
+			bfs(dest);
 		}
 		if (!cache.get(dest).containsKey(source)) {
 			return Direction.Center;
@@ -65,8 +57,8 @@ public class Pathfinding {
 	}
 	
 	public static int pathLength(Tile source, Tile dest) {
-		if (!(cache.containsKey(dest) && cache.get(dest).containsKey(source)) || !(cache.containsKey(source) && cache.get(source).containsKey(dest))) {
-			bfs(source, dest);
+		if (!((cache.containsKey(dest) && cache.get(dest).containsKey(source)) || (cache.containsKey(source) && cache.get(source).containsKey(dest)))) {
+			bfs(dest);
 		}
 		if (cache.containsKey(dest)) {
 			if (!cache.get(dest).containsKey(source)) {
