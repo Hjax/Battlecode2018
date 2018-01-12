@@ -7,6 +7,11 @@ public class Micro {
 
 	private static Map<Robot, Tile> randomTargets = new HashMap<>();
 	private static ArrayList<Tile> targets = new ArrayList<>();
+	static {
+		for (Tile loc:Constants.startingEnemiesLocation) {
+			targets.add(loc);
+		}
+	}
 	private static ArrayList<Robot> enemyFactories = new ArrayList<>();
 	private static ArrayList<Robot> helpRequests = new ArrayList<>();
 	private static ArrayList<Robot> newHelpRequests = new ArrayList<>();
@@ -25,7 +30,7 @@ public class Micro {
 	
 	public static void run() {
 		startTurn();
-		for (Robot r: GameInfoCache.allRangers) {
+		for (Robot r: GameInfoCache.allyRangers) {
 			Tile target = null;
 			if (helpRequests.size() + enemyFactories.size() > 0) {
 				// TODO this is probably slow
@@ -56,15 +61,19 @@ public class Micro {
 				}
 			}
 			if (target != null) {
-				try {
-					if (Game.canMove(r, Pathfinding.path(r.tile(), target))) {
-						Game.moveRobot(r, Pathfinding.path(r.tile(), target));
-					}
-				} catch (Exception e) {
-					
+				if (Game.canMove(r, Pathfinding.path(r.tile(), target))) {
+					Game.moveRobot(r, Pathfinding.path(r.tile(), target));
 				}
 			}
-			if (Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy()).length > 0) {
+			if (Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy()).length > 0) {
+				if (Game.isAttackReady(r) && Game.canAttack(r, Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy())[0])) {
+					Game.attack(r, Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
+					if (Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy()).length > 0) {
+						newHelpRequests.add(Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
+					}
+				}
+			}
+			else if (Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy()).length > 0) {
 				if (Game.isAttackReady(r) && Game.canAttack(r, Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy())[0])) {
 					Game.attack(r, Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
 					if (Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy()).length > 0) {
