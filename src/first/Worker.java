@@ -224,7 +224,6 @@ public class Worker
 			}
 		else
 		{
-			System.out.printf("My location is (%d,%d) and my target is (%d,%d)\n", worker.tile().getX(), worker.tile().getY(), target.location.getX(), target.location.getY());
 			if (Game.canMove(worker, Pathfinding.path(worker.tile(), target.location)))
 			{
 				Game.moveRobot(worker, Pathfinding.path(worker.tile(), target.location));
