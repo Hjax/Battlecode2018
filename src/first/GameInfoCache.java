@@ -87,7 +87,7 @@ public class GameInfoCache
 	
 	private static void updateType(UnitType type, ArrayList<Robot> allyCache, ArrayList<Robot> enemyCache, ArrayList<Robot> allCache)
 	{
-		for (Robot bot:Game.senseNearbyUnits(Tile.getInstance(Planet.Earth, 0, 0), type))
+		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
 				if (bot.team() == Game.team())

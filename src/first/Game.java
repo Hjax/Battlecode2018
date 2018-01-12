@@ -313,20 +313,20 @@ public class Game {
 		return units.toArray(new Robot[0]);
 	}
 	
-	public static Robot[] senseNearbyUnits(Tile location, UnitType type, Team team) {
-		return senseNearbyUnits(location, INFINITY, type, team);
+	public static Robot[] senseNearbyUnits(UnitType type, Team team) {
+		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(Tile location, Team team) {
-		return senseNearbyUnits(location, INFINITY, team);
+	public static Robot[] senseNearbyUnits(Team team) {
+		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, team);
 	}
 	
-	public static Robot[] senseNearbyUnits(Tile location, UnitType type) {
-		return senseNearbyUnits(location, INFINITY, type);
+	public static Robot[] senseNearbyUnits(UnitType type) {
+		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type);
 	}
 	
-	public static Robot[] senseNearbyUnits(Tile location) {
-		return senseNearbyUnits(location, INFINITY);
+	public static Robot[] senseNearbyUnits() {
+		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY);
 	}
 	
 	public static Robot senseUnitAtLocation(Tile location) {
