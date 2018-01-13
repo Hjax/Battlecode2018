@@ -1,10 +1,12 @@
 package first;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
@@ -14,6 +16,9 @@ public class Worker
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
 	private static HashSet<Tile> factoryPlacements = new HashSet<Tile>(); 
+	private static PriorityQueue<Tile> factoryGrid;
+	private static Tile factoryGridCenter;
+	
 	
 	private static class WorkerDistanceTuple
 	{
@@ -71,6 +76,23 @@ public class Worker
 		return farWorker;
 	}
 	
+	private static class FactoryTileComparator implements Comparator<Tile>
+	{
+		public int compare(Tile arg0, Tile arg1) {
+			int dist1 = Pathfinding.pathLength(arg0, factoryGridCenter);
+			int dist2 = Pathfinding.pathLength(arg1, factoryGridCenter);
+			if (dist1 < dist2)
+			{
+				return -1;
+			}
+			if (dist1 == dist2)
+			{
+				return 0;
+			}
+			return 1;
+		}
+		
+	}
 	
 	private static void buildOrder()
 	{
@@ -96,6 +118,43 @@ public class Worker
 			{
 				Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
 				idleWorkers.remove(bestWorker.worker);
+				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1);
+				
+				factoryGrid = new PriorityQueue<Tile>(Constants.HEIGHT * Constants.WIDTH / 4, new FactoryTileComparator());
+				int x = factoryGridCenter.getX() + 2;
+				int y = factoryGridCenter.getY();
+				Tile place;
+				while (y < Constants.HEIGHT)
+				{
+					while (x < Constants.WIDTH)
+					{
+						place = Tile.getInstance(Game.planet(), x, y);
+						if (Game.isPassableTerrainAt(place))
+						{
+							factoryGrid.add(place);
+						}
+						
+						x += 2;
+					}
+					y += 2;
+					x -= Constants.WIDTH;
+				}
+				x = factoryGridCenter.getX() - 2;
+				y = factoryGridCenter.getY();
+				while (y > Constants.HEIGHT)
+				{
+					while (x < Constants.WIDTH)
+					{
+						place = Tile.getInstance(Game.planet(), x, y);
+							if (Game.isPassableTerrainAt(place))
+							{
+								factoryGrid.add(place);
+							}
+						x -= 2;
+					}
+					y -= 2;
+					x += Constants.WIDTH;
+				}
 			}
 			else
 			{
@@ -125,7 +184,6 @@ public class Worker
 					Game.replicate(worker, replicateDir);
 				}
 			}
-			
 		}
 	}
 	
@@ -232,6 +290,98 @@ public class Worker
 		}
 	}
 	
+	private static boolean shouldBuildFactory()
+	{
+		if (factoryGrid.peek() == null)
+		{
+			return false;
+		}
+		if (Game.karbonite() >=100 && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	private static void placeFactory()
+	{
+		
+		Tile placement = factoryGrid.peek();
+		System.out.printf("\ttrying to place factory at (%d,%d)\n", placement.getX(), placement.getY());
+		Robot closestWorker = null;
+		int bestDistance = Constants.INFINITY;
+		int currentDistance;
+		for (Robot worker:idleWorkers)
+		{
+			currentDistance = Pathfinding.pathLength(worker.tile(), placement);
+			if (currentDistance < bestDistance)
+			{
+				bestDistance = currentDistance;
+				closestWorker = worker;
+			}
+		}
+		if (closestWorker == null)
+		{
+			return;
+		}
+		if (bestDistance == 1)
+		{
+			System.out.printf("At (%d,%d) adjacent to placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
+			if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
+			{
+				System.out.printf("building factory\n");
+				Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
+				factoryGrid.poll();
+				idleWorkers.remove(closestWorker);
+			}
+		}
+		else if (bestDistance == 0)
+		{
+			System.out.printf("At (%d,%d) on top of placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
+			Direction moveDir = Utilities.findOccupiableDir(closestWorker.tile());
+			if (moveDir != Direction.Center)
+			{
+				if (Game.canMove(closestWorker, moveDir))
+				{
+					Game.moveRobot(closestWorker, moveDir);
+					if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
+					{
+						System.out.printf("building factory\n");
+						Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
+						factoryGrid.poll();
+						idleWorkers.remove(closestWorker);
+					}
+					
+				}
+				
+			}
+		}
+		else if (bestDistance > 1)
+		{
+			System.out.printf("At (%d,%d) away from placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
+			Direction moveDir = Pathfinding.path(closestWorker.tile(), placement);
+			if (moveDir != Direction.Center)
+			{
+				if (Game.canMove(closestWorker, moveDir))
+				{
+					Game.moveRobot(closestWorker, moveDir);
+					if (Pathfinding.pathLength(closestWorker.tile(), placement) == 1)
+					{
+						if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
+						{
+							System.out.printf("building factory\n");
+							Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
+							factoryGrid.poll();
+							idleWorkers.remove(closestWorker);
+						}
+					}
+
+				}
+			}
+			
+		}
+	}
+	
 	public static void run() 
 	{
 		idleWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
@@ -242,6 +392,10 @@ public class Worker
 		if (Game.planet() == Planet.Earth)
 		{
 			buildOrder();
+		}
+		if (shouldBuildFactory())
+		{
+			placeFactory();
 		}
 		giveWorkersOrders();
 		if (shouldReplicate())

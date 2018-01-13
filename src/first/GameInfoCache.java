@@ -111,7 +111,6 @@ public class GameInfoCache
 				{
 					if (Game.karboniteAt(deposit) == 0)
 					{
-						System.out.printf("\t\t\t\tdeleting deposit\n");
 						depletedDeposits.add(deposit);
 					}
 				}

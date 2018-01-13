@@ -17,7 +17,7 @@ public class Player
             	long time = System.nanoTime();
                 Worker.run();
                 workerTime += System.nanoTime() - time;
-                System.out.printf("Total worker time is %d miliseconds\n", (workerTime)/1000000);
+                //System.out.printf("Total worker time is %d miliseconds\n", (workerTime)/1000000);
                 Factory.run();
                 
                 Micro.run();
