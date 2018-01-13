@@ -141,9 +141,9 @@ public class Worker
 				}
 				x = factoryGridCenter.getX() - 2;
 				y = factoryGridCenter.getY();
-				while (y > Constants.HEIGHT)
+				while (y >= 0)
 				{
-					while (x < Constants.WIDTH)
+					while (x >= 0)
 					{
 						place = Tile.getInstance(Game.planet(), x, y);
 							if (Game.isPassableTerrainAt(place))
@@ -222,30 +222,42 @@ public class Worker
 	{
 		workerLabel: for (Robot worker:idleWorkers)
 		{
+			Robot closestBlueprint = null;
+			int distance = Constants.INFINITY;
+			long mostHealth = -1;
 			for (Robot structure:GameInfoCache.currentBlueprints)
 			{
-				if (Pathfinding.pathLength(structure.tile(), worker.tile()) < Constants.BUILDRANGE)
+				int testDistance = Pathfinding.pathLength(structure.tile(), worker.tile());
+				if (testDistance < Constants.BUILDRANGE)
 				{
-					Direction moveDir = Pathfinding.path(worker.tile(), structure.tile());
-					if (Game.canMove(worker, moveDir))
+					if (structure.health() > mostHealth)
 					{
-						Game.moveRobot(worker, moveDir);
+						distance = testDistance;
+						mostHealth = structure.health();
+						closestBlueprint = structure;
 					}
-					if (Pathfinding.pathLength(structure.tile(), worker.tile()) <= 1)
-					{
-						if (Game.canBuild(worker, structure))
-						{
-							Game.build(worker, structure);
-						}
-					}
-					continue workerLabel;
 				}
+			}
+			if (closestBlueprint != null)
+			{
+				Direction moveDir = Pathfinding.path(worker.tile(), closestBlueprint.tile());
+				if (Game.canMove(worker, moveDir))
+				{
+					Game.moveRobot(worker, moveDir);
+				}
+				if (distance <= 1)
+				{
+					if (Game.canBuild(worker, closestBlueprint))
+					{
+						Game.build(worker, closestBlueprint);
+					}
+				}
+				continue workerLabel;
 			}
 			if (Game.isMoveReady(worker))
 			{
 				Tile closest = null;
 				int minDistance = Constants.INFINITY;
-				int distance;
 				int destinationQuadrant = findKarboniteQuadrant(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE);
 				if (destinationQuadrant == -1)
 				{
@@ -278,19 +290,20 @@ public class Worker
 	
 	private static void harvest()
 	{
-		for (Robot worker:idleWorkers)
+		worker: for (Robot worker:idleWorkers)
 		{
 			for (Direction dir: Game.directions)
 			{
 				if (Game.canHarvest(worker, dir))
 				{
 					Game.harvest(worker, dir);
+					continue worker;
 				}
 			}
 		}
 	}
 	
-	private static boolean shouldBuildFactory()
+	private static boolean shouldBlueprintFactory()
 	{
 		if (factoryGrid.peek() == null)
 		{
@@ -382,6 +395,21 @@ public class Worker
 		}
 	}
 	
+	private static void tryBuildFactory()
+	{
+		worker: for (Robot worker:idleWorkers)
+		{
+			for (Robot thing: Game.senseNearbyUnits(worker.tile(), 2))
+			{
+				if (Game.canBuild(worker, thing))
+				{
+					Game.build(worker, thing);
+					continue worker;
+				}
+			}
+		}
+	}
+	
 	public static void run() 
 	{
 		idleWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
@@ -393,7 +421,7 @@ public class Worker
 		{
 			buildOrder();
 		}
-		if (shouldBuildFactory())
+		if (shouldBlueprintFactory())
 		{
 			placeFactory();
 		}
