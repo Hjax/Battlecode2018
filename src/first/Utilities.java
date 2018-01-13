@@ -58,7 +58,8 @@ public class Utilities
 	{
 		for (Direction dir: Game.directions)
 		{
-			if (Game.isPassableTerrainAt(offsetInDirection(start, dir, 1)))
+			Tile test = offsetInDirection(start, dir, 1);
+			if (Game.isPassableTerrainAt(test) && Game.isOccupiable(test) == 1)
 			{
 				return dir;
 			}

@@ -29,7 +29,7 @@ public class GameInfoCache
 					for (int dir:directions)
 					{
 						int test = loc + dir;
-						if ((Math.abs(test % Constants.WIDTH - loc % Constants.WIDTH) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && Game.pathMap[test]))
+						if ((Math.abs(test % Constants.QUADRANTROWSIZE - loc % Constants.QUADRANTROWSIZE) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && Game.pathMap[test]))
 						{
 							karboniteDeposits.get(test).add(checkLocation);
 						}

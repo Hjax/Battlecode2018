@@ -20,25 +20,39 @@ public class Worker
 	private static Tile factoryGridCenter;
 	
 	
-	private static class WorkerDistanceTuple
+	private static class WorkerScoreTuple implements Comparator<WorkerScoreTuple>
 	{
-		public int rushDistance;
+		public int score;
 		public Robot worker;
 		
-		WorkerDistanceTuple(int dist, Robot work)
+		WorkerScoreTuple(int SCORE, Robot work)
 		{
-			rushDistance = dist;
+			score = SCORE;
 			worker = work;
+		}
+
+		public int compare(WorkerScoreTuple o1, WorkerScoreTuple o2) 
+		{
+			//higher score is "less than" lower score for sorting purposes
+			if (o1.score > o2.score)
+			{
+				return -1;
+			}
+			if (o1.score == o2.score)
+			{
+				return 0;
+			}
+			return 1;
 		}
 	}
 	
-	private static WorkerDistanceTuple bestWorker()
+	private static WorkerScoreTuple bestWorker()
 	{
 		int min = Constants.INFINITY;
 		int max = -1;
 		int pathDistance = -1;
-		WorkerDistanceTuple closeWorker = new WorkerDistanceTuple(Constants.INFINITY, null);
-		WorkerDistanceTuple farWorker = new WorkerDistanceTuple(-1, null);
+		WorkerScoreTuple closeWorker = new WorkerScoreTuple(Constants.INFINITY, null);
+		WorkerScoreTuple farWorker = new WorkerScoreTuple(-1, null);
 		
 		for (int ally = 0; ally < Constants.startingAlliesLocation.length; ally++)
 		{
@@ -54,25 +68,25 @@ public class Worker
 					min = pathDistance;
 				}
 			}
-			if (max < closeWorker.rushDistance)
+			if (max < closeWorker.score)
 			{
 				System.out.printf("Updating closeWorker\n");
-				closeWorker.rushDistance = max;
+				closeWorker.score = max;
 				closeWorker.worker = Constants.startingAllies[ally];
 			}
-			if (min > farWorker.rushDistance)
+			if (min > farWorker.score)
 			{
 				System.out.printf("Updating farWorker\n");
-				farWorker.rushDistance = min;
+				farWorker.score = min;
 				farWorker.worker = Constants.startingAllies[ally];
 			}
 		}
-		if (closeWorker.rushDistance <= Constants.RUSHTHRESHOLD)
+		if (closeWorker.score <= Constants.RUSHTHRESHOLD)
 		{
-			System.out.printf("rush distance is %d\tworker id is %d\n", closeWorker.rushDistance, closeWorker.worker.id());
+			System.out.printf("rush distance is %d\tworker id is %d\n", closeWorker.score, closeWorker.worker.id());
 			return closeWorker;
 		}
-		System.out.printf("rush distance is %d\tworker id is %d\n", farWorker.rushDistance, farWorker.worker.id());
+		System.out.printf("rush distance is %d\tworker id is %d\n", farWorker.score, farWorker.worker.id());
 		return farWorker;
 	}
 	
@@ -98,7 +112,7 @@ public class Worker
 	{
 		if (Game.round() == 1)
 		{
-			WorkerDistanceTuple bestWorker = bestWorker();
+			WorkerScoreTuple bestWorker = bestWorker();
 			Tile nearestEnemy = Constants.startingEnemiesLocation[0];
 
 			for (Tile enemy:Constants.startingEnemiesLocation)
@@ -109,7 +123,7 @@ public class Worker
 				}
 			}
 			Direction buildDir = Pathfinding.path(bestWorker.worker.tile(), nearestEnemy);;
-			if (bestWorker.rushDistance > Constants.RUSHTHRESHOLD)
+			if (bestWorker.score > Constants.RUSHTHRESHOLD)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
@@ -165,24 +179,57 @@ public class Worker
 	}
 	
 	
-	//TODO: think of reasonable conditions
-	private static boolean shouldReplicate()
+	private static int replicateScore(Robot worker)
 	{
-		return GameInfoCache.allyWorkers.size() < Constants.WORKERLIMIT;
+		int score = 0;
+		Integer distance = null;
+		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
+		for (Robot blueprint:GameInfoCache.currentBlueprints)
+		{
+			distance = Pathfinding.pathLength(worker.tile(), blueprint.tile());
+			if (distance != null)
+			{
+				score += 50 / distance;
+			}
+		}
+		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
+		for (Robot otherWorker:GameInfoCache.allyWorkers)
+		{
+			if (otherWorker == worker)
+			{
+				continue;
+			}
+			distance = Pathfinding.pathLength(otherWorker.tile(), worker.tile());
+			if (distance != null)
+			{
+				score -= 20/distance;
+			}
+			
+		}
+		return score;
+		
 	}
+	
 	
 	private static void replicateWorkers()
 	{
+		PriorityQueue<WorkerScoreTuple> workerOrder = new PriorityQueue<WorkerScoreTuple>(GameInfoCache.allyWorkers.size()+1, new WorkerScoreTuple(0,null));
 		for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			if (worker.location().isOnMap())
 			{
-				Direction replicateDir;
-				replicateDir = Utilities.findOccupiableDir(worker.tile());
-				if (Game.canReplicate(worker, replicateDir))
-				{
-					Game.replicate(worker, replicateDir);
-				}
+				workerOrder.add(new WorkerScoreTuple(replicateScore(worker), worker));
+			}
+		}
+		while (Game.karbonite() > Constants.REPLICATECOST && workerOrder.peek() != null && workerOrder.peek().score > 0)
+		{
+			Direction replicateDir;
+			Robot worker = workerOrder.poll().worker;
+			replicateDir = Utilities.findOccupiableDir(worker.tile());
+			System.out.printf("trying to replicate to (%d,%d)\n", Utilities.offsetInDirection(worker.tile(), replicateDir, 1).getX(), Utilities.offsetInDirection(worker.tile(), replicateDir, 1).getY());
+			if (Game.canReplicate(worker, replicateDir))
+			{
+				Game.replicate(worker, replicateDir);
 			}
 		}
 	}
@@ -309,7 +356,7 @@ public class Worker
 		{
 			return false;
 		}
-		if (Game.karbonite() >=100 && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		if (Game.karbonite() >=(100 + 30 * (GameInfoCache.allyFactories.size())) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
 		{
 			return true;
 		}
@@ -320,7 +367,6 @@ public class Worker
 	{
 		
 		Tile placement = factoryGrid.peek();
-		System.out.printf("\ttrying to place factory at (%d,%d)\n", placement.getX(), placement.getY());
 		Robot closestWorker = null;
 		int bestDistance = Constants.INFINITY;
 		int currentDistance;
@@ -339,10 +385,8 @@ public class Worker
 		}
 		if (bestDistance == 1)
 		{
-			System.out.printf("At (%d,%d) adjacent to placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
 			if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
 			{
-				System.out.printf("building factory\n");
 				Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
 				factoryGrid.poll();
 				idleWorkers.remove(closestWorker);
@@ -350,7 +394,6 @@ public class Worker
 		}
 		else if (bestDistance == 0)
 		{
-			System.out.printf("At (%d,%d) on top of placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
 			Direction moveDir = Utilities.findOccupiableDir(closestWorker.tile());
 			if (moveDir != Direction.Center)
 			{
@@ -359,7 +402,6 @@ public class Worker
 					Game.moveRobot(closestWorker, moveDir);
 					if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
 					{
-						System.out.printf("building factory\n");
 						Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
 						factoryGrid.poll();
 						idleWorkers.remove(closestWorker);
@@ -371,7 +413,6 @@ public class Worker
 		}
 		else if (bestDistance > 1)
 		{
-			System.out.printf("At (%d,%d) away from placement\n", closestWorker.tile().getX(), closestWorker.tile().getY());
 			Direction moveDir = Pathfinding.path(closestWorker.tile(), placement);
 			if (moveDir != Direction.Center)
 			{
@@ -382,7 +423,6 @@ public class Worker
 					{
 						if (Game.canBlueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement)))
 						{
-							System.out.printf("building factory\n");
 							Game.blueprint(closestWorker, UnitType.Factory, closestWorker.tile().directionTo(placement));
 							factoryGrid.poll();
 							idleWorkers.remove(closestWorker);
@@ -425,11 +465,9 @@ public class Worker
 		{
 			placeFactory();
 		}
+		replicateWorkers();
 		giveWorkersOrders();
-		if (shouldReplicate())
-		{
-			replicateWorkers();
-		}
+		tryBuildFactory ();
 		harvest();
 	}
 	

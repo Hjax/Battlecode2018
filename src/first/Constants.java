@@ -35,9 +35,19 @@ public class Constants {
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 10;
-	public static final int WORKERLIMIT = 5;
+	public static final int WORKERLIMIT = 10;
+	public static final int WORKERLIMITWEIGHT = 10;
+	public static final int WORKERREPLICATEDEPOSITWEIGHT = 2;
 	public static final int FACTORYLIMIT = 5;
-	public static final int BUILDRANGE = 5;
+	public static final int BUILDRANGE = 3;
+	
+	public static final int REPLICATECOST = 15;
+	public static final int WORKERCOST = 25;
+	public static final int RANGERCOST = 20;
+	public static final int KNIGHTCOST = 20;
+	public static final int MAGECOST = 20;
+	public static final int HEALERCOST = 20;
+	
 	
 	public static final int WIDTH = (int) Game.startingMap(Game.planet()).getWidth();
 	public static final int HEIGHT = (int) Game.startingMap(Game.planet()).getHeight();
