@@ -7,3 +7,10 @@ README.md
 replay.bc18
 run.bat
 src/run.sh
+battlecode-manager
+example
+battlecode/
+battlecode.bat
+battlecode.sh
+run_nodocker.sh
+run_nodocker.bat

@@ -1,0 +1,150 @@
+# an example text-format map.
+# this is a comment.
+
+# random seed
+seed: 1337
+
+# orbit settings
+# a rocket launched on round n will take:
+# sin(n * 2pi/period) * amplitude + center
+# rounds to reach Mars
+orbit_amplitude: 50
+orbit_period: 40
+orbit_center: 100
+
+EARTH:
+width: 20
+height: 20
+# can also be horizontal, none
+symmetry: none
+
+# name the symbols on the map
+# symbols must be one character,
+# and can't be "#", "*", ":", "=", or ">"
+
+_ =
+x = impassable
+Q = 100k
+1 = 10k
+2 = 20k
+3 = 35k
+4 = 70k
+
+# can place workers
+r = red_worker
+b = blue_worker 10k
+# workers can also have karbonite on their square
+R = red_worker 10k
+B = blue_worker
+# note: when mirroring, teams will flip
+
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 r 1 _ 1 _ x x 1 _ 1 _ R _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ b _ 1 _ 1 x x _ 1 _ 1 B 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+> 1 _ 1 _ 1 _ 1 _ 1 x x _ 1 _ 1 _ 1 _ 1 _  
+> _ 1 _ 1 _ 1 _ 1 _ x x 1 _ 1 _ 1 _ 1 _ 1
+
+# every line of a map must start with ">"
+# if you leave off squares they'll be left empty / overwritten by the symmetry maker
+
+MARS:
+width: 20
+height: 20
+symmetry: none
+
+# symbols carry over from above
+# can define more if we want
+J = 1000k
+
+# spaces aren't needed
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxx__________
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+>xxxxxxxxxxxxxxxxxxxx
+
+# pro tip: if you're using vim keybindings, try selecting somewhere on that map and typing ctrl-v kkjjjjrx 
+
+# asteroids:
+# * round x y karbonite
+# note that y starts at 0 at the bottom of the map
+* 20 15 15 50
+* 40 15 15 50
+* 60 15 15 50
+* 80 15 15 50
+* 100 15 15 50
+* 120 15 15 50
+* 140 15 15 50
+* 160 15 15 50
+* 180 15 15 50
+* 200 15 15 50
+* 220 15 15 50
+* 240 15 15 50
+* 260 15 15 50
+* 280 15 15 50
+* 300 15 15 50
+* 320 15 15 50
+* 340 15 15 50
+* 360 15 15 50
+* 380 15 15 50
+* 400 15 15 50
+* 420 15 15 50
+* 440 15 15 50
+* 460 15 15 50
+* 480 15 15 50
+* 500 15 15 50
+* 520 15 15 50
+* 540 15 15 50
+* 560 15 15 50
+* 580 15 15 50
+* 600 15 15 50
+* 620 15 15 50
+* 640 15 15 50
+* 660 15 15 50
+* 680 15 15 50
+* 700 15 15 50
+* 720 15 15 50
+* 740 15 15 50
+* 760 15 15 50
+* 780 15 15 50
+* 800 15 15 50
+* 820 15 15 50
+* 840 15 15 50
+* 860 15 15 50
+* 880 15 15 50
+* 900 15 15 50
+* 920 15 15 50
+* 940 15 15 50
+* 960 15 15 50
+* 980 15 15 50
+
