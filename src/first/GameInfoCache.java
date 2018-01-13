@@ -11,6 +11,7 @@ public class GameInfoCache
 	
 	static
 	{
+		long start = System.nanoTime();
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
 		{
 			karboniteDeposits.add(new HashSet<Tile>());
@@ -38,6 +39,7 @@ public class GameInfoCache
 				}
 			}
 		}
+		System.out.println("GameInfoCache init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
 	}
 	
 	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
