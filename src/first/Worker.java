@@ -61,10 +61,12 @@ public class Worker
 				pathDistance = Pathfinding.pathLength(Constants.startingAlliesLocation[ally], Constants.startingEnemiesLocation[enemy]);
 				if (pathDistance > max)
 					{
+						System.out.printf("updating max to %d\n", pathDistance);
 						max = pathDistance;
 					}
-				if (pathDistance < min)
+				if (pathDistance < min && pathDistance != -1)
 				{
+					System.out.printf("updating min to %d\n", pathDistance);
 					min = pathDistance;
 				}
 			}
@@ -117,7 +119,8 @@ public class Worker
 
 			for (Tile enemy:Constants.startingEnemiesLocation)
 			{
-				if (Pathfinding.pathLength(bestWorker.worker.tile(), enemy) < Pathfinding.pathLength(bestWorker.worker.tile(), nearestEnemy))
+				int distance = Pathfinding.pathLength(bestWorker.worker.tile(), enemy);
+				if (distance != -1 && distance < Pathfinding.pathLength(bestWorker.worker.tile(), nearestEnemy))
 				{
 					nearestEnemy = enemy;
 				}
@@ -182,12 +185,12 @@ public class Worker
 	private static int replicateScore(Robot worker)
 	{
 		int score = 0;
-		Integer distance = null;
+		int distance = -1;
 		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
 		for (Robot blueprint:GameInfoCache.currentBlueprints)
 		{
 			distance = Pathfinding.pathLength(worker.tile(), blueprint.tile());
-			if (distance != null)
+			if (distance != -1)
 			{
 				score += 50 / distance;
 			}
@@ -200,7 +203,7 @@ public class Worker
 				continue;
 			}
 			distance = Pathfinding.pathLength(otherWorker.tile(), worker.tile());
-			if (distance != null)
+			if (distance != -1)
 			{
 				score -= 20/distance;
 			}
