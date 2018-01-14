@@ -4,8 +4,10 @@ import bc.*;
 import java.util.*;
 
 public class Robot {
-	Unit unit;
-	long round;
+	private Unit unit;
+	private long round;
+	private int id;
+	private static int nextId = 0;
 	private static Map<Integer, Robot> box;
 	static {
 		box = new HashMap<>();
@@ -22,6 +24,7 @@ public class Robot {
 	public Robot(Unit unit) {
 		round = Game.round();
 		this.unit = unit;
+		this.id = nextId++;
 	}
 	
 	public void update() {
@@ -90,6 +93,9 @@ public class Robot {
 	int id() {
 		update();
 		return unit.id();
+	}
+	int predictableId() {
+		return id;
 	}
 	short isAbilityUnlocked() {
 		update();

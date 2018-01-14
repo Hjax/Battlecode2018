@@ -11,6 +11,7 @@ public class GameInfoCache
 	
 	static
 	{
+		long start = System.nanoTime();
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
 		{
 			karboniteDeposits.add(new HashSet<Tile>());
@@ -29,7 +30,7 @@ public class GameInfoCache
 					for (int dir:directions)
 					{
 						int test = loc + dir;
-						if ((Math.abs(test % Constants.WIDTH - loc % Constants.WIDTH) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && Game.pathMap[test]))
+						if ((Math.abs(test % Constants.QUADRANTROWSIZE - loc % Constants.QUADRANTROWSIZE) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && Game.pathMap[test]))
 						{
 							karboniteDeposits.get(test).add(checkLocation);
 						}
@@ -38,8 +39,10 @@ public class GameInfoCache
 				}
 			}
 		}
+		System.out.println("GameInfoCache init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
 	}
 	
+	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
 	
 	public static ArrayList<Robot> allyWorkers = new ArrayList<Robot>();
 	public static ArrayList<Robot> allyKnights = new ArrayList<Robot>();
@@ -91,6 +94,8 @@ public class GameInfoCache
 		allFactories = new ArrayList<Robot>();
 		allRockets = new ArrayList<Robot>();
 		
+		currentBlueprints = new HashSet<Robot>();
+		
 		updateType(UnitType.Worker, allyWorkers, enemyWorkers, allWorkers);
 		updateType(UnitType.Knight, allyKnights, enemyKnights, allKnights);
 		updateType(UnitType.Ranger, allyRangers, enemyRangers, allRangers);
@@ -108,7 +113,6 @@ public class GameInfoCache
 				{
 					if (Game.karboniteAt(deposit) == 0)
 					{
-						System.out.printf("\t\t\t\tdeleting deposit\n");
 						depletedDeposits.add(deposit);
 					}
 				}
@@ -127,6 +131,10 @@ public class GameInfoCache
 		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
+				if (type == UnitType.Factory && bot.structureIsBuilt() != 1)
+				{
+					currentBlueprints.add(bot);
+				}
 				if (bot.team() == Game.team())
 				{
 					allyCache.add(bot);

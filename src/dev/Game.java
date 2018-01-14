@@ -8,12 +8,13 @@ public class Game {
 	public static Direction[] directions;
 	public static Direction[] moveDirections;
 	public static Set<Tile> passable = new HashSet<>();
-	
+	public static final PlanetMap startingMap;
+	public static final Planet planet;
 	public static boolean[] pathMap;
 	
 	public static final int INFINITY = 99999999;
 	static {
-	
+		long start = System.nanoTime();
         gc = new GameController();
         directions = Direction.values();
         moveDirections = new Direction[8];
@@ -23,22 +24,24 @@ public class Game {
         		moveDirections[i++] = d;
         	}
         }
-        pathMap = new boolean[(int) (gc.startingMap(gc.planet()).getWidth() * gc.startingMap(gc.planet()).getHeight())];
-        for (int x = 0; x < gc.startingMap(gc.planet()).getWidth(); x++) {
-        	for (int y = 0; y < gc.startingMap(gc.planet()).getHeight(); y++) {
-            	if (gc.startingMap(gc.planet()).onMap(new MapLocation(gc.planet(), x, y))) {
-            		if (gc.startingMap(gc.planet()).isPassableTerrainAt(new MapLocation(gc.planet(), x, y)) > 0) {
-                		passable.add(Tile.getInstance(gc.planet(), x, y));
-                	}
-            		pathMap[x + Constants.WIDTH * y] = gc.startingMap(gc.planet()).isPassableTerrainAt(new MapLocation(gc.planet(), x, y)) > 0;
-            	}
+        startingMap = gc.startingMap(gc.planet());
+        planet = gc.planet();
+        pathMap = new boolean[(int) (Constants.WIDTH * Constants.HEIGHT)];
+        for (int x = 0; x < Constants.WIDTH; x++) {
+        	for (int y = 0; y < Constants.HEIGHT; y++) {
+            	if (startingMap.isPassableTerrainAt(new MapLocation(planet, x, y)) > 0) {
+                	passable.add(Tile.getInstance(planet, x, y));
+                	pathMap[x + Constants.WIDTH * y] = true;
+                } else {
+                	pathMap[x + Constants.WIDTH * y] = false;
+                }
             }
         }
+        System.out.println("Game init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
     }
 	public static void startTurn() 
 	{
 		GameInfoCache.updateCache();
-		Worker.startTurn();
 	}
 
 	public static VecMapLocation allLocationsWithin(Tile location, long radis_squared) {
