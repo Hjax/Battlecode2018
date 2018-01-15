@@ -14,7 +14,6 @@ public class Game {
 	
 	public static final int INFINITY = 99999999;
 	static {
-		long start = System.nanoTime();
         gc = new GameController();
         directions = Direction.values();
         moveDirections = new Direction[8];
@@ -37,7 +36,6 @@ public class Game {
                 }
             }
         }
-        System.out.println("Game init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
     }
 	public static void startTurn() 
 	{

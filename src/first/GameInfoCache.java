@@ -11,7 +11,6 @@ public class GameInfoCache
 	
 	static
 	{
-		long start = System.nanoTime();
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
 		{
 			karboniteDeposits.add(new HashSet<Tile>());
@@ -34,12 +33,10 @@ public class GameInfoCache
 						{
 							karboniteDeposits.get(test).add(checkLocation);
 						}
-						
 					}
 				}
 			}
 		}
-		System.out.println("GameInfoCache init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
 	}
 	
 	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
@@ -104,6 +101,7 @@ public class GameInfoCache
 		updateType(UnitType.Factory, allyFactories, enemyFactories, allFactories);
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
 		
+		
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
 		for (HashSet<Tile> quadrant:karboniteDeposits)
 		{
@@ -120,6 +118,7 @@ public class GameInfoCache
 			for (Tile deposit: depletedDeposits)
 			{
 				quadrant.remove(deposit);
+				
 			}
 		}
 		
