@@ -1,4 +1,4 @@
-package replicateDirection;
+package rocketBot;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -237,7 +237,7 @@ public class GameInfoCache
 		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
-				if (type == UnitType.Factory && bot.structureIsBuilt() != 1)
+				if (( type == UnitType.Rocket || type == UnitType.Factory) && bot.structureIsBuilt() != 1)
 				{
 					currentBlueprints.add(bot);
 				}

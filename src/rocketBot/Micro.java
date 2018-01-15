@@ -1,4 +1,4 @@
-package replicateDirection;
+package rocketBot;
 
 import java.util.*;
 import bc.*;
@@ -71,6 +71,7 @@ public class Micro {
 					}
 				}
 			} else {
+				
 				if (targets.size() == 0) {
 					if (randomTargets.containsKey(r)) {
 						target = randomTargets.get(r);

@@ -1,4 +1,4 @@
-package replicateDirection;
+package rocketBot;
 
 import bc.UnitType;
 import bc.*;
@@ -6,7 +6,7 @@ import bc.*;
 public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
-			if (!(r.isFactoryProducing() > 0) && Game.canProduceRobot(r, UnitType.Ranger)) {
+			if (!(r.isFactoryProducing() > 0) && Game.canProduceRobot(r, UnitType.Ranger) && Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyRangers.size() < Constants.RANGERLIMIT) {
 				Game.produceRobot(r, UnitType.Ranger);
 			}
 			if (r.structureGarrison().length > 0) {

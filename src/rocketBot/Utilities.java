@@ -1,4 +1,4 @@
-package replicateDirection;
+package rocketBot;
 
 import bc.*;
 
@@ -76,7 +76,6 @@ public class Utilities
 		Direction right = rotateClockwise(dir);
 		while (left != right)
 		{
-			System.out.printf("\t\tsearching for passable direction\n");
 			if (Game.isPassableTerrainAt(offsetInDirection(start,left, 1)))
 			{
 				return left;
@@ -105,7 +104,6 @@ public class Utilities
 		Direction right = rotateClockwise(dir);
 		while (left != right)
 		{
-			System.out.printf("\t\tsearching for occupiable direction\n");
 			if (Game.isPassableTerrainAt(offsetInDirection(start,left, 1)) && Game.isOccupiable(offsetInDirection(start, left, 1)) > 0)
 			{
 				return left;
