@@ -1,4 +1,4 @@
-package first;
+package micro;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -137,13 +137,13 @@ public class Worker
 				idleWorkers.remove(bestWorker.worker);
 				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1);
 				
-				factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
+				factoryGrid = new PriorityQueue<Tile>(Constants.HEIGHT * Constants.WIDTH / 4, new FactoryTileComparator());
 				int x = factoryGridCenter.getX() + 2;
 				int y = factoryGridCenter.getY();
 				Tile place;
-				while (y < Game.HEIGHT)
+				while (y < Constants.HEIGHT)
 				{
-					while (x < Game.WIDTH)
+					while (x < Constants.WIDTH)
 					{
 						place = Tile.getInstance(Game.planet(), x, y);
 						if (Game.isPassableTerrainAt(place))
@@ -154,7 +154,7 @@ public class Worker
 						x += 2;
 					}
 					y += 2;
-					x -= Game.WIDTH;
+					x -= Constants.WIDTH;
 				}
 				x = factoryGridCenter.getX() - 2;
 				y = factoryGridCenter.getY();
@@ -170,7 +170,7 @@ public class Worker
 						x -= 2;
 					}
 					y -= 2;
-					x += Game.WIDTH;
+					x += Constants.WIDTH;
 				}
 			}
 			else
