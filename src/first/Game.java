@@ -8,13 +8,31 @@ public class Game {
 	public static Direction[] directions;
 	public static Direction[] moveDirections;
 	public static Set<Tile> passable = new HashSet<>();
-	public static final PlanetMap startingMap;
-	public static final Planet planet;
 	public static boolean[] pathMap;
 	
+	public static final Planet PLANET;
+	public static final int WIDTH;
+	public static final int HEIGHT;
+	public static final PlanetMap STARTINGMAP;
+	public static final AsteroidPattern ASTEROIDPATTERN;
+	public static final OrbitPattern ORBITPATTERN;
 	public static final int INFINITY = 99999999;
+	public static final Team TEAM;
+	public static final Team ENEMY;
+	public static int round = 0;
+	
 	static {
         gc = new GameController();
+        WIDTH = (int) startingMap(planet()).getWidth();
+        HEIGHT = (int) startingMap(planet()).getHeight();
+        ASTEROIDPATTERN =  gc.asteroidPattern();
+        ORBITPATTERN = gc.orbitPattern();
+        TEAM = gc.team();
+        if (TEAM == Team.Blue) {
+        	ENEMY = Team.Red;
+        } else {
+        	ENEMY = Team.Blue;
+        }
         directions = Direction.values();
         moveDirections = new Direction[8];
         int i = 0;
@@ -23,16 +41,16 @@ public class Game {
         		moveDirections[i++] = d;
         	}
         }
-        startingMap = gc.startingMap(gc.planet());
-        planet = gc.planet();
-        pathMap = new boolean[(int) (Constants.WIDTH * Constants.HEIGHT)];
-        for (int x = 0; x < Constants.WIDTH; x++) {
-        	for (int y = 0; y < Constants.HEIGHT; y++) {
-            	if (startingMap.isPassableTerrainAt(new MapLocation(planet, x, y)) > 0) {
-                	passable.add(Tile.getInstance(planet, x, y));
-                	pathMap[x + Constants.WIDTH * y] = true;
+        STARTINGMAP = gc.startingMap(gc.planet());
+        PLANET = gc.planet();
+        pathMap = new boolean[(int) (Game.WIDTH * Game.HEIGHT)];
+        for (int x = 0; x < Game.WIDTH; x++) {
+        	for (int y = 0; y < Game.HEIGHT; y++) {
+            	if (STARTINGMAP.isPassableTerrainAt(new MapLocation(PLANET, x, y)) > 0) {
+                	passable.add(Tile.getInstance(PLANET, x, y));
+                	pathMap[x + Game.WIDTH * y] = true;
                 } else {
-                	pathMap[x + Constants.WIDTH * y] = false;
+                	pathMap[x + Game.WIDTH * y] = false;
                 }
             }
         }
@@ -47,7 +65,7 @@ public class Game {
 	}
 	
 	public static AsteroidPattern asteroidPattern() {
-		return gc.asteroidPattern();
+		return ASTEROIDPATTERN;
 	}
 	
 	public static void attack(Robot robot, Robot target) {
@@ -235,11 +253,12 @@ public class Game {
 	}
 	
 	public static void nextTurn() {
+		round++;
 		gc.nextTurn();
 	}
 	
 	public static OrbitPattern orbitPattern() {
-		return gc.orbitPattern();
+		return ORBITPATTERN;
 	}
 	
 	public static void overcharge(Robot healer, Robot target) {
@@ -247,7 +266,7 @@ public class Game {
 	}
 	
 	public static Planet planet() {
-		return gc.planet();
+		return PLANET;
 	}
 	
 	public static void produceRobot(Robot factory, UnitType type) {
@@ -279,7 +298,7 @@ public class Game {
 	}
 	
 	public static long round() {
-		return gc.round();
+		return round;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius) {
@@ -360,14 +379,11 @@ public class Game {
 	}
 	
 	public static Team team() {
-		return gc.team();
+		return TEAM;
 	}
 	
 	public static Team enemy() {
-		if (team() == Team.Red) {
-			return Team.Blue;
-		}
-		return Team.Red;
+		return ENEMY;
 	}
 	
 	public static Robot unit(int id) {
@@ -599,6 +615,7 @@ public class Game {
 		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(planet(), x, y))));
 		return Tile.getInstance(new MapLocation(planet(), x, y));
 	}
+
 }
 
 
