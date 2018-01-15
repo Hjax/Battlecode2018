@@ -2,16 +2,23 @@ package dev;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import bc.*;
 
 public class GameInfoCache 
 {
 	public static ArrayList<HashSet<Tile>> karboniteDeposits = new ArrayList<HashSet<Tile>>(Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE);
+	public static int[] karboniteDistance = new int[Game.WIDTH * Game.HEIGHT];
+	public static int[] nearestKarbonite = new int[Game.WIDTH * Game.HEIGHT];
+	public static HashSet<Integer> karboniteLocations = new HashSet<Integer>();
+	
+	private static HashSet<Integer> queuedIndices = new HashSet<Integer>();
+	private static LinkedList<Integer> karboniteQueue = new LinkedList<Integer>();
 	
 	static
 	{
-		long start = System.nanoTime();
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
 		{
 			karboniteDeposits.add(new HashSet<Tile>());
@@ -34,12 +41,91 @@ public class GameInfoCache
 						{
 							karboniteDeposits.get(test).add(checkLocation);
 						}
-						
 					}
 				}
 			}
 		}
-		System.out.println("GameInfoCache init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
+		initDijkstraMap();
+	}
+	
+	private static void initDijkstraMap()
+	{
+		
+		queuedIndices = new HashSet<Integer>();
+		karboniteQueue = new LinkedList<Integer>();
+		for (int x = 0; x < Game.WIDTH; x++)
+		{
+			for (int y = 0; y < Game.HEIGHT; y++)
+			{
+				int index = x + y * Game.WIDTH;
+				if (Game.initialKarboniteAt(Tile.getInstance(Game.planet(), x, y)) > 0)
+				{
+					karboniteDistance[index] = 0;
+					nearestKarbonite[index] = index;
+					karboniteQueue.add(index);
+					queuedIndices.add(index);
+					karboniteLocations.add(index);
+				}
+				else
+				{
+					karboniteDistance[index] = Constants.INFINITY;
+					nearestKarbonite[index] = -1;
+				}
+				
+			}
+		}
+		updateDijkstraMap();
+		
+		
+
+	}
+	
+	private static void updateDijkstraMap()
+	{
+		int[] directions = {1, 1 - Game.WIDTH, -1 * Game.WIDTH, -1 - Game.WIDTH, -1, Game.WIDTH - 1, Game.WIDTH, Game.WIDTH + 1};
+		while (karboniteQueue.size() > 0)
+		{
+			int loc = karboniteQueue.poll();
+			queuedIndices.remove(loc);
+			for (int dir:directions)
+			{
+				int test = loc + dir;
+				if ((Math.abs(test % Game.WIDTH - loc % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT && Game.pathMap[test]))
+				{
+					if (!karboniteLocations.contains(nearestKarbonite[test]))
+					{
+						nearestKarbonite[test] = nearestKarbonite[loc];
+						karboniteDistance[test] = karboniteDistance[loc] + 1;
+						if (!queuedIndices.contains(test))
+						{
+							karboniteQueue.add(test);
+							queuedIndices.add(test);
+						}
+						
+					}
+					else if (!karboniteLocations.contains(nearestKarbonite[loc]) || karboniteDistance[test]+1 < karboniteDistance[loc])
+					{
+						karboniteDistance[loc] = karboniteDistance[test] + 1;
+						nearestKarbonite[loc] = nearestKarbonite[test];
+						if (!queuedIndices.contains(loc))
+						{
+							karboniteQueue.add(loc);
+							queuedIndices.add(loc);
+						}
+					}
+					else if (karboniteDistance[loc]+1 < karboniteDistance[test])
+					{
+						karboniteDistance[test] = karboniteDistance[loc] + 1;
+						nearestKarbonite[test] = nearestKarbonite[loc];
+						if (!queuedIndices.contains(test))
+						{
+							karboniteQueue.add(test);
+							queuedIndices.add(test);
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
@@ -120,8 +206,28 @@ public class GameInfoCache
 			for (Tile deposit: depletedDeposits)
 			{
 				quadrant.remove(deposit);
+				
 			}
 		}
+		for (Integer deposit:karboniteLocations)
+		{
+			Tile location = Tile.getInstance(Game.planet(), deposit % Game.WIDTH, deposit / Game.WIDTH);
+			if (Game.canSenseLocation(location) && Game.karboniteAt(location) == 0)
+			{
+				karboniteQueue.add(deposit);
+				queuedIndices.add(deposit);
+			}
+			
+		}
+		for (Integer deposit:queuedIndices)
+		{
+			karboniteLocations.remove(deposit);
+		}
+		if (karboniteLocations.size() > 0)
+		{
+			updateDijkstraMap();
+		}
+		
 		
 		
 	}

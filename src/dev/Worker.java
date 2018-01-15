@@ -137,13 +137,13 @@ public class Worker
 				idleWorkers.remove(bestWorker.worker);
 				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1);
 				
-				factoryGrid = new PriorityQueue<Tile>(Constants.HEIGHT * Constants.WIDTH / 4, new FactoryTileComparator());
+				factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
 				int x = factoryGridCenter.getX() + 2;
 				int y = factoryGridCenter.getY();
 				Tile place;
-				while (y < Constants.HEIGHT)
+				while (y < Game.HEIGHT)
 				{
-					while (x < Constants.WIDTH)
+					while (x < Game.WIDTH)
 					{
 						place = Tile.getInstance(Game.planet(), x, y);
 						if (Game.isPassableTerrainAt(place))
@@ -154,7 +154,7 @@ public class Worker
 						x += 2;
 					}
 					y += 2;
-					x -= Constants.WIDTH;
+					x -= Game.WIDTH;
 				}
 				x = factoryGridCenter.getX() - 2;
 				y = factoryGridCenter.getY();
@@ -170,7 +170,7 @@ public class Worker
 						x -= 2;
 					}
 					y -= 2;
-					x += Constants.WIDTH;
+					x += Game.WIDTH;
 				}
 			}
 			else
@@ -229,43 +229,11 @@ public class Worker
 			Direction replicateDir;
 			Robot worker = workerOrder.poll().worker;
 			replicateDir = Utilities.findOccupiableDir(worker.tile());
-			System.out.printf("trying to replicate to (%d,%d)\n", Utilities.offsetInDirection(worker.tile(), replicateDir, 1).getX(), Utilities.offsetInDirection(worker.tile(), replicateDir, 1).getY());
 			if (Game.canReplicate(worker, replicateDir))
 			{
 				Game.replicate(worker, replicateDir);
 			}
 		}
-	}
-	
-	private static int findKarboniteQuadrant(int startingQuadrant)
-	{
-		Queue<Integer> open = new LinkedList<>();
-		Set<Integer> closed = new HashSet<>();
-		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
-	
-		int size = Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE;
-		 
-		open.add(startingQuadrant);
-		closed.add(startingQuadrant);
-		while (open.size() > 0) {
-			Integer current = open.poll();
-			// for each direction 
-			for (int i = 0; i < 8; i++) {
-				Integer test = current + directions[i];
-				if (!closed.contains(test) && !open.contains(test)) {
-					if (Math.abs(test % Constants.QUADRANTROWSIZE - current % Constants.QUADRANTCOLUMNSIZE) <= 1 && test >= 0 && test < size) 
-					{
-						if (GameInfoCache.karboniteDeposits.get(test).size() > 0)
-						{
-							return test;
-						}
-						 open.add(test);
-					}
-				}
-				closed.add(current);
-			}
-		}
-		return -1;
 	}
 	
 	private static void giveWorkersOrders()
@@ -306,35 +274,24 @@ public class Worker
 			}
 			if (Game.isMoveReady(worker))
 			{
+				int closestKarbonite = -1;
+				int currentLocation = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
 				Tile closest = null;
-				int minDistance = Constants.INFINITY;
-				int destinationQuadrant = findKarboniteQuadrant(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE);
-				if (destinationQuadrant == -1)
+				if (GameInfoCache.karboniteLocations.size() > 0)
+				{
+					closestKarbonite = GameInfoCache.nearestKarbonite[currentLocation];
+					closest = Tile.getInstance(Game.planet(), closestKarbonite % Game.WIDTH, closestKarbonite/Game.WIDTH);
+				}
+				else
 				{
 					continue;
 				}
-				for (Tile deposit:GameInfoCache.karboniteDeposits.get(destinationQuadrant))
+				Direction moveDir = Pathfinding.path(worker.tile(), closest);
+				if (Game.canMove(worker, moveDir))
 				{
-					distance = Pathfinding.pathLength(deposit, worker.tile());
-					
-					if (distance < minDistance)
-					{
-						minDistance = distance;
-						closest = deposit;
-					}
-					
+					Game.moveRobot(worker, moveDir);
 				}
-				if (closest != null)
-				{
-					Direction moveDir = Pathfinding.path(worker.tile(), closest);
-					if (Game.canMove(worker, moveDir))
-					{
-						Game.moveRobot(worker, moveDir);
-					}
-				}
-			}	
-			
-			
+			}
 		}
 	}
 	

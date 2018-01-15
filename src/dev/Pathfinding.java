@@ -9,15 +9,15 @@ public class Pathfinding {
 	static {
 		cache = new HashMap<>();
 	}
-	private static int[] directions = {1, 1 - Constants.WIDTH, -1 * Constants.WIDTH, -1 - Constants.WIDTH, -1, Constants.WIDTH - 1, Constants.WIDTH, Constants.WIDTH + 1};
+	private static int[] directions = {1, 1 - Game.WIDTH, -1 * Game.WIDTH, -1 - Game.WIDTH, -1, Game.WIDTH - 1, Game.WIDTH, Game.WIDTH + 1};
 	
 	private static void bfs(Tile dest) {
 		Map<Integer, Integer> current_map = new HashMap<>();
 		Queue<Integer> open = new LinkedList<>();
 		Set<Integer> closed = new HashSet<>();
 		 
-		Integer destination = dest.getX() + dest.getY() * Constants.WIDTH;
-		int size = Constants.WIDTH * Constants.HEIGHT;
+		Integer destination = dest.getX() + dest.getY() * Game.WIDTH;
+		int size = Game.WIDTH * Game.HEIGHT;
 		 
 		open.add(destination);
 		closed.add(destination);
@@ -28,7 +28,7 @@ public class Pathfinding {
 			for (int i = 0; i < 8; i++) {
 				Integer test = current + directions[i];
 				if (!closed.contains(test) && !open.contains(test)) {
-					if (Math.abs(test % Constants.WIDTH - current % Constants.WIDTH) <= 1 && test >= 0 && test < size && Game.pathMap[test]) {
+					if (Math.abs(test % Game.WIDTH - current % Game.WIDTH) <= 1 && test >= 0 && test < size && Game.pathMap[test]) {
 						 open.add(test);
 						 current_map.put(test, current_map.get(current) + 1);
 					}
@@ -41,8 +41,8 @@ public class Pathfinding {
 	
 	public static Direction path(Tile source, Tile dest) 
 	{
-		Integer sourceInt = source.getX() + source.getY() * Constants.WIDTH;
-		Integer destInt = dest.getX() + dest.getY() * Constants.WIDTH;
+		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
+		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
 		if (!cache.containsKey(destInt)) {
 			bfs(dest);
 		}
@@ -52,7 +52,7 @@ public class Pathfinding {
 		int best = 0;
 		for (int direction: directions) {
 			int test = sourceInt + direction;
-			if (Math.abs(test % Constants.WIDTH - sourceInt % Constants.WIDTH) <= 1 && test >= 0 && test < Constants.WIDTH * Constants.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Constants.WIDTH, (test)/Constants.WIDTH)) > 0) {
+			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
 				if (best == 0 && (cache.get(destInt).get(sourceInt + best)) >= cache.get(destInt).get(test)) {
 					best = direction;
 				}
@@ -68,17 +68,17 @@ public class Pathfinding {
 			//System.out.printf("East\n");
 			return Direction.East;
 		}
-		else if (best == 1 - Constants.WIDTH)
+		else if (best == 1 - Game.WIDTH)
 		{
 			//System.out.printf("Southeast\n");
 			return Direction.Southeast;
 		}
-		else if (best == -1 * Constants.WIDTH)
+		else if (best == -1 * Game.WIDTH)
 		{
 			//System.out.printf("South\n");
 			return Direction.South;
 		}
-		else if (best == -1 - Constants.WIDTH)
+		else if (best == -1 - Game.WIDTH)
 		{
 			//System.out.printf("Southwest\n");
 			return Direction.Southwest;
@@ -88,17 +88,17 @@ public class Pathfinding {
 			//System.out.printf("West\n");
 			return Direction.West;
 		}
-		else if (best == Constants.WIDTH - 1)
+		else if (best == Game.WIDTH - 1)
 		{
 			//System.out.printf("Northwest\n");
 			return Direction.Northwest;
 		}
-		else if (best == Constants.WIDTH)
+		else if (best == Game.WIDTH)
 		{
 			//System.out.printf("North\n");
 			return Direction.North;
 		}
-		else if (best == Constants.WIDTH+1)
+		else if (best == Game.WIDTH+1)
 		{
 			//System.out.printf("Northeast\n");
 			return Direction.Northeast;
@@ -111,8 +111,8 @@ public class Pathfinding {
 	}
 	
 	public static int pathLength(Tile source, Tile dest) {
-		Integer sourceInt = source.getX() + source.getY() * Constants.WIDTH;
-		Integer destInt = dest.getX() + dest.getY() * Constants.WIDTH;
+		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
+		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
 		if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
 			bfs(dest);
 		}

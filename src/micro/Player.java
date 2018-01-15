@@ -1,5 +1,6 @@
 package micro;
 
+
 import bc.*;
 
 
@@ -15,7 +16,7 @@ public class Player
         	System.out.println("Current round: "+ Game.round());
         	Game.startTurn();
         	
-            
+        	
             if (Game.planet() == Planet.Earth) {
             	long time = System.nanoTime();
                 Worker.run();

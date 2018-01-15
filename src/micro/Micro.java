@@ -33,20 +33,20 @@ public class Micro {
 		int score = 0;
 		// todo account for unit types other than ranger
 		// todo check if enemy threats is even helping
-		Robot[] enemyThreats = Game.senseNearbyUnits(square, (long) (r.movementHeat() >= 5 ? Math.pow(Math.sqrt(r.attackRange()) + 2, 2)  : Math.pow(Math.sqrt(r.attackRange()) + 1, 2)), UnitType.Ranger, Game.enemy());
 		Robot[] enemies = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Ranger, Game.enemy());
 		Robot[] tooClose = Game.senseNearbyUnits(square, 10, UnitType.Ranger, Game.enemy());
-		if (enemyThreats.length * r.damage() > r.health()) {
+		if (enemies.length * r.damage() > r.health()) {
 			score -= 100;
 		}
 		if (enemies.length == 1) {
-			score += 20;
+			score += 40;
+			if (enemies[0].health() < r.health()) {
+				score += 60;
+			}
 		}
-		if (enemies.length == 2) {
-			score += 10;
-		}
-		score -= enemyThreats.length * 2;
+		score -= enemies.length * 2;
 		score -= tooClose.length;
+
 		if (target != null) {
 			score -= Pathfinding.pathLength(square,  target) * 10;
 		}
