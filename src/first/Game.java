@@ -22,7 +22,6 @@ public class Game {
 	public static int round = 1;
 	
 	static {
-		long start = System.nanoTime();
         gc = new GameController();
         TEAM = gc.team();
         if (TEAM == Team.Blue) {
@@ -55,7 +54,6 @@ public class Game {
                 }
             }
         }
-        System.out.println("Game init took: " + ((System.nanoTime() - start) / 1000000.0) + " ms");
     }
 	public static void startTurn() 
 	{
