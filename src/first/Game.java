@@ -19,15 +19,11 @@ public class Game {
 	public static final int INFINITY = 99999999;
 	public static final Team TEAM;
 	public static final Team ENEMY;
-	public static int round = 0;
+	public static int round = 1;
 	
 	static {
 		long start = System.nanoTime();
         gc = new GameController();
-        WIDTH = (int) startingMap(planet()).getWidth();
-        HEIGHT = (int) startingMap(planet()).getHeight();
-        ASTEROIDPATTERN =  gc.asteroidPattern();
-        ORBITPATTERN = gc.orbitPattern();
         TEAM = gc.team();
         if (TEAM == Team.Blue) {
         	ENEMY = Team.Red;
@@ -44,6 +40,10 @@ public class Game {
         }
         STARTINGMAP = gc.startingMap(gc.planet());
         PLANET = gc.planet();
+        WIDTH = (int) STARTINGMAP.getWidth();
+        HEIGHT = (int) STARTINGMAP.getHeight();
+        ASTEROIDPATTERN =  gc.asteroidPattern();
+        ORBITPATTERN = gc.orbitPattern();
         pathMap = new boolean[(int) (Game.WIDTH * Game.HEIGHT)];
         for (int x = 0; x < Game.WIDTH; x++) {
         	for (int y = 0; y < Game.HEIGHT; y++) {
