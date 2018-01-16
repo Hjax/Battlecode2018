@@ -162,7 +162,7 @@ public class Micro {
 						}
 					}
 				}
-				if (Game.canHeal(r, best)) {
+				if (best != null && Game.canHeal(r, best)) {
 					Game.heal(r, best);
 					damage[best.predictableId()] += r.damage();
 				}
