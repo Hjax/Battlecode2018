@@ -332,7 +332,6 @@ public class Worker
 	
 	private static void placeStructure(UnitType structure)
 	{
-		
 		Tile placement = factoryGrid.peek();
 		Robot closestWorker = null;
 		int bestDistance = Constants.INFINITY;

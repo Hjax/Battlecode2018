@@ -260,6 +260,7 @@ public class Worker
 	
 	private static void giveWorkersOrders()
 	{
+		HashSet<Robot> removeWorkers = new HashSet<Robot>();
 		workerLabel: for (Robot worker:idleWorkers)
 		{
 			Robot closestBlueprint = null;
@@ -275,6 +276,7 @@ public class Worker
 						distance = testDistance;
 						mostHealth = structure.health();
 						closestBlueprint = structure;
+						
 					}
 				}
 			}
@@ -284,36 +286,24 @@ public class Worker
 				if (Game.canMove(worker, moveDir))
 				{
 					Game.moveRobot(worker, moveDir);
+					System.out.printf("moving\n");
+					removeWorkers.add(worker);
 				}
-				if (distance <= 1)
+				if (Pathfinding.pathLength(worker.tile(), closestBlueprint.tile()) <= 1)
 				{
 					if (Game.canBuild(worker, closestBlueprint))
 					{
 						Game.build(worker, closestBlueprint);
+						removeWorkers.add(worker);
+						System.out.printf("building\n");
 					}
 				}
 				continue workerLabel;
 			}
-			if (Game.isMoveReady(worker))
-			{
-				int closestKarbonite = -1;
-				int currentLocation = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
-				Tile closest = null;
-				if (GameInfoCache.karboniteLocations.size() > 0)
-				{
-					closestKarbonite = GameInfoCache.nearestKarbonite[currentLocation];
-					closest = Tile.getInstance(Game.planet(), closestKarbonite % Game.WIDTH, closestKarbonite/Game.WIDTH);
-				}
-				else
-				{
-					continue;
-				}
-				Direction moveDir = Pathfinding.path(worker.tile(), closest);
-				if (Game.canMove(worker, moveDir))
-				{
-					Game.moveRobot(worker, moveDir);
-				}
-			}
+		}
+		for (Robot worker: removeWorkers)
+		{
+			idleWorkers.remove(worker);
 		}
 	}
 	
@@ -321,8 +311,24 @@ public class Worker
 	{
 		worker: for (Robot worker:idleWorkers)
 		{
-			for (Direction dir: Game.directions)
+			Direction moveDir = Direction.Center;
+			if (GameInfoCache.karboniteLocations.size() > 0)
 			{
+				moveDir = Pathfinding.karbonitePath(worker.tile());
+			}
+			else
+			{
+				continue;
+			}
+			
+			if (Game.canMove(worker, moveDir))
+			{
+				Game.moveRobot(worker, moveDir);
+			}
+			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
+			if (GameInfoCache.karboniteDistance[index] <= 1)
+			{
+				Direction dir = worker.tile().directionTo(Tile.getInstance(Game.planet(), GameInfoCache.nearestKarbonite[index] % Game.WIDTH, GameInfoCache.nearestKarbonite[index] / Game.WIDTH));
 				if (Game.canHarvest(worker, dir))
 				{
 					Game.harvest(worker, dir);
