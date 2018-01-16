@@ -23,6 +23,7 @@ public class Game {
 	public static final Team TEAM;
 	public static final Team ENEMY;
 	public static int round = 1;
+	public static Random rand = new Random();
 	
 	static {
         gc = new GameController();
@@ -635,7 +636,6 @@ public class Game {
 	}
 	
 	public static Tile getRandomLocation() {
-		Random rand = new Random();
 		int x = 0;
 		int y = 0;
 		do {
@@ -646,7 +646,6 @@ public class Game {
 	}
 	
 	public static Tile getRandomLocation(Planet plnt) {
-		Random rand = new Random();
 		int x = 0;
 		int y = 0;
 		System.out.printf("before do-while\n");
