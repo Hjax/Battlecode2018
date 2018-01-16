@@ -1,4 +1,4 @@
-package rocketBot;
+package apiRemoval;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -126,54 +126,80 @@ public class Worker
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
-			buildDir = Utilities.findNearestPassableDir(bestWorker.worker.tile(), buildDir);
+			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker.tile(), buildDir);
+			System.out.printf("building in direction %s\n", buildDir.name());
 			if (buildDir != Direction.Center)
 			{
 				Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
 				idleWorkers.remove(bestWorker.worker);
 				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1);
-				
-				factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
-				int x = factoryGridCenter.getX() + 2;
-				int y = factoryGridCenter.getY();
-				Tile place;
-				while (y < Game.HEIGHT)
-				{
-					while (x < Game.WIDTH)
-					{
-						place = Tile.getInstance(Game.planet(), x, y);
-						if (Game.isPassableTerrainAt(place))
-						{
-							factoryGrid.add(place);
-						}
-						
-						x += 2;
-					}
-					y += 2;
-					x -= Game.WIDTH;
-				}
-				x = factoryGridCenter.getX() - 2;
-				y = factoryGridCenter.getY();
-				while (y >= 0)
-				{
-					while (x >= 0)
-					{
-						place = Tile.getInstance(Game.planet(), x, y);
-							if (Game.isPassableTerrainAt(place))
-							{
-								factoryGrid.add(place);
-							}
-						x -= 2;
-					}
-					y -= 2;
-					x += Game.WIDTH;
-				}
+				initializeBuildGrid();
 			}
 			else
 			{
 				//TODO: HANDLE OUR BEST WORKER BEING TRAPPED
+				while (buildDir == Direction.Center)
+				{
+					for (Robot worker:GameInfoCache.allyWorkers)
+					{
+						buildDir = Utilities.findOccupiableDir(worker.tile());
+						if (buildDir == Direction.Center)
+						{
+							continue;
+						}
+						Game.blueprint(worker, UnitType.Factory, buildDir);
+						idleWorkers.remove(worker);
+						factoryGridCenter = Utilities.offsetInDirection(worker.tile(), buildDir, 1);
+						initializeBuildGrid();
+					}
+					if (buildDir == Direction.Center)
+					{
+						Robot disintegratedWorker = GameInfoCache.allyWorkers.get(0);
+						GameInfoCache.allyWorkers.remove(0);
+						Game.disintegrateUnit(disintegratedWorker);
+					}
+				}
 			}
 			
+		}
+	}
+	
+	private static void initializeBuildGrid()
+	{
+		factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
+		int x = factoryGridCenter.getX() + 2;
+		int y = factoryGridCenter.getY();
+		Tile place;
+		while (y < Game.HEIGHT)
+		{
+			while (x < Game.WIDTH)
+			{
+				place = Tile.getInstance(Game.planet(), x, y);
+				if (Game.isPassableTerrainAt(place))
+				{
+					factoryGrid.add(place);
+				}
+				
+				x += 2;
+			}
+			y += 2;
+			x -= Game.WIDTH;
+		}
+		x = factoryGridCenter.getX() - 2;
+		y = factoryGridCenter.getY();
+		while (y >= 0)
+		{
+			while (x >= 0)
+			{
+				place = Tile.getInstance(Game.planet(), x, y);
+					if (Game.isPassableTerrainAt(place))
+					{
+						factoryGrid.add(place);
+					}
+				x -= 2;
+			}
+			y -= 2;
+			x += Game.WIDTH;
 		}
 	}
 	
@@ -239,7 +265,6 @@ public class Worker
 			Robot closestBlueprint = null;
 			int distance = Constants.INFINITY;
 			long mostHealth = -1;
-			boolean acted = false;
 			for (Robot structure:GameInfoCache.currentBlueprints)
 			{
 				int testDistance = Pathfinding.pathLength(structure.tile(), worker.tile());
@@ -250,44 +275,40 @@ public class Worker
 						distance = testDistance;
 						mostHealth = structure.health();
 						closestBlueprint = structure;
-						
 					}
 				}
 			}
 			if (closestBlueprint != null)
 			{
-				if (distance > 1)
+				Direction moveDir = Pathfinding.path(worker.tile(), closestBlueprint.tile());
+				if (Game.canMove(worker, moveDir))
 				{
-					Direction moveDir = Pathfinding.path(worker.tile(), closestBlueprint.tile());
-					if (Game.canMove(worker, moveDir))
-					{
-						Game.moveRobot(worker, moveDir);
-						acted = true;
-					}
+					Game.moveRobot(worker, moveDir);
 				}
-				
 				if (distance <= 1)
 				{
 					if (Game.canBuild(worker, closestBlueprint))
 					{
 						Game.build(worker, closestBlueprint);
-						acted = true;
 					}
 				}
 				continue workerLabel;
 			}
-			else if (Game.isMoveReady(worker) && acted == false)
+			if (Game.isMoveReady(worker))
 			{
-				Direction moveDir = Direction.Center;
+				int closestKarbonite = -1;
+				int currentLocation = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
+				Tile closest = null;
 				if (GameInfoCache.karboniteLocations.size() > 0)
 				{
-					moveDir = Pathfinding.karbonitePath(worker.tile());
+					closestKarbonite = GameInfoCache.nearestKarbonite[currentLocation];
+					closest = Tile.getInstance(Game.planet(), closestKarbonite % Game.WIDTH, closestKarbonite/Game.WIDTH);
 				}
 				else
 				{
 					continue;
 				}
-				
+				Direction moveDir = Pathfinding.path(worker.tile(), closest);
 				if (Game.canMove(worker, moveDir))
 				{
 					Game.moveRobot(worker, moveDir);
@@ -300,10 +321,8 @@ public class Worker
 	{
 		worker: for (Robot worker:idleWorkers)
 		{
-			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
-			if (GameInfoCache.karboniteDistance[index] <= 1)
+			for (Direction dir: Game.directions)
 			{
-				Direction dir = worker.tile().directionTo(Tile.getInstance(Game.planet(), GameInfoCache.nearestKarbonite[index] % Game.WIDTH, GameInfoCache.nearestKarbonite[index] / Game.WIDTH));
 				if (Game.canHarvest(worker, dir))
 				{
 					Game.harvest(worker, dir);
@@ -510,8 +529,13 @@ public class Worker
 		}
 		
 		replicateWorkers();
-		giveWorkersOrders();
-		tryBuildFactory ();
+		
+		if (Game.PLANET == Planet.Earth)
+		{
+			giveWorkersOrders();
+			tryBuildFactory ();
+		}
+		
 		harvest();
 		
 		moveRandomly();

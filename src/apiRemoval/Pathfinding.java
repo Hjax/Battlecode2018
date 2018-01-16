@@ -1,4 +1,4 @@
-package rocketBot;
+package apiRemoval;
 
 import bc.*;
 
@@ -57,74 +57,6 @@ public class Pathfinding {
 					best = direction;
 				}
 				else if (cache.get(destInt).get(sourceInt + best) > cache.get(destInt).get(test)) {
-					best = direction;
-				}
-			}
-		}
-		//System.out.printf("Pathing from (%d,%d) to (%d,%d) using direction ", source.getX(), source.getY(), dest.getX(), dest.getY());
-		
-		if (best == 1)
-		{
-			//System.out.printf("East\n");
-			return Direction.East;
-		}
-		else if (best == 1 - Game.WIDTH)
-		{
-			//System.out.printf("Southeast\n");
-			return Direction.Southeast;
-		}
-		else if (best == -1 * Game.WIDTH)
-		{
-			//System.out.printf("South\n");
-			return Direction.South;
-		}
-		else if (best == -1 - Game.WIDTH)
-		{
-			//System.out.printf("Southwest\n");
-			return Direction.Southwest;
-		}
-		else if (best == -1)
-		{
-			//System.out.printf("West\n");
-			return Direction.West;
-		}
-		else if (best == Game.WIDTH - 1)
-		{
-			//System.out.printf("Northwest\n");
-			return Direction.Northwest;
-		}
-		else if (best == Game.WIDTH)
-		{
-			//System.out.printf("North\n");
-			return Direction.North;
-		}
-		else if (best == Game.WIDTH+1)
-		{
-			//System.out.printf("Northeast\n");
-			return Direction.Northeast;
-		}
-		else
-		{
-			//System.out.printf("Center\n");
-			return Direction.Center;
-		}
-	}
-	
-	public static Direction karbonitePath(Tile source) 
-	{
-		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
-		if (GameInfoCache.nearestKarbonite[sourceInt] == -1)
-		{
-			return Direction.Center;
-		}
-		int best = 0;
-		for (int direction: directions) {
-			int test = sourceInt + direction;
-			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
-				if (best == 0 && (GameInfoCache.karboniteDistance[sourceInt + best]) >= GameInfoCache.karboniteDistance[test]) {
-					best = direction;
-				}
-				else if (GameInfoCache.karboniteDistance[sourceInt + best] > GameInfoCache.karboniteDistance[test]) {
 					best = direction;
 				}
 			}
