@@ -126,54 +126,80 @@ public class Worker
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
-			buildDir = Utilities.findNearestPassableDir(bestWorker.worker.tile(), buildDir);
+			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker.tile(), buildDir);
+			System.out.printf("building in direction %s\n", buildDir.name());
 			if (buildDir != Direction.Center)
 			{
 				Game.blueprint(bestWorker.worker, UnitType.Factory, buildDir);
 				idleWorkers.remove(bestWorker.worker);
 				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker.tile(), buildDir, 1);
-				
-				factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
-				int x = factoryGridCenter.getX() + 2;
-				int y = factoryGridCenter.getY();
-				Tile place;
-				while (y < Game.HEIGHT)
-				{
-					while (x < Game.WIDTH)
-					{
-						place = Tile.getInstance(Game.planet(), x, y);
-						if (Game.isPassableTerrainAt(place))
-						{
-							factoryGrid.add(place);
-						}
-						
-						x += 2;
-					}
-					y += 2;
-					x -= Game.WIDTH;
-				}
-				x = factoryGridCenter.getX() - 2;
-				y = factoryGridCenter.getY();
-				while (y >= 0)
-				{
-					while (x >= 0)
-					{
-						place = Tile.getInstance(Game.planet(), x, y);
-							if (Game.isPassableTerrainAt(place))
-							{
-								factoryGrid.add(place);
-							}
-						x -= 2;
-					}
-					y -= 2;
-					x += Game.WIDTH;
-				}
+				initializeBuildGrid();
 			}
 			else
 			{
 				//TODO: HANDLE OUR BEST WORKER BEING TRAPPED
+				while (buildDir == Direction.Center)
+				{
+					for (Robot worker:GameInfoCache.allyWorkers)
+					{
+						buildDir = Utilities.findOccupiableDir(worker.tile());
+						if (buildDir == Direction.Center)
+						{
+							continue;
+						}
+						Game.blueprint(worker, UnitType.Factory, buildDir);
+						idleWorkers.remove(worker);
+						factoryGridCenter = Utilities.offsetInDirection(worker.tile(), buildDir, 1);
+						initializeBuildGrid();
+					}
+					if (buildDir == Direction.Center)
+					{
+						Robot disintegratedWorker = GameInfoCache.allyWorkers.get(0);
+						GameInfoCache.allyWorkers.remove(0);
+						Game.disintegrateUnit(disintegratedWorker);
+					}
+				}
 			}
 			
+		}
+	}
+	
+	private static void initializeBuildGrid()
+	{
+		factoryGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new FactoryTileComparator());
+		int x = factoryGridCenter.getX() + 2;
+		int y = factoryGridCenter.getY();
+		Tile place;
+		while (y < Game.HEIGHT)
+		{
+			while (x < Game.WIDTH)
+			{
+				place = Tile.getInstance(Game.planet(), x, y);
+				if (Game.isPassableTerrainAt(place))
+				{
+					factoryGrid.add(place);
+				}
+				
+				x += 2;
+			}
+			y += 2;
+			x -= Game.WIDTH;
+		}
+		x = factoryGridCenter.getX() - 2;
+		y = factoryGridCenter.getY();
+		while (y >= 0)
+		{
+			while (x >= 0)
+			{
+				place = Tile.getInstance(Game.planet(), x, y);
+					if (Game.isPassableTerrainAt(place))
+					{
+						factoryGrid.add(place);
+					}
+				x -= 2;
+			}
+			y -= 2;
+			x += Game.WIDTH;
 		}
 	}
 	

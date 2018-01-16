@@ -648,13 +648,10 @@ public class Game {
 	public static Tile getRandomLocation(Planet plnt) {
 		int x = 0;
 		int y = 0;
-		System.out.printf("before do-while\n");
 		do {
 			 x = rand.nextInt((int) startingMap(plnt).getWidth());
 			 y = rand.nextInt((int) startingMap(plnt).getHeight());
-			 System.out.printf("before while check\n");
 		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(plnt, x, y))));
-		System.out.printf("done do-while\n");
 		return Tile.getInstance(new MapLocation(plnt, x, y));
 	}
 
