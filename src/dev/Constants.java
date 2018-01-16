@@ -37,7 +37,10 @@ public class Constants {
 	public static final int WORKERLIMITWEIGHT = 10;
 	public static final int WORKERREPLICATEDEPOSITWEIGHT = 2;
 	public static final int FACTORYLIMIT = 5;
-	public static final int BUILDRANGE = 3;
+	public static final int FACTORYBUILDRANGE = 3;
+	public static final int ROCKETBUILDRANGE = 50;
+	public static final int RANGERLIMIT = 50;
+	public static final int FACTORYHALTROUND = 725; 
 	
 	public static final int REPLICATECOST = 15;
 	public static final int WORKERCOST = 25;
@@ -45,6 +48,7 @@ public class Constants {
 	public static final int KNIGHTCOST = 20;
 	public static final int MAGECOST = 20;
 	public static final int HEALERCOST = 20;
+	public static final int RANGERRANGE = 50;
 	
 	
 	public static final int QUADRANTSIZE = 4;

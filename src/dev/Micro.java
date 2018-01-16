@@ -29,7 +29,7 @@ public class Micro {
 		}
 		damage = new int[5000];
 	}
-	public static int score(Robot r, Tile square, Tile target) {
+	public static int scoreRangers(Robot r, Tile square, Tile target) {
 		int score = 0;
 		// todo account for unit types other than ranger
 		// todo check if enemy threats is even helping
@@ -51,12 +51,34 @@ public class Micro {
 			score -= Pathfinding.pathLength(square,  target) * 10;
 		}
 		return score;
-		
+	}
+	
+	public static int scoreHealers(Robot r, Tile square, Tile target) {
+		int score = 0;
+		Robot[] enemies = Game.senseCombatUnits(square, Constants.RANGERRANGE, Game.enemy());
+		if (enemies.length > 0) {
+			int enemy_score = 0;
+			for (Robot enemy: enemies) {
+				enemy_score += enemy.tile().distanceSquaredTo(square);
+			}
+			enemy_score = enemy_score / enemies.length;
+			score -= enemy_score;
+		}
+		Robot[] allies = Game.senseCombatUnits(square, r.attackRange(), Game.team());
+		if (enemies.length * r.damage() > r.health()) {
+			score -= 100;
+		}
+		score += allies.length;
+
+		if (target != null) {
+			score -= Pathfinding.pathLength(square,  target) * 10;
+		}
+		return score;
 	}
 		
 	public static void run() {
 		startTurn();
-		for (Robot r: GameInfoCache.allyRangers) {
+		for (Robot r: GameInfoCache.allyCombat) {
 			if (!r.location().isOnMap()) {
 				continue;
 			}
@@ -94,7 +116,18 @@ public class Micro {
 				int bestScore = 0;
 				for (Direction d: Game.directions) {
 					if ((Game.isPassableTerrainAt(r.tile().add(d)) && Game.canMove(r, d)) || d == Direction.Center) {
-						int current = score(r, r.tile().add(d), target);
+						int current = -1 * Constants.INFINITY;
+						switch (r.unitType()) {
+							case Ranger:
+								current = scoreRangers(r, r.tile().add(d), target);
+								break;
+							case Healer:
+								current = scoreHealers(r, r.tile().add(d), target);
+								break;
+							default:
+								break;
+						}
+						
 						if (best == null || current > bestScore) {
 							bestScore = current;
 							best = d;
@@ -105,14 +138,29 @@ public class Micro {
 					Game.moveRobot(r, best);
 				}
 			}
-			if (Game.isAttackReady(r)) {
+			if (r.unitType() == UnitType.Healer && Game.isHealReady(r)) {
+				Robot best = null;
+				Robot[] healee = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.TEAM);
+				for (Robot ally: healee) {
+					if (best == null || (ally.health() - damage[ally.predictableId()] < best.health())) {
+						best = ally;
+					}
+				}
+				if (Game.canHeal(r, best)) {
+					Game.heal(r, best);
+					damage[best.predictableId()] += r.damage();
+				}
+			}
+			else if (Game.isAttackReady(r)) {
 				Robot[] combat = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy());
 				if (combat.length > 0) {
 					Robot best = null;
 					for (Robot enemy: combat) {
-						if (enemy.health() - damage[enemy.predictableId()] > 0) {
-							if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
-								best = enemy;
+						if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
+							if (enemy.health() - damage[enemy.predictableId()] > 0) {
+								if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+									best = enemy;
+								}
 							}
 						}
 					}

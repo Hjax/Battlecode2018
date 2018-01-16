@@ -138,6 +138,8 @@ public class GameInfoCache
 	public static ArrayList<Robot> allyFactories = new ArrayList<Robot>();
 	public static ArrayList<Robot> allyRockets = new ArrayList<Robot>();
 	
+	public static ArrayList<Robot> allyCombat = new ArrayList<Robot>();
+	
 	public static ArrayList<Robot> enemyWorkers = new ArrayList<Robot>();
 	public static ArrayList<Robot> enemyKnights = new ArrayList<Robot>();
 	public static ArrayList<Robot> enemyRangers = new ArrayList<Robot>();
@@ -163,6 +165,8 @@ public class GameInfoCache
 		allyHealers = new ArrayList<Robot>();
 		allyFactories = new ArrayList<Robot>();
 		allyRockets = new ArrayList<Robot>();
+		
+		allyCombat = new ArrayList<Robot>();
 		
 		enemyWorkers = new ArrayList<Robot>();
 		enemyKnights = new ArrayList<Robot>();
@@ -191,6 +195,8 @@ public class GameInfoCache
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
 		
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
+		
+		
 		for (HashSet<Tile> quadrant:karboniteDeposits)
 		{
 			for (Tile deposit: quadrant)
@@ -223,6 +229,22 @@ public class GameInfoCache
 		{
 			karboniteLocations.remove(deposit);
 		}
+		
+		AsteroidStrike asteroid = null;
+		if (Game.ASTEROIDPATTERN.hasAsteroid(Game.round()))
+		{
+			asteroid = Game.ASTEROIDPATTERN.asteroid(Game.round());
+			if (Game.PLANET == Planet.Mars)
+			{
+				int loc = asteroid.getLocation().getX() + asteroid.getLocation().getY() * Game.WIDTH;
+				karboniteLocations.add(loc);
+				karboniteDistance[loc] = 0;
+				nearestKarbonite[loc] = loc;
+				queuedIndices.add(loc);
+				karboniteQueue.add(loc);
+			}
+		}
+		
 		if (karboniteLocations.size() > 0)
 		{
 			updateDijkstraMap();
@@ -237,13 +259,16 @@ public class GameInfoCache
 		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
-				if (type == UnitType.Factory && bot.structureIsBuilt() != 1)
+				if (( type == UnitType.Rocket || type == UnitType.Factory) && bot.structureIsBuilt() != 1)
 				{
 					currentBlueprints.add(bot);
 				}
 				if (bot.team() == Game.team())
 				{
 					allyCache.add(bot);
+					if (bot.unitType() != UnitType.Worker && bot.unitType() != UnitType.Factory && bot.unitType() != UnitType.Rocket) {
+						allyCombat.add(bot);
+					}
 				}
 				else
 				{
