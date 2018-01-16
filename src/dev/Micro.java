@@ -189,6 +189,7 @@ public class Micro {
 					Robot[] civilian = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy());
 					if (civilian.length > 0) {
 						if (Game.canAttack(r, civilian[0])) {
+							newHelpRequests.add(Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
 							Game.attack(r, civilian[0]);
 						}
 					}

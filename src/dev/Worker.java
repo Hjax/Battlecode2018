@@ -209,6 +209,7 @@ public class Worker
 		int score = 0;
 		int distance = -1;
 		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
+		if (Game.round() >= 750) score += Constants.INFINITY;
 		for (Robot blueprint:GameInfoCache.currentBlueprints)
 		{
 			distance = Pathfinding.pathLength(worker.tile(), blueprint.tile());
@@ -541,7 +542,7 @@ public class Worker
 			giveWorkersOrders();
 			tryBuildFactory ();
 		}
-		
+
 		harvest();
 		
 		moveRandomly();
