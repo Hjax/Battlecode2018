@@ -33,8 +33,8 @@ public class Micro {
 		int score = 0;
 		// todo account for unit types other than ranger
 		// todo check if enemy threats is even helping
-		Robot[] enemies = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Ranger, Game.enemy());
-		Robot[] tooClose = Game.senseNearbyUnits(square, 10, UnitType.Ranger, Game.enemy());
+		Robot[] enemies = Game.senseCombatUnits(square, r.attackRange(), Game.enemy());
+		Robot[] tooClose = Game.senseCombatUnits(square, 10, Game.enemy());
 		if (enemies.length * r.damage() > r.health()) {
 			score -= 100;
 		}
@@ -57,6 +57,9 @@ public class Micro {
 	public static void run() {
 		startTurn();
 		for (Robot r: GameInfoCache.allyRangers) {
+			if (!r.location().isOnMap()) {
+				continue;
+			}
 			Tile target = null;
 			if (helpRequests.size() + enemyFactories.size() > 0) {
 				// TODO this is probably slow
