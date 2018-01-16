@@ -8,12 +8,15 @@ public class Game {
 	public static Direction[] directions;
 	public static Direction[] moveDirections;
 	public static Set<Tile> passable = new HashSet<>();
+	public static Set<Tile> passableOther = new HashSet<>();
 	public static boolean[] pathMap;
 	
 	public static final Planet PLANET;
+	public static final Planet OTHERPLANET;
 	public static final int WIDTH;
 	public static final int HEIGHT;
 	public static final PlanetMap STARTINGMAP;
+	public static final PlanetMap STARTINGMAPOTHER;
 	public static final AsteroidPattern ASTEROIDPATTERN;
 	public static final OrbitPattern ORBITPATTERN;
 	public static final int INFINITY = 99999999;
@@ -39,6 +42,16 @@ public class Game {
         }
         STARTINGMAP = gc.startingMap(gc.planet());
         PLANET = gc.planet();
+        if (PLANET == Planet.Earth)
+        {
+        	OTHERPLANET = Planet.Mars;
+        	STARTINGMAPOTHER = gc.startingMap(Planet.Mars);
+        }
+        else
+        {
+        	OTHERPLANET = Planet.Earth;
+        	STARTINGMAPOTHER = gc.startingMap(Planet.Earth);
+        }
         WIDTH = (int) STARTINGMAP.getWidth();
         HEIGHT = (int) STARTINGMAP.getHeight();
         ASTEROIDPATTERN =  gc.asteroidPattern();
@@ -51,6 +64,14 @@ public class Game {
                 	pathMap[x + Game.WIDTH * y] = true;
                 } else {
                 	pathMap[x + Game.WIDTH * y] = false;
+                }
+            }
+        }
+        
+        for (int x = 0; x < Game.STARTINGMAPOTHER.getWidth(); x++) {
+        	for (int y = 0; y < Game.STARTINGMAPOTHER.getHeight(); y++) {
+            	if (STARTINGMAPOTHER.isPassableTerrainAt(new MapLocation(OTHERPLANET, x, y)) > 0) {
+                	passableOther.add(Tile.getInstance(OTHERPLANET, x, y));
                 }
             }
         }
@@ -593,7 +614,15 @@ public class Game {
 	}
 	
 	public static boolean isPassableTerrainAt(Tile loc) {
-		return passable.contains(loc);
+		if (loc.getPlanet() == PLANET)
+		{
+			return passable.contains(loc);
+		}
+		else
+		{
+			return passableOther.contains(loc);
+		}
+		
 	}
 	
 	public static Robot[] getInitialUnits() {
@@ -614,6 +643,20 @@ public class Game {
 			 y = rand.nextInt((int) startingMap(planet()).getHeight());
 		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(planet(), x, y))));
 		return Tile.getInstance(new MapLocation(planet(), x, y));
+	}
+	
+	public static Tile getRandomLocation(Planet plnt) {
+		Random rand = new Random();
+		int x = 0;
+		int y = 0;
+		System.out.printf("before do-while\n");
+		do {
+			 x = rand.nextInt((int) startingMap(plnt).getWidth());
+			 y = rand.nextInt((int) startingMap(plnt).getHeight());
+			 System.out.printf("before while check\n");
+		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(plnt, x, y))));
+		System.out.printf("done do-while\n");
+		return Tile.getInstance(new MapLocation(plnt, x, y));
 	}
 
 }

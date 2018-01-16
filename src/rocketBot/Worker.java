@@ -1,25 +1,19 @@
 package rocketBot;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 
 import bc.*;
 
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
-	private static HashSet<Tile> factoryPlacements = new HashSet<Tile>(); 
 	private static PriorityQueue<Tile> factoryGrid;
-	private static Tile factoryGridCenter;
+	private static Tile factoryGridCenter = Rocket.landingGridCenter;
 	private static Random rng = new Random(5468);
+	private static int rockets = 0;
 	
 	
 	private static class WorkerScoreTuple implements Comparator<WorkerScoreTuple>
@@ -356,6 +350,10 @@ public class Worker
 				Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
 				factoryGrid.poll();
 				idleWorkers.remove(closestWorker);
+				if (structure == UnitType.Rocket)
+				{
+					rockets++;
+				}
 			}
 		}
 		else if (bestDistance == 0)
@@ -371,6 +369,10 @@ public class Worker
 						Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
 						factoryGrid.poll();
 						idleWorkers.remove(closestWorker);
+						if (structure == UnitType.Rocket)
+						{
+							rockets++;
+						}
 					}
 					
 				}
@@ -392,6 +394,10 @@ public class Worker
 							Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
 							factoryGrid.poll();
 							idleWorkers.remove(closestWorker);
+							if (structure == UnitType.Rocket)
+							{
+								rockets++;
+							}
 						}
 					}
 
@@ -418,9 +424,15 @@ public class Worker
 	
 	private static boolean shouldBuildRocket()
 	{
+		
 		if (Game.PLANET == Planet.Mars)
 		{
 			return false;
+		}
+		
+		if (Game.researchInfo().getLevel(UnitType.Rocket) > 0 && rockets == 0 && GameInfoCache.allyFactories.size() >= 2 && Game.karbonite() > 80)
+		{
+			return true;
 		}
 		
 		if (Game.round >= 650)
@@ -447,12 +459,31 @@ public class Worker
 		}
 	}
 	
+	private static void loadRocket()
+	{
+		worker: for (Robot worker:idleWorkers)
+		{
+			for (Robot thing: Game.senseNearbyUnits(worker.tile(), 2, UnitType.Rocket))
+			{
+				if (Game.canLoad(thing, worker))
+				{
+					Game.load(thing, worker);
+					continue worker;
+				}
+			}
+		}
+	}
+	
 	public static void run() 
 	{
 		idleWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
 		for (Robot worker:GameInfoCache.allyWorkers)
 		{
-			idleWorkers.add(worker);
+			if (!worker.location().isInGarrison())
+			{
+				idleWorkers.add(worker);
+			}
+			
 		}
 		if (Game.planet() == Planet.Earth)
 		{
@@ -466,10 +497,16 @@ public class Worker
 		{
 			placeStructure(UnitType.Rocket);
 		}
+		if (Game.PLANET == Planet.Earth)
+		{
+			loadRocket();
+		}
+		
 		replicateWorkers();
 		giveWorkersOrders();
 		tryBuildFactory ();
 		harvest();
+		
 		moveRandomly();
 	}
 	

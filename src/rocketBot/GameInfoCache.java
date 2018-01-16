@@ -191,6 +191,8 @@ public class GameInfoCache
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
 		
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
+		
+		
 		for (HashSet<Tile> quadrant:karboniteDeposits)
 		{
 			for (Tile deposit: quadrant)
@@ -223,6 +225,22 @@ public class GameInfoCache
 		{
 			karboniteLocations.remove(deposit);
 		}
+		
+		AsteroidStrike asteroid = null;
+		if (Game.ASTEROIDPATTERN.hasAsteroid(Game.round()))
+		{
+			asteroid = Game.ASTEROIDPATTERN.asteroid(Game.round());
+			if (Game.PLANET == Planet.Mars)
+			{
+				int loc = asteroid.getLocation().getX() + asteroid.getLocation().getY() * Game.WIDTH;
+				karboniteLocations.add(loc);
+				karboniteDistance[loc] = 0;
+				nearestKarbonite[loc] = loc;
+				queuedIndices.add(loc);
+				karboniteQueue.add(loc);
+			}
+		}
+		
 		if (karboniteLocations.size() > 0)
 		{
 			updateDijkstraMap();

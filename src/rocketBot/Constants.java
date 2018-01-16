@@ -40,7 +40,7 @@ public class Constants {
 	public static final int FACTORYBUILDRANGE = 3;
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int RANGERLIMIT = 50;
-	public static final int FACTORYHALTROUND = 700; 
+	public static final int FACTORYHALTROUND = 725; 
 	
 	public static final int REPLICATECOST = 15;
 	public static final int WORKERCOST = 25;

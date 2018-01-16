@@ -9,7 +9,8 @@ import bc.Planet;
 public class Rocket 
 {
 	private static PriorityQueue<Tile> landingGrid;
-	private static Tile landingGridCenter;
+	public static Tile landingGridCenter;
+	private static int launchedRockets = 0;
 	
 	
 	private static class LandingTileComparator implements Comparator<Tile>
@@ -32,7 +33,7 @@ public class Rocket
 	
 	static
 	{
-		landingGridCenter = Game.getRandomLocation();
+		landingGridCenter = Game.getRandomLocation(Planet.Mars);
 		
 		landingGrid = new PriorityQueue<Tile>(Game.HEIGHT * Game.WIDTH / 4, new LandingTileComparator());
 		int x = landingGridCenter.getX();
@@ -85,10 +86,14 @@ public class Rocket
 	
 	private static void unload()
 	{
-		for (Robot rocket: GameInfoCache.allyRockets) {
-			if (rocket.structureGarrison().length > 0) {
-				for (Direction dir: Game.moveDirections) {
-					if (Game.canUnload(rocket, dir)) {
+		for (Robot rocket: GameInfoCache.allyRockets) 
+		{
+			if (rocket.structureGarrison().length > 0) 
+			{
+				for (Direction dir: Game.moveDirections) 
+				{
+					if (Game.canUnload(rocket, dir)) 
+					{
 						Game.unload(rocket, dir);
 					}
 				}
@@ -100,11 +105,11 @@ public class Rocket
 	{
 		for (Robot rocket: GameInfoCache.allyRockets)
 		{
-			if (rocket.structureGarrison().length == rocket.structureMaxCapacity() || Game.round == 749)
+			System.out.printf("rocket has %d units loaded\n", rocket.structureGarrison().length);
+			if ((launchedRockets == 0 && rocket.structureGarrison().length > 1) || (rocket.structureGarrison().length == rocket.structureMaxCapacity() || Game.round == 749))
 			{
 				if (Game.canLaunchRocket(rocket, landingGrid.peek())) 
 				{
-					System.out.printf("\tlaunching\n");
 					Game.launchRocket(rocket, landingGrid.poll());
 				}
 				
