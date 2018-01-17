@@ -27,7 +27,7 @@ public class Robot {
 		this.id = nextId++;
 	}
 	
-	public void update() {
+	private void update() {
 		if (round != Game.round()) {
 			try {
 				this.unit = Game.gc.unit(unit.id());
@@ -35,6 +35,15 @@ public class Robot {
 			} catch (Exception e) {
 				
 			}
+		}
+	}
+	
+	public void forceUpdate() {
+		try {
+			this.unit = Game.gc.unit(unit.id());
+			round = Game.round();
+		} catch (Exception e) {
+			
 		}
 	}
 	long abilityCooldown()  {

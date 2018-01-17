@@ -92,14 +92,17 @@ public class Game {
 	
 	public static void attack(Robot robot, Robot target) {
 		gc.attack(robot.id(), target.id());
+		target.forceUpdate();
 	}
 	
 	public static void beginSnipe(Robot ranger, Tile location) {
 		gc.beginSnipe(ranger.id(), location.location);
+		ranger.forceUpdate();
 	}
 	
 	public static void blink(Robot mage, Tile location) {
 		gc.blink(mage.id(), location.location);
+		mage.forceUpdate();
 	}
 	
 	public static void blueprint(Robot worker, UnitType structure, Direction direction) {
@@ -108,6 +111,7 @@ public class Game {
 	
 	public static void build(Robot worker, Robot blueprint) {
 		gc.build(worker.id(), blueprint.id());
+		blueprint.forceUpdate();
 	}
 	
 	public static boolean canAttack(Robot robot, Robot target) {
@@ -188,6 +192,7 @@ public class Game {
 	
 	public static void disintegrateUnit(Robot unit) {
 		gc.disintegrateUnit(unit.id());
+		unit.forceUpdate();
 	}
 	
 	public static Veci32 getTeamArray(Planet planet) {
@@ -244,6 +249,8 @@ public class Game {
 	
 	public static void javelin(Robot knight, Robot target) {
 		gc.javelin(knight.id(), target.id());
+		knight.forceUpdate();
+		target.forceUpdate();
 	}
 	
 	public static long karbonite() {
@@ -256,14 +263,18 @@ public class Game {
 	
 	public static void launchRocket(Robot rocket, Tile location) {
 		gc.launchRocket(rocket.id(), location.location);
+		rocket.forceUpdate();
 	}
 	
 	public static void load(Robot structure, Robot unit) {
 		gc.load(structure.id(), unit.id());
+		unit.forceUpdate();
+		structure.forceUpdate();
 	}
 	
 	public static void moveRobot(Robot robot, Direction direction) {
 		gc.moveRobot(robot.id(), direction);
+		robot.forceUpdate();
 	}
 	
 	public static Robot[] myUnits() {
@@ -285,6 +296,8 @@ public class Game {
 	
 	public static void overcharge(Robot healer, Robot target) {
 		gc.overcharge(healer.id(), target.id());
+		healer.forceUpdate();
+		target.forceUpdate();
 	}
 	
 	public static Planet planet() {
@@ -293,6 +306,7 @@ public class Game {
 	
 	public static void produceRobot(Robot factory, UnitType type) {
 		gc.produceRobot(factory.id(), type);
+		factory.forceUpdate();
 	}
 	
 	public static short queueResearch(UnitType branch) {
@@ -301,10 +315,12 @@ public class Game {
 	
 	public static void repair(Robot worker, Robot structure) {
 		gc.repair(worker.id(), structure.id());
+		worker.forceUpdate();
 	}
 	
 	public static void replicate(Robot worker, Direction direction) {
 		gc.replicate(worker.id(), direction);
+		worker.forceUpdate();
 	}
 	
 	public static ResearchInfo researchInfo() {
@@ -435,7 +451,11 @@ public class Game {
 	}
 	
 	public static void unload(Robot structure, Direction direction) {
-		gc.unload(structure.id(), direction);
+		Robot[] garrison = structure.structureGarrison();
+		if (garrison.length > 0) {
+			gc.unload(structure.id(), direction);
+			garrison[0].forceUpdate();			
+		}
 	}
 	
 	public static Team winningTeam() {
@@ -444,170 +464,6 @@ public class Game {
 	
 	public static void writeTeamArray(long index, int value) {
 		gc.writeTeamArray(index, value);
-	}
-	
-	public static void attack(int robot, int target) {
-		gc.attack(robot, target);
-	}
-	
-	public static void beginSnipe(int ranger, Tile location) {
-		gc.beginSnipe(ranger, location.location);
-	}
-	
-	public static void blink(int mage, Tile location) {
-		gc.blink(mage, location.location);
-	}
-	
-	public static void blueprint(int worker, UnitType structure, Direction direction) {
-		gc.blueprint(worker, structure, direction);
-	}
-	
-	public static void build(int worker, int blueprint) {
-		gc.build(worker, blueprint);
-	}
-	
-	public static boolean canAttack(int robot, int target) {
-		return gc.canAttack(robot, target);
-	}
-	
-	public static boolean canBeginSnipe(int ranger, Tile location) {
-		return gc.canBeginSnipe(ranger, location.location);
-	}
-	
-	public static boolean canBlink(int mage, Tile location) {
-		return gc.canBlink(mage, location.location);
-	}
-	
-	public static boolean canBlueprint(int worker, UnitType structure, Direction direction) { 
-		return gc.canBlueprint(worker, structure, direction);
-	}
-	
-	public static boolean canBuild(int worker, int structure) {
-		return gc.canBuild(worker, structure);
-	}
-	
-	public static boolean canHarvest(int worker, Direction direction) {
-		return gc.canHarvest(worker, direction);
-	}
-	
-	public static boolean canHeal(int healer, int target) {
-		return gc.canHeal(healer, target);
-	}
-	
-	public static boolean canJavelin(int knight, int target) {
-		return gc.canJavelin(knight, target);
-	}
-	
-	public static boolean canLaunchRocket(int rocket, Tile destination) {
-		return gc.canLaunchRocket(rocket, destination.location);
-	}
-	
-	public static boolean canLoad(int structure, int robot) {
-		return gc.canLoad(structure, robot);
-	}
-	
-	public static boolean canMove(int robot, Direction direction) {
-		return isMoveReady(robot) && gc.canMove(robot, direction);
-	}
-	
-	public static boolean canOvercharge(int healer, int target) {
-		return gc.canOvercharge(healer, target);
-	}
-	
-	public static boolean canProduceRobot(int factory, UnitType robotType) {
-		return gc.canProduceRobot(factory, robotType);
-	}
-	
-	public static boolean canRepair(int worker, int structure) {
-		return gc.canRepair(worker, structure);
-	}
-	
-	public static boolean canReplicate(int worker, Direction direction) {
-		return gc.canReplicate(worker, direction);
-	}
-	
-	public static boolean canSenseUnit(int unit) {
-		return gc.canSenseUnit(unit);
-	}
-	
-	public static boolean canUnload(int structure, Direction direction) {
-		return gc.canUnload(structure, direction);
-	}
-	
-	public static void disintegrateUnit(int unit) {
-		gc.disintegrateUnit(unit);
-	}
-	
-	public static void harvest(int worker, Direction direction) {
-		gc.harvest(worker, direction);
-	}
-	
-	public static void heal(int healer, int target) {
-		gc.heal(healer, target);
-	}
-	
-	public static boolean isAttackReady(int unit) {
-		return gc.isAttackReady(unit);
-	}
-	
-	public static boolean isBeginSnipeReady(int ranger) {
-		return gc.isBeginSnipeReady(ranger);
-	}
-	
-	public static boolean isBlinkReady(int mage) {
-		return gc.isBlinkReady(mage);
-	}
-	
-	public static boolean isHealReady(int healer) {
-		return gc.isHealReady(healer);
-	}
-	
-	public static boolean isJavelinReady(int knight) {
-		return gc.isJavelinReady(knight);
-	}
-	
-	public static boolean isMoveReady(int unit) {
-		return gc.isMoveReady(unit);
-	}
-	
-	public static boolean isOverchargeReady(int unit) {
-		return gc.isOverchargeReady(unit);
-	}
-	
-	public static void javelin(int knight, int target) {
-		gc.javelin(knight, target);
-	}
-	
-	public static void launchRocket(int rocket, Tile location) {
-		gc.launchRocket(rocket, location.location);
-	}
-	
-	public static void load(int structure, int unit) {
-		gc.load(structure, unit);
-	}
-	
-	public static void moveRobot(int robot, Direction direction) {
-		gc.moveRobot(robot, direction);
-	}
-	
-	public static void overcharge(int healer, int target) {
-		gc.overcharge(healer, target);
-	}
-	
-	public static void produceRobot(int factory, UnitType type) {
-		gc.produceRobot(factory, type);
-	}
-	
-	public static void repair(int worker, int structure) {
-		gc.repair(worker, structure);
-	}
-	
-	public static void replicate(int worker, Direction direction) {
-		gc.replicate(worker, direction);
-	}
-	
-	public static void unload(int structure, Direction direction) {
-		gc.unload(structure, direction);
 	}
 	
 	public static boolean onMap(Tile loc, Planet p) {
