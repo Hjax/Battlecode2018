@@ -51,6 +51,8 @@ public class Player
                 Rocket.run();
                 Timing.end("Rocket");
         	} catch (Exception e) {
+        		System.out.println("An error has occured");
+        		e.printStackTrace();
         	}
             System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
             Game.nextTurn();
