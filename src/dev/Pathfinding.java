@@ -123,7 +123,6 @@ public class Pathfinding {
 		int direction = dirStart;
 		do
 		{
-			System.out.printf("direction = %d, dirStart = %d\n", direction, dirStart);
 			int test = sourceInt + directions[direction];
 			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
 				if (best == 0 && (GameInfoCache.karboniteDistance[sourceInt + best]) >= GameInfoCache.karboniteDistance[test]) {
