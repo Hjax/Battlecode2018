@@ -118,7 +118,8 @@ public class Worker
 					nearestEnemy = enemy;
 				}
 			}
-			Direction buildDir = Pathfinding.path(bestWorker.worker.tile(), nearestEnemy);;
+			Direction buildDir = Pathfinding.path(bestWorker.worker.tile(), nearestEnemy);
+			System.out.printf("buildDir = %s", buildDir.name());
 			if (buildDir == Direction.Center)
 			{
 				buildDir = bestWorker.worker.tile().directionTo(nearestEnemy);
@@ -126,6 +127,14 @@ public class Worker
 			if (bestWorker.score > Constants.RUSHTHRESHOLD)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
+			}
+			else
+			{
+				GlobalStrategy.rush = true;
+				Constants.FACTORYBUILDRANGE = 4;
+				Constants.FACTORYREPLICATEPRESSURE = 150;
+				Constants.WORKERREPLICATEDEPOSITWEIGHT = 0;
+				Constants.WORKERLIMITWEIGHT = 0;
 			}
 			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker.tile(), buildDir);
 			System.out.printf("building in direction %s\n", buildDir.name());
@@ -219,7 +228,7 @@ public class Worker
 			distance = Pathfinding.pathLength(worker.tile(), blueprint.tile());
 			if (distance != -1)
 			{
-				score += 50 / distance;
+				score += Constants.FACTORYREPLICATEPRESSURE / distance;
 			}
 		}
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
@@ -255,7 +264,15 @@ public class Worker
 		{
 			Direction replicateDir;
 			Robot worker = workerOrder.poll().worker;
-			replicateDir = Utilities.findNearestOccupiableDir(worker.tile(), Utilities.oppositeDir(worker.tile().directionTo(factoryGridCenter)));
+			if (GlobalStrategy.rush)
+			{
+				replicateDir = Utilities.findNearestOccupiableDir(worker.tile(), worker.tile().directionTo(factoryGridCenter));
+			}
+			else
+			{
+				replicateDir = Utilities.findNearestOccupiableDir(worker.tile(), Utilities.oppositeDir(worker.tile().directionTo(factoryGridCenter)));
+			}
+			
 			if (Game.canReplicate(worker, replicateDir))
 			{
 				Game.replicate(worker, replicateDir);
@@ -366,7 +383,7 @@ public class Worker
 		{
 			return true;
 		}
-		else if (Game.karbonite() >=(100 + 50 * (GameInfoCache.allyFactories.size())) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		else if (Game.karbonite() >=(100 + 20 * (GameInfoCache.allyFactories.size())) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
 		{
 			return true;
 		}

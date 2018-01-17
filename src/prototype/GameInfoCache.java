@@ -83,8 +83,14 @@ public class GameInfoCache
 	private static void updateDijkstraMap()
 	{
 		int[] directions = {1, 1 - Game.WIDTH, -1 * Game.WIDTH, -1 - Game.WIDTH, -1, Game.WIDTH - 1, Game.WIDTH, Game.WIDTH + 1};
+		int infinityTimer = 0;
 		while (karboniteQueue.size() > 0)
 		{
+			if (infinityTimer++ > 500)
+			{
+				System.out.printf("count to infinity\n");
+				break;
+			}
 			int loc = karboniteQueue.poll();
 			queuedIndices.remove(loc);
 			for (int dir:directions)
@@ -194,6 +200,8 @@ public class GameInfoCache
 		updateType(UnitType.Factory, allyFactories, enemyFactories, allFactories);
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
 		
+		queuedIndices = new HashSet<Integer>();
+		karboniteQueue = new LinkedList<Integer>();
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
 		
 		for (HashSet<Tile> quadrant:karboniteDeposits)
@@ -246,6 +254,7 @@ public class GameInfoCache
 		
 		if (karboniteLocations.size() > 0)
 		{
+			System.out.printf("updating dijkstra map\n");
 			updateDijkstraMap();
 		}
 		

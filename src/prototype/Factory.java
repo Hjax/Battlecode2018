@@ -8,7 +8,7 @@ public class Factory {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
 				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyRangers.size() < Constants.RANGERLIMIT) {
-					if (GameInfoCache.allyRangers.size() > (5 * (GameInfoCache.allyHealers.size() + 1))) {
+					if (GameInfoCache.allyRangers.size() > (3 * (GameInfoCache.allyHealers.size() + 1))) {
 						if (Game.canProduceRobot(r, UnitType.Healer)) {
 							Game.produceRobot(r, UnitType.Healer);
 						} 

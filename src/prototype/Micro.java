@@ -181,16 +181,46 @@ public class Micro {
 						}
 					}
 					if (best != null && Game.canAttack(r, best)) {
-						newHelpRequests.add(Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
+						newHelpRequests.add(best);
 						damage[best.predictableId()] += r.damage();
 						Game.attack(r, best);
 					}
 				} else {
-					Robot[] civilian = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy());
-					if (civilian.length > 0) {
-						if (Game.canAttack(r, civilian[0])) {
-							newHelpRequests.add(Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy())[0]);
-							Game.attack(r, civilian[0]);
+					Robot[] fact = Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Factory, Game.enemy());
+					if (fact.length > 0) {
+						Robot best = null;
+						for (Robot enemy: fact) {
+							if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
+								if (enemy.health() - damage[enemy.predictableId()] > 0) {
+									if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+										best = enemy;
+									}
+								}
+							}
+						}
+						if (best != null && Game.canAttack(r, best)) {
+							newHelpRequests.add(best);
+							damage[best.predictableId()] += r.damage();
+							Game.attack(r, best);
+						}
+					} else {
+						Robot[] civilian = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy());
+						if (civilian.length > 0) {
+							Robot best = null;
+							for (Robot enemy: civilian) {
+								if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
+									if (enemy.health() - damage[enemy.predictableId()] > 0) {
+										if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+											best = enemy;
+										}
+									}
+								}
+							}
+							if (best != null && Game.canAttack(r, best)) {
+								newHelpRequests.add(best);
+								damage[best.predictableId()] += r.damage();
+								Game.attack(r, best);
+							}
 						}
 					}
 				}
