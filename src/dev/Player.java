@@ -6,6 +6,8 @@ import bc.*;
 
 public class Player 
 {
+	public static long totalTime;
+	public static long longest = 0;
     public static void main(String[] args) {
     	Game.queueResearch(UnitType.Worker);
     	Game.queueResearch(UnitType.Ranger);
@@ -18,6 +20,13 @@ public class Player
     	Game.queueResearch(UnitType.Healer);
         while (true) 
         {
+        	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) 
+        	{
+        		System.out.println("Low on time, ending turn");
+        		Game.nextTurn();
+        		continue;
+        	}
+        	long start = System.nanoTime();
         	try {
             	if (Game.round() % 20 == 0) {
             		System.gc();
@@ -54,7 +63,11 @@ public class Player
         		System.out.println("An error has occured");
         		e.printStackTrace();
         	}
-            System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
+
+            start = System.nanoTime() - start;
+            if (start > longest) longest = start;
+            totalTime += start;
+            System.out.printf("\t\tremaining time is %d, longest %f, average %f\n", Game.gc.getTimeLeftMs(), longest / 1000000.0, (totalTime / Game.round()) / 1000000.0);
             Game.nextTurn();
         }
     }

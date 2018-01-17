@@ -41,8 +41,10 @@ public class Constants {
 	public static int FACTORYBUILDRANGE = 3;
 	public static int FACTORYREPLICATEPRESSURE = 50;
 	public static final int ROCKETBUILDRANGE = 50;
-	public static final int RANGERLIMIT = 50;
+	public static final int COMBATLIMIT = 50;
 	public static final int FACTORYHALTROUND = 725; 
+	// if we are below this amount of time, skip turn
+	public static final int CLOCKBUFFER = 200;
 	
 	public static final int REPLICATECOST = 15;
 	public static final int WORKERCOST = 25;

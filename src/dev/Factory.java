@@ -7,7 +7,7 @@ public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
-				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyRangers.size() < Constants.RANGERLIMIT) {
+				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
 					
 					if (GameInfoCache.allyWorkers.size() == 0)
 					{
