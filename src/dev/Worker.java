@@ -337,18 +337,14 @@ public class Worker
 	private static void harvest()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
+		if (GameInfoCache.karboniteLocations.size() == 0)
+		{
+			return;
+		}
 		worker: for (Robot worker:idleWorkers)
 		{
 			Direction moveDir = Direction.Center;
-			if (GameInfoCache.karboniteLocations.size() > 0)
-			{
-				moveDir = Pathfinding.karbonitePath(worker.tile());
-			}
-			else
-			{
-				continue;
-			}
-			
+			moveDir = Pathfinding.karbonitePath(worker.tile());
 			if (Game.canMove(worker, moveDir))
 			{
 				Game.moveRobot(worker, moveDir);
@@ -486,7 +482,7 @@ public class Worker
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
 		worker: for (Robot worker:idleWorkers)
 		{
-			for (Robot thing: Game.senseNearbyUnits(worker.tile(), 2))
+			for (Robot thing: GameInfoCache.currentBlueprints)
 			{
 				if (Game.canBuild(worker, thing))
 				{
