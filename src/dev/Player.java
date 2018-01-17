@@ -42,7 +42,7 @@ public class Player
         	} catch (Exception e) {
         		
         	}
-        		
+        	System.out.printf("ending turn\n");	
             Game.nextTurn();
         }
     }
