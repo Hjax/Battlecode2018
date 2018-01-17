@@ -16,8 +16,9 @@ public class Player
     	Game.queueResearch(UnitType.Ranger);
     	Game.queueResearch(UnitType.Rocket);
     	Game.queueResearch(UnitType.Healer);
-        while (true) 
+    	while (true) 
         {
+    		System.out.printf("\t\tremaining time before turn starts is %d\n", Game.gc.getTimeLeftMs());
         	try {
             	if (Game.round() % 20 == 0) {
             		System.gc();
@@ -26,23 +27,34 @@ public class Player
             	Timing.start("StartTurn");
             	Game.startTurn();
             	Timing.end("StartTurn");
+        	} catch (Exception e) {
+        	}
+        	try {
             	Timing.start("Worker");
             	Worker.run();
             	Timing.end("Worker");
+        	} catch (Exception e) {
+        	}
+        	try {
             	Timing.start("Factory");
                 Factory.run();
                 Timing.end("Factory");
+        	} catch (Exception e) {
+        	}
+        	try {
                 Timing.start("Micro");
                 Micro.run();
                 Timing.end("Micro");
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        	try {
                 Timing.start("Rocket");
                 Rocket.run();
                 Timing.end("Rocket");
-                System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
         	} catch (Exception e) {
-        		
         	}
-        		
+        	System.out.printf("\t\tending turn\n");
             Game.nextTurn();
         }
     }

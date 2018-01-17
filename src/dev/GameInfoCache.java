@@ -258,6 +258,10 @@ public class GameInfoCache
 			updateDijkstraMap();
 		}
 		
+		if (Game.planet() == Planet.Earth && allyWorkers.size() + allyFactories.size() == 0)
+		{
+			Game.writeTeamArray(0, 1);
+		}
 		
 		
 	}

@@ -13,7 +13,7 @@ public class Worker
 	private static PriorityQueue<Tile> factoryGrid;
 	private static Tile factoryGridCenter = Rocket.landingGridCenter;
 	private static Random rng = new Random(5468);
-	private static int rockets = 0;
+	public static int rockets = 0;
 	private static HashSet<Robot> replicatedWorkers = new HashSet<Robot>();
 	
 	
@@ -133,7 +133,7 @@ public class Worker
 				GlobalStrategy.rush = true;
 				Constants.FACTORYBUILDRANGE = 4;
 				Constants.FACTORYREPLICATEPRESSURE = 150;
-				Constants.WORKERREPLICATEDEPOSITWEIGHT = 0;
+				Constants.WORKERREPLICATEDEPOSITWEIGHT = 1;
 				Constants.WORKERLIMITWEIGHT = 0;
 			}
 			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker.tile(), buildDir);
@@ -218,8 +218,12 @@ public class Worker
 	{
 		int score = 0;
 		int distance = -1;
+		if (worker.abilityHeat() >= 10)
+		{
+			return -1;
+		}
 		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
-		if (Game.round() >= 750)
+		if (Game.round() >= 750 || Game.getTeamArray(Planet.Earth).get(0) == 1)
 		{
 			score += Constants.INFINITY;
 		}
@@ -276,7 +280,6 @@ public class Worker
 			if (Game.canReplicate(worker, replicateDir))
 			{
 				Game.replicate(worker, replicateDir);
-				idleWorkers.remove(worker);
 				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(worker.tile(), replicateDir, 1)))
 				{
 					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(worker.tile(), replicateDir, 1)));
@@ -383,7 +386,7 @@ public class Worker
 		{
 			return true;
 		}
-		else if (Game.karbonite() >=(100 + 20 * (GameInfoCache.allyFactories.size())) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		else if (Game.karbonite() >=(160) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
 		{
 			return true;
 		}
@@ -410,18 +413,20 @@ public class Worker
 		{
 			return;
 		}
+		idleWorkers.remove(closestWorker);
 		if (bestDistance == 1)
 		{
 			if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 			{
 				Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
-				factoryGrid.poll();
-				idleWorkers.remove(closestWorker);
+				
+				
 				if (structure == UnitType.Rocket)
 				{
 					rockets++;
 				}
 			}
+			factoryGrid.poll();
 		}
 		else if (bestDistance == 0)
 		{
@@ -431,7 +436,6 @@ public class Worker
 				if (Game.canMove(closestWorker, moveDir))
 				{
 					Game.moveRobot(closestWorker, moveDir);
-					idleWorkers.remove(closestWorker);
 					if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 					{
 						Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
@@ -454,7 +458,6 @@ public class Worker
 				if (Game.canMove(closestWorker, moveDir))
 				{
 					Game.moveRobot(closestWorker, moveDir);
-					idleWorkers.remove(closestWorker);
 					if (Pathfinding.pathLength(closestWorker.tile(), placement) == 1)
 					{
 						if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
@@ -469,6 +472,10 @@ public class Worker
 					}
 
 				}
+			}
+			else
+			{
+				factoryGrid.poll();
 			}
 			
 		}
@@ -503,8 +510,9 @@ public class Worker
 			return false;
 		}
 		
-		if (Game.researchInfo().getLevel(UnitType.Rocket) > 0 && rockets == 0 && GameInfoCache.allyFactories.size() >= 2 && Game.karbonite() > 80)
+		if (Game.researchInfo().getLevel(UnitType.Rocket) > 0 && rockets == 0)
 		{
+			System.out.printf("\tYes, build rocket\n");
 			return true;
 		}
 		
@@ -572,24 +580,26 @@ public class Worker
 		}
 		while (idleWorkers.size() > 0)
 		{
+			System.out.printf("we have %d idle workers\n", idleWorkers.size());
 			if (Game.planet() == Planet.Earth)
 			{
 				buildOrder();
+			}
+			
+			if (shouldBuildRocket())
+			{
+				placeStructure(UnitType.Rocket);
 			}
 			if (shouldBlueprintFactory())
 			{
 				placeStructure(UnitType.Factory);
 			}
-			if (shouldBuildRocket())
-			{
-				placeStructure(UnitType.Rocket);
-			}
+			
 			if (Game.PLANET == Planet.Earth)
 			{
 				loadRocket();
 			}
 			replicateWorkers();
-			
 			if (Game.PLANET == Planet.Earth)
 			{
 				giveWorkersOrders();
@@ -600,6 +610,7 @@ public class Worker
 			idleWorkers = new HashSet<Robot>();
 			idleWorkers.addAll(replicatedWorkers);
 			replicatedWorkers = new HashSet<Robot>();
+			
 		}
 		
 	}

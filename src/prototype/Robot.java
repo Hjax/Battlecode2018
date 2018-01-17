@@ -43,7 +43,7 @@ public class Robot {
 	}
 	long abilityHeat() {
 		update();
-		return unit.abilityCooldown();
+		return unit.abilityHeat();
 	}
 	long abilityRange() {
 		update();
