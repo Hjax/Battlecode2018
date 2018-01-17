@@ -26,23 +26,33 @@ public class Player
             	Timing.start("StartTurn");
             	Game.startTurn();
             	Timing.end("StartTurn");
+        	} catch (Exception e) {
+        	}
+        	try {
             	Timing.start("Worker");
             	Worker.run();
             	Timing.end("Worker");
+        	} catch (Exception e) {
+        	}
+        	try {
             	Timing.start("Factory");
                 Factory.run();
                 Timing.end("Factory");
+        	} catch (Exception e) {
+        	}
+        	try {
                 Timing.start("Micro");
                 Micro.run();
                 Timing.end("Micro");
+        	} catch (Exception e) {
+        	}
+        	try {
                 Timing.start("Rocket");
                 Rocket.run();
                 Timing.end("Rocket");
-                System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
         	} catch (Exception e) {
-        		
         	}
-        	System.out.printf("ending turn\n");	
+            System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
             Game.nextTurn();
         }
     }
