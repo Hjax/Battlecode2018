@@ -18,27 +18,31 @@ public class Player
     	Game.queueResearch(UnitType.Healer);
         while (true) 
         {
-        	if (Game.round() % 20 == 0) {
-        		System.gc();
+        	try {
+            	if (Game.round() % 20 == 0) {
+            		System.gc();
+            	}
+            	System.out.println("Current round: "+ Game.round());
+            	Timing.start("StartTurn");
+            	Game.startTurn();
+            	Timing.end("StartTurn");
+            	Timing.start("Worker");
+            	Worker.run();
+            	Timing.end("Worker");
+            	Timing.start("Factory");
+                Factory.run();
+                Timing.end("Factory");
+                Timing.start("Micro");
+                Micro.run();
+                Timing.end("Micro");
+                Timing.start("Rocket");
+                Rocket.run();
+                Timing.end("Rocket");
+                System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
+        	} catch (Exception e) {
+        		
         	}
-        	System.out.println("Current round: "+ Game.round());
-        	Timing.start("StartTurn");
-        	Game.startTurn();
-        	Timing.end("StartTurn");
-        	Timing.start("Worker");
-        	Worker.run();
-        	Timing.end("Worker");
-        	Timing.start("Factory");
-            Factory.run();
-            Timing.end("Factory");
-            Timing.start("Micro");
-            Micro.run();
-            Timing.end("Micro");
-            Timing.start("Rocket");
-            Rocket.run();
-            Timing.end("Rocket");
-            System.out.printf("\t\tremaining time is %d\n", Game.gc.getTimeLeftMs());
-            
+        		
             Game.nextTurn();
         }
     }
