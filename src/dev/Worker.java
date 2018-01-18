@@ -593,7 +593,9 @@ public class Worker
 			
 			if (Game.PLANET == Planet.Earth)
 			{
-				loadRocket();
+				if (Game.round() < Constants.FACTORYHALTROUND || GameInfoCache.allyCombat.size() == 0 || Rocket.launchedRockets == 0) {
+					loadRocket();
+				}
 			}
 			replicateWorkers();
 			if (Game.PLANET == Planet.Earth)
