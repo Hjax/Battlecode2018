@@ -16,7 +16,7 @@ public class Rocket
 	public static Map<Robot, Robot> assignments = new HashMap<>();
 	public static Map<Robot, Integer> assignmentCount = new HashMap<>();
 	public static Tile landingGridCenter;
-	private static int launchedRockets = 0;
+	public static int launchedRockets = 0;
 	
 	
 	private static class LandingTileComparator implements Comparator<Tile>

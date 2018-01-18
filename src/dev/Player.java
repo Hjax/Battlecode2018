@@ -9,15 +9,17 @@ public class Player
 	public static long totalTime;
 	public static long longest = 0;
     public static void main(String[] args) {
-    	Game.queueResearch(UnitType.Worker);
-    	Game.queueResearch(UnitType.Ranger);
-    	Game.queueResearch(UnitType.Rocket);
-    	Game.queueResearch(UnitType.Healer);
-    	Game.queueResearch(UnitType.Healer);
-    	Game.queueResearch(UnitType.Ranger);
-    	Game.queueResearch(UnitType.Ranger);
-    	Game.queueResearch(UnitType.Rocket);
-    	Game.queueResearch(UnitType.Healer);
+    	if (Game.planet() == Planet.Earth) {
+        	Game.queueResearch(UnitType.Worker);
+        	Game.queueResearch(UnitType.Ranger);
+        	Game.queueResearch(UnitType.Healer);    	
+        	Game.queueResearch(UnitType.Rocket);
+        	Game.queueResearch(UnitType.Healer);
+        	Game.queueResearch(UnitType.Ranger);
+        	Game.queueResearch(UnitType.Rocket);
+        	Game.queueResearch(UnitType.Healer);
+        	Game.queueResearch(UnitType.Rocket);
+    	}
         while (true) 
         {
         	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) 
