@@ -54,6 +54,7 @@ public class Constants {
 	public static final int MAGECOST = 20;
 	public static final int HEALERCOST = 20;
 	public static final int RANGERRANGE = 50;
+	public static final int HEALERRANGE = 30;
 	
 	
 	public static final int QUADRANTSIZE = 4;
