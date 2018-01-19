@@ -517,7 +517,7 @@ public class Worker
 			return true;
 		}
 		
-		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYLIMIT && Game.karbonite() > 150 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
+		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYGOAL && Game.karbonite() > 75 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
 		{
 			return true;
 		}
