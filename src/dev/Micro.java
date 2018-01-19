@@ -4,7 +4,7 @@ import java.util.*;
 import bc.*;
 
 public class Micro {
-
+	// TODO shoot before moving when it makes sense
 	private static Map<Robot, Tile> randomTargets = new HashMap<>();
 	private static ArrayList<Tile> targets = new ArrayList<>();
 	static {
@@ -16,7 +16,7 @@ public class Micro {
 	private static ArrayList<Robot> helpRequests = new ArrayList<>();
 	private static ArrayList<Robot> newHelpRequests = new ArrayList<>();
 	
-	private static void startTurn() {
+	public static void startTurn() {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
@@ -38,16 +38,16 @@ public class Micro {
 			score -= 100;
 		}
 		if (enemies.length == 1) {
-			score += 40;
-			if (enemies[0].health() < r.health()) {
-				score += 60;
+			score += 20;
+			if (enemies[0].health() <= r.health()) {
+				score += 30;
 			}
 		}
 		score -= enemies.length * 2;
 		score -= tooClose.length;
 
 		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target) * 10;
+			score -= Pathfinding.pathLength(square,  target);
 		}
 		return score;
 	}
@@ -70,13 +70,12 @@ public class Micro {
 		score += allies.length;
 
 		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target) * 10;
+			score -= Pathfinding.pathLength(square,  target);
 		}
 		return score;
 	}
 		
 	public static void run() {
-		startTurn();
 		long time = 0;
 		for (Robot r: GameInfoCache.allyCombat) {
 			if (!r.location().isOnMap() || r.location().isInGarrison() || r.location().isInSpace()) {

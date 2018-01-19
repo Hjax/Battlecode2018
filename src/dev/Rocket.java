@@ -1,5 +1,6 @@
 package dev;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,8 @@ public class Rocket
 	public static Map<Robot, Integer> assignmentCount = new HashMap<>();
 	public static Tile landingGridCenter;
 	public static int launchedRockets = 0;
+	public static ArrayList<RocketInfo> radar = new ArrayList<>();
+	public static int flyingWorkers = 0;
 	
 	
 	private static class LandingTileComparator implements Comparator<Tile>
@@ -78,6 +81,22 @@ public class Rocket
 		}
 	}
 	
+	public static void startTurn()
+	{
+		flyingWorkers = 0;
+		for (RocketInfo rocket: radar)
+		{
+			if (Game.round() >= rocket.landRound + 50) //50 turns for communication delay
+			{
+				radar.remove(rocket);
+			}
+			else
+			{
+				flyingWorkers += rocket.workerCount;
+			}
+		}
+	}
+	
 	public static void run()
 	{
 		if (Game.PLANET == Planet.Mars)
@@ -106,6 +125,8 @@ public class Rocket
 	}
 	
 	private static void cleanUpRocket(Robot rocket) {
+		radar.add(new RocketInfo(rocket));
+		Worker.factoryGrid.add(rocket.tile());
 		Set<Robot> toRemove = new HashSet<>();
 		for (Robot r: assignments.keySet()) {
 			if (assignments.get(r) == rocket) {
@@ -117,16 +138,6 @@ public class Rocket
 		}
 	}
 	
-	private static void tryLoadRockets() {
-		// not currently being used
-		for (Robot rocket: GameInfoCache.allyRockets) {
-			for (Robot r: GameInfoCache.allyCombat) {
-				if (Game.canLoad(rocket, r)) {
-					Game.load(rocket, r);
-				}
-			}
-		}
-	}
   	
 	private static void assignToRockets() {
 		for (Robot rocket: GameInfoCache.allyRockets)  {
@@ -179,9 +190,9 @@ public class Rocket
 			{
 				if (Game.canLaunchRocket(rocket, landingGrid.peek())) 
 				{
+					cleanUpRocket(rocket);
 					Game.launchRocket(rocket, landingGrid.poll());
 					launchedRockets++;
-					cleanUpRocket(rocket);
 				}
 				
 			}

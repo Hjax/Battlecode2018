@@ -10,7 +10,7 @@ import bc.*;
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
-	private static PriorityQueue<Tile> factoryGrid;
+	public static PriorityQueue<Tile> factoryGrid;
 	private static Tile factoryGridCenter = Rocket.landingGridCenter;
 	private static Random rng = new Random(5468);
 	public static int rockets = 0;
@@ -378,7 +378,7 @@ public class Worker
 		{
 			return false;
 		}
-		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 100)
+		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 100 && GameInfoCache.currentBlueprints.size() <= 2)
 		{
 			return true;
 		}
@@ -498,6 +498,15 @@ public class Worker
 		}
 	}
 	
+	private static boolean shouldLoadRocket() 
+	{
+		if (GameInfoCache.allyCombat.size() == 0 || Rocket.launchedRockets == 0 || Game.getTeamArray(Planet.Mars).get(1) + Rocket.flyingWorkers < Constants.MARSWORKERGOAL)
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	private static boolean shouldBuildRocket()
 	{
 		
@@ -593,7 +602,7 @@ public class Worker
 			
 			if (Game.PLANET == Planet.Earth)
 			{
-				if (Game.round() < Constants.FACTORYHALTROUND || GameInfoCache.allyCombat.size() == 0 || Rocket.launchedRockets == 0) {
+				if (shouldLoadRocket()) {
 					loadRocket();
 				}
 			}

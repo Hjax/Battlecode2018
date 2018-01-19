@@ -8,9 +8,7 @@ public class Factory {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
 				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
-					
-					if (GameInfoCache.allyWorkers.size() == 0)
-					{
+					if (GameInfoCache.allyWorkers.size() == 0) {
 						if (Game.canProduceRobot(r, UnitType.Worker)) {
 							Game.produceRobot(r, UnitType.Worker);
 						} 
@@ -23,7 +21,6 @@ public class Factory {
 						Game.produceRobot(r, UnitType.Ranger);
 					}
 				}
-
 			}
 			if (r.structureGarrison().length > 0) {
 				for (Direction d: Game.moveDirections) {

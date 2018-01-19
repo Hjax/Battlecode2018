@@ -80,6 +80,8 @@ public class Game {
 	public static void startTurn() 
 	{
 		GameInfoCache.updateCache();
+		Rocket.startTurn();
+		Micro.startTurn();
 	}
 
 	public static VecMapLocation allLocationsWithin(Tile location, long radis_squared) {
