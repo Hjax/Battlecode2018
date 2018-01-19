@@ -90,7 +90,7 @@ public class Worker
 		public int compare(Tile arg0, Tile arg1) {
 			int dist1 = Pathfinding.pathLength(arg0, factoryGridCenter);
 			int dist2 = Pathfinding.pathLength(arg1, factoryGridCenter);
-			if (dist1 < dist2)
+			if (dist1 < dist2 && dist1 != -1)
 			{
 				return -1;
 			}
