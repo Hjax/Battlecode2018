@@ -86,7 +86,7 @@ public class GameInfoCache
 		int infinityTimer = 0;
 		while (karboniteQueue.size() > 0)
 		{
-			if (infinityTimer++ > 500)
+			if (infinityTimer++ > Game.MAPSIZE)
 			{
 				System.out.printf("count to infinity\n");
 				break;
@@ -98,7 +98,7 @@ public class GameInfoCache
 				int test = loc + dir;
 				if ((Math.abs(test % Game.WIDTH - loc % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT && Game.pathMap[test]))
 				{
-					if (!karboniteLocations.contains(nearestKarbonite[test]))
+					if (karboniteLocations.contains(nearestKarbonite[loc]) && !karboniteLocations.contains(nearestKarbonite[test]))
 					{
 						nearestKarbonite[test] = nearestKarbonite[loc];
 						karboniteDistance[test] = karboniteDistance[loc] + 1;
@@ -109,7 +109,7 @@ public class GameInfoCache
 						}
 						
 					}
-					else if (!karboniteLocations.contains(nearestKarbonite[loc]) || karboniteDistance[test]+1 < karboniteDistance[loc])
+					else if (karboniteLocations.contains(nearestKarbonite[test]) && (!karboniteLocations.contains(nearestKarbonite[loc]) || karboniteDistance[test]+1 < karboniteDistance[loc]))
 					{
 						karboniteDistance[loc] = karboniteDistance[test] + 1;
 						nearestKarbonite[loc] = nearestKarbonite[test];
@@ -117,16 +117,6 @@ public class GameInfoCache
 						{
 							karboniteQueue.add(loc);
 							queuedIndices.add(loc);
-						}
-					}
-					else if (karboniteDistance[loc]+1 < karboniteDistance[test])
-					{
-						karboniteDistance[test] = karboniteDistance[loc] + 1;
-						nearestKarbonite[test] = nearestKarbonite[loc];
-						if (!queuedIndices.contains(test))
-						{
-							karboniteQueue.add(test);
-							queuedIndices.add(test);
 						}
 					}
 				}
@@ -199,7 +189,6 @@ public class GameInfoCache
 		updateType(UnitType.Healer, allyHealers, enemyHealers, allHealers);
 		updateType(UnitType.Factory, allyFactories, enemyFactories, allFactories);
 		updateType(UnitType.Rocket, allyRockets, enemyRockets, allRockets);
-		
 		queuedIndices = new HashSet<Integer>();
 		karboniteQueue = new LinkedList<Integer>();
 		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
@@ -236,6 +225,17 @@ public class GameInfoCache
 		{
 			karboniteLocations.remove(deposit);
 		}
+		if (queuedIndices.size() > 0)
+		{
+			for (int x = 0; x < Game.WIDTH * Game.HEIGHT; x++)
+			{
+				if (!karboniteLocations.contains(nearestKarbonite[x]))
+				{
+					karboniteQueue.add(x);
+					queuedIndices.add(x);
+				}
+			}
+		}
 		
 		AsteroidStrike asteroid = null;
 		if (Game.ASTEROIDPATTERN.hasAsteroid(Game.round()))
@@ -254,7 +254,6 @@ public class GameInfoCache
 		
 		if (karboniteLocations.size() > 0)
 		{
-			System.out.printf("updating dijkstra map\n");
 			updateDijkstraMap();
 		}
 		
@@ -262,7 +261,6 @@ public class GameInfoCache
 		{
 			Game.writeTeamArray(0, 1);
 		}
-		
 		
 	}
 	

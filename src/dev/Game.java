@@ -15,6 +15,7 @@ public class Game {
 	public static final Planet OTHERPLANET;
 	public static final int WIDTH;
 	public static final int HEIGHT;
+	public static final int MAPSIZE;
 	public static final PlanetMap STARTINGMAP;
 	public static final PlanetMap STARTINGMAPOTHER;
 	public static final AsteroidPattern ASTEROIDPATTERN;
@@ -55,6 +56,7 @@ public class Game {
         }
         WIDTH = (int) STARTINGMAP.getWidth();
         HEIGHT = (int) STARTINGMAP.getHeight();
+        MAPSIZE = WIDTH * HEIGHT;
         ASTEROIDPATTERN =  gc.asteroidPattern();
         ORBITPATTERN = gc.orbitPattern();
         pathMap = new boolean[(int) (Game.WIDTH * Game.HEIGHT)];
