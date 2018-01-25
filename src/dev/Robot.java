@@ -23,7 +23,7 @@ public class Robot {
 	
 	public Robot(Unit unit) {
 		round = Game.round();
-		this.gcId = gcId;
+		this.gcId = unit.id();
 		this.id = nextId++;
 	}
 	

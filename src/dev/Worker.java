@@ -78,8 +78,10 @@ public class Worker
 		}
 		if (closeWorker.score <= Constants.RUSHTHRESHOLD)
 		{
+			System.out.printf("rush distance is %d\n", closeWorker.score);
 			return closeWorker;
 		}
+		System.out.printf("rush distance is %d\n", farWorker.score);
 		return farWorker;
 	}
 	
@@ -91,7 +93,7 @@ public class Worker
 			if (dist1 < dist2 && dist1 != -1)
 			{
 				return -1;
-			}
+			}	
 			if (dist1 == dist2)
 			{
 				return 0;
