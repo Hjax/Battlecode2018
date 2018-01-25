@@ -238,7 +238,7 @@ public class Worker
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
 		for (Robot otherWorker:GameInfoCache.allyWorkers)
 		{
-			if (otherWorker == worker)
+			if (otherWorker == worker || !otherWorker.location().isOnMap())
 			{
 				continue;
 			}
