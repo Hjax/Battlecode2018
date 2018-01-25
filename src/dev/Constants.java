@@ -2,33 +2,40 @@ package dev;
 
 public class Constants {
 	
-	public static final Robot[] startingRobots = Game.getInitialUnits();
-	public static final Robot[] startingAllies = new Robot[startingRobots.length/2];
-	public static final Robot[] startingEnemies = new Robot[startingAllies.length];
-	
-	public static final Tile[] startingRobotLocation = new Tile[startingRobots.length];
-	public static final Tile[] startingAlliesLocation = new Tile[startingAllies.length];
-	public static final Tile[] startingEnemiesLocation = new Tile[startingEnemies.length];
+	public static final Tile[] startingRobotLocation = Game.getInitialUnits();
+	public static final Tile[] startingAlliesLocation;
+	public static final Tile[] startingEnemiesLocation;
 
 	static
 	{
 		int allyIndex = 0;
 		int enemyIndex = 0;
-		for (Robot worker:startingRobots)
+		for (Tile worker:startingRobotLocation)
 		{
-			startingRobotLocation[allyIndex+enemyIndex] = worker.tile();
-			if (worker.team() == Game.team())
+			if (Game.hasUnitAtLocation(worker))
 			{
-				startingAlliesLocation[allyIndex] = worker.tile();
-				startingAllies[allyIndex++] = worker;
+				allyIndex++;
 			}
 			else
 			{
-				startingEnemiesLocation[enemyIndex] = worker.tile();
-				startingEnemies[enemyIndex++] = worker;
+				enemyIndex++;
 			}
 		}
-		
+		startingAlliesLocation = new Tile[allyIndex];
+		startingEnemiesLocation = new Tile[enemyIndex];
+		allyIndex = 0;
+		enemyIndex = 0;
+		for (Tile worker:startingRobotLocation)
+		{
+			if (Game.hasUnitAtLocation(worker))
+			{
+				startingAlliesLocation[allyIndex++] = worker;
+			}
+			else
+			{
+				startingEnemiesLocation[enemyIndex++] = worker;
+			}
+		}
 	}
 
 	public static final int INFINITY = 99999999;
@@ -60,5 +67,7 @@ public class Constants {
 	public static final int QUADRANTSIZE = 4;
 	public static final int QUADRANTROWSIZE = (int) Math.ceil(Game.WIDTH / (double) QUADRANTSIZE);
 	public static final int QUADRANTCOLUMNSIZE = (int) Math.ceil(Game.HEIGHT / (double) QUADRANTSIZE);
+	public static final int RANGERDAMAGE = 30;
+	public static final int ROCKETBUILDLIMIT = 4;
 	
 }

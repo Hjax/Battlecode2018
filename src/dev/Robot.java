@@ -4,9 +4,9 @@ import bc.*;
 import java.util.*;
 
 public class Robot {
-	private Unit unit;
 	private long round;
 	private int id;
+	private int gcId;
 	private static int nextId = 0;
 	private static Map<Integer, Robot> box;
 	static {
@@ -23,160 +23,108 @@ public class Robot {
 	
 	public Robot(Unit unit) {
 		round = Game.round();
-		this.unit = unit;
+		this.gcId = gcId;
 		this.id = nextId++;
 	}
 	
-	private void update() {
-		if (round != Game.round()) {
-			try {
-				this.unit = Game.gc.unit(unit.id());
-				round = Game.round();
-			} catch (Exception e) {
-				
-			}
-		}
-	}
-	
-	public void forceUpdate() {
-		try {
-			this.unit = Game.gc.unit(unit.id());
-			round = Game.round();
-		} catch (Exception e) {
-			
-		}
-	}
 	long abilityCooldown()  {
-		update();
-		return unit.abilityCooldown();
+		return Game.gc.unit(gcId).abilityCooldown();
 	}
 	long abilityHeat() {
-		update();
-		return unit.abilityHeat();
+		return Game.gc.unit(gcId).abilityHeat();
 	}
 	long abilityRange() {
-		update();
-		return unit.abilityRange();
+		return Game.gc.unit(gcId).abilityRange();
 	}
 	long attackCooldown() {
-		update();
-		return unit.attackCooldown();
+		return Game.gc.unit(gcId).attackCooldown();
 	}
 	long attackHeat() {
-		update();
-		return unit.attackHeat();
+		return Game.gc.unit(gcId).attackHeat();
 	}
 	long attackRange() {
-		update();
-		return unit.attackRange();
+		return Game.gc.unit(gcId).attackRange();
 	}
 	int damage() {
-		update();
-		return unit.damage();
+		return Game.gc.unit(gcId).damage();
 	}
 	boolean equals(Robot other) {
-		update();
-		other.update();
-		return unit.equals(other.unit);
+		return gcId == other.gcId;
 	}
 	long factoryMaxRoundsLeft() {
-		update();
-		return unit.factoryMaxRoundsLeft();
+		return Game.gc.unit(gcId).factoryMaxRoundsLeft();
 	}
 	long factoryRoundsLeft()  {
-		update();
-		return unit.factoryRoundsLeft();
+		return Game.gc.unit(gcId).factoryRoundsLeft();
 	}
 	UnitType factoryUnitType() {
-		update();
-		return unit.factoryUnitType();
+		return Game.gc.unit(gcId).factoryUnitType();
 	}
 	long healerSelfHealAmount() {
-		update();
-		return unit.healerSelfHealAmount();
+		return Game.gc.unit(gcId).healerSelfHealAmount();
 	}
 	long health() {
-		update();
-		return unit.health();
+		return Game.gc.unit(gcId).health();
 	}
 	int id() {
-		update();
-		return unit.id();
+		return gcId;
 	}
 	int predictableId() {
 		return id;
 	}
 	short isAbilityUnlocked() {
-		update();
-		return unit.isAbilityUnlocked();
+		return Game.gc.unit(gcId).isAbilityUnlocked();
 	}
 	short isFactoryProducing() {
-		update();
-		return unit.isFactoryProducing();
+		return Game.gc.unit(gcId).isFactoryProducing();
 	}
 	long knightDefense() {
-		update();
-		return unit.knightDefense();
+		return Game.gc.unit(gcId).knightDefense();
 	}
 	Location location() {
-		update();
-		return unit.location();
+		return Game.gc.unit(gcId).location();
 	}
 	Tile tile() {
-		update();
-		return Tile.getInstance(unit.location().mapLocation());
+		return Tile.getInstance(Game.gc.unit(gcId).location().mapLocation());
 	}
 	long maxHealth() {
-		update();
-		return unit.maxHealth();
+		return Game.gc.unit(gcId).maxHealth();
 	}
 	long movementCooldown() {
-		update();
-		return unit.movementCooldown();
+		return Game.gc.unit(gcId).movementCooldown();
 	}
 	long movementHeat() {
-		update();
-		return unit.movementHeat();
+		return Game.gc.unit(gcId).movementHeat();
 	}
 	long rangerCannotAttackRange() {
-		update();
-		return unit.rangerCannotAttackRange();
+		return Game.gc.unit(gcId).rangerCannotAttackRange();
 	}
 	long rangerCountdown() {
-		update();
-		return unit.rangerCountdown();
+		return Game.gc.unit(gcId).rangerCountdown();
 	}
 	short rangerIsSniping() {
-		update();
-		return unit.rangerIsSniping();
+		return Game.gc.unit(gcId).rangerIsSniping();
 	}
 	long rangerMaxCountdown() {
-		update();
-		return unit.rangerMaxCountdown();
+		return Game.gc.unit(gcId).rangerMaxCountdown();
 	}
 	MapLocation rangerTargetLocation() {
-		update();
-		return unit.rangerTargetLocation();
+		return Game.gc.unit(gcId).rangerTargetLocation();
 	}
 	long researchLevel() {
-		update();
-		return unit.researchLevel();
+		return Game.gc.unit(gcId).researchLevel();
 	}
 	int rocketBlastDamage() {
-		update();
-		return unit.rocketBlastDamage();
+		return Game.gc.unit(gcId).rocketBlastDamage();
 	}
 	short rocketIsUsed() {
-		update();
-		return unit.rocketIsUsed();
+		return Game.gc.unit(gcId).rocketIsUsed();
 	}
 	long rocketTravelTimeDecrease() {
-		update();
-		return unit.rocketTravelTimeDecrease();
+		return Game.gc.unit(gcId).rocketTravelTimeDecrease();
 	}
 	Robot[] structureGarrison() {
-		update();
-		VecUnitID result = unit.structureGarrison();
+		VecUnitID result = Game.gc.unit(gcId).structureGarrison();
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = new Robot(Game.gc.unit(result.get(i)));
@@ -184,39 +132,30 @@ public class Robot {
 		return units;
 	}
 	short structureIsBuilt() {
-		update();
-		return unit.structureIsBuilt();
+		return Game.gc.unit(gcId).structureIsBuilt();
 	}
 	long structureMaxCapacity() {
-		update();
-		return unit.structureMaxCapacity();
+		return Game.gc.unit(gcId).structureMaxCapacity();
 	}
 	Team team() {
-		update();
-		return unit.team();
+		return Game.gc.unit(gcId).team();
 	}
 	UnitType unitType() {
-		update();
-		return unit.unitType();
+		return Game.gc.unit(gcId).unitType();
 	}
 	long visionRange() {
-		update();
-		return unit.visionRange();
+		return Game.gc.unit(gcId).visionRange();
 	}
 	long workerBuildHealth() {
-		update();
-		return unit.workerBuildHealth();
+		return Game.gc.unit(gcId).workerBuildHealth();
 	}
 	long workerHarvestAmount() {
-		update();
-		return unit.workerBuildHealth();
+		return Game.gc.unit(gcId).workerBuildHealth();
 	}
 	short workerHasActed() {
-		update();
-		return unit.workerHasActed();
+		return Game.gc.unit(gcId).workerHasActed();
 	}
 	long workerRepairHealth() {
-		update();
-		return unit.workerRepairHealth();
+		return Game.gc.unit(gcId).workerRepairHealth();
 	}
 }
