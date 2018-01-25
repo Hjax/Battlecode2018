@@ -95,6 +95,7 @@ public class Game {
 	public static void attack(Robot robot, Robot target) {
 		gc.attack(robot.id(), target.id());
 		target.forceUpdate();
+		robot.forceUpdate();
 	}
 	
 	public static void beginSnipe(Robot ranger, Tile location) {
@@ -211,6 +212,8 @@ public class Game {
 	
 	public static void heal(Robot healer, Robot target) {
 		gc.heal(healer.id(), target.id());
+		healer.forceUpdate();
+		target.forceUpdate();
 	}
 	
 	public static boolean isAttackReady(Robot unit) {
