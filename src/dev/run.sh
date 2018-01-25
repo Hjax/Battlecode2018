@@ -7,5 +7,5 @@ echo javac $(find . -name '*.java') -classpath ../battlecode/ -d .
 javac $(find . -name '*.java') -classpath ../battlecode/java -d .
 
 # Run our code.
-echo java -classpath .:../battlecode/java dev.Player
-java -classpath .:../battlecode/java dev.Player
+echo java -Xmx40m -classpath .:../battlecode/java dev.Player
+java -Xmx40m -classpath .:../battlecode/java dev.Player

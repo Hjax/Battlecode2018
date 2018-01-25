@@ -15,8 +15,11 @@ public class Micro {
 	private static ArrayList<Robot> enemyFactories = new ArrayList<>();
 	private static ArrayList<Robot> helpRequests = new ArrayList<>();
 	private static ArrayList<Robot> newHelpRequests = new ArrayList<>();
+	private static Map<Robot, Integer> scoreMap = new HashMap<Robot, Integer>();
 	
-	public static void startTurn() {
+	
+	
+ 	public static void startTurn() {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
@@ -27,89 +30,122 @@ public class Micro {
 				enemyFactories.add(oldEnemyFactories.get(i));
 			}
 		}
-	}
-	public static int scoreRangers(Robot r, Tile square, Tile target) {
-		int score = 0;
-		// todo account for unit types other than ranger
-		// todo check if enemy threats is even helping
+		scoreAllFights();
+ 	}
 
-		Robot[] enemies = Game.senseCombatUnits(square, (long) Math.pow(Math.sqrt(r.attackRange()) + 1, 2), Game.enemy());
-		Robot[] nearbyRangers = Game.senseNearbyUnits(square, 4, UnitType.Ranger, Game.team());
-		Robot[] nearbyHealers = Game.senseNearbyUnits(square, Constants.HEALERRANGE, UnitType.Healer, Game.team());
-		
-		if (enemies.length * r.damage() >= r.health()) {
-			score -= 200;
-		}
-		
-		for (Robot e: enemies) {
-			score -= 250/square.distanceSquaredTo(e.tile());
-			if (square.distanceSquaredTo(e.tile()) >= (r.attackRange() - 12)) {
-				score += 20;
+ 	public static void heal(Robot r) {
+ 		if (r.attackHeat() >= 10) return;
+ 		Robot best = null;
+		Robot[] healee = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.team());
+		for (Robot ally: healee) {
+			if (ally.health() < ally.maxHealth()) {
+				if (best == null || (ally.health() < best.health())) {
+					best = ally;
+				}
 			}
 		}
-		
-		for (Robot a:nearbyRangers)
-		{
-			if (a != r)
-			{
-				score -= 5/square.distanceSquaredTo(a.tile());
-			}
-			
+		if (best != null && Game.canHeal(r, best)) {
+			Game.heal(r, best);
 		}
-		score += nearbyHealers.length * 3;
-		
-		if (r.attackHeat() >= 10) {
-			score -= 5 * enemies.length;
-		}
+ 	}
 
-		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target);
-		}
-		return score;
-	}
-	
-	public static int scoreHealers(Robot r, Tile square, Tile target) {
-		int score = 0;
-		Robot[] enemies = Game.senseCombatUnits(square, Constants.RANGERRANGE, Game.enemy());
-		if (enemies.length > 0) {
-			int enemy_score = 0;
-			for (Robot enemy: enemies) {
-				enemy_score += enemy.tile().distanceSquaredTo(square);
+ 	public static void target(Robot r, UnitType u) {
+ 		if (r.attackHeat() >= 10) return;
+		Robot[] targets = Game.senseNearbyUnits(r.tile(), r.attackRange(), u, Game.enemy());
+		if (targets.length > 0) {
+			Robot best = null;
+			for (Robot enemy: targets) {
+				if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
+					if (enemy.health() > 0) {
+						if (best == null || enemy.health() < best.health()) {
+							best = enemy;
+						}
+					}
+				}
 			}
-			enemy_score = enemy_score / enemies.length;
-			score -= enemy_score;
-		}
-		Robot[] allyRangers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Ranger, Game.team());
-		Robot[] allyHealers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Healer, Game.team());
-		for (Robot a:allyRangers)
-		{
-			if (a != r)
-			{
-				score += 2/square.distanceSquaredTo(a.tile());
+			if (best != null && Game.canAttack(r, best)) {
+				newHelpRequests.add(best);
+				Game.attack(r, best);
 			}
-			
 		}
-		
-		if (enemies.length * r.damage() > r.health()) {
-			score -= 100;
-		}
-		for (Robot a:allyHealers)
-		{
-			if (a != r)
-			{
-				score -= 2/square.distanceSquaredTo(a.tile());
-			}
-			
-		};
-
-		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target);
-		}
-		return score;
-	}
+ 	}
+ 	
+ 	public static void shoot(Robot r) {
+ 		target(r, UnitType.Factory);
+ 		target(r, UnitType.Rocket);
+ 		target(r, UnitType.Mage);
+ 		target(r, UnitType.Healer);
+ 		target(r, UnitType.Ranger);
+ 		target(r, UnitType.Knight);
+ 		target(r, UnitType.Worker);
+ 	}
+ 	
+ 	public static void scoreFight(Robot r) {
+ 		int score = 0;
+ 		Queue<Robot> open = new LinkedList<>();
+ 		Set<Robot> closed = new HashSet<>();
+ 		open.add(r);
+ 		while (open.size() > 0) {
+ 			Robot current = open.poll();
+ 			closed.add(current);
+ 			Robot[] targets;
+ 			if (current.unitType() == UnitType.Healer) {
+ 				targets = Game.senseCombatUnits(current.tile(), (long) Math.pow(Math.sqrt(current.attackRange()) + 2, 2), current.team() == Game.team() ? Game.team() : Game.enemy());
+ 			} else {
+ 				targets = Game.senseCombatUnits(current.tile(), (long) Math.pow(Math.sqrt(current.attackRange()) + 2, 2), current.team() == Game.team() ? Game.enemy() : Game.team());
+ 			}
+ 			if (targets.length > 0) {
+ 				score += (current.team() == Game.team() ? 1 : -1) * Math.abs(current.damage()) * 2;
+ 				score += (current.team() == Game.team() ? 1 : -1) * current.health();
+ 			}
+ 			Robot[] sense = Game.senseCombatUnits(current.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.team());
+ 			for (Robot c: sense) {
+ 				if (!closed.contains(c) && !open.contains(c)) {
+ 					open.add(c);
+ 				}
+ 			}
+ 			sense = Game.senseCombatUnits(current.tile(), Constants.RANGERRANGE, Game.enemy());
+ 			for (Robot c: sense) {
+ 				if (!closed.contains(c) && !open.contains(c)) {
+ 					open.add(c);
+ 				}
+ 			}
+ 		}
+ 		for (Robot u: closed) {
+ 			scoreMap.put(u, score);
+ 		}
+ 	}
+ 	
+ 	public static Direction getAverageEnemyDirection(Robot r) {
+ 		int x = 0, y = 0;
+ 		Robot[] nearby = Game.senseCombatUnits(r.tile(), Constants.RANGERVISION, Game.enemy());
+ 		for (Robot n: nearby) {
+ 			x += n.tile().getX();
+ 			y += n.tile().getY();
+ 		}
+ 		return r.tile().directionTo(Tile.getInstance(Game.planet(), x / nearby.length, y / nearby.length));
+ 	}
+ 	
+ 	public static Direction getAverageAllyDirection(Robot r) {
+ 		int x = 0, y = 0;
+ 		Robot[] nearby = Game.senseCombatUnits(r.tile(), Constants.RANGERVISION, Game.team());
+ 		for (Robot n: nearby) {
+ 			x += n.tile().getX();
+ 			y += n.tile().getY();
+ 		}
+ 		return r.tile().directionTo(Tile.getInstance(Game.planet(), x / nearby.length, y / nearby.length));
+ 	}
+ 	
+ 	public static void scoreAllFights() {
+ 		scoreMap = new HashMap<>();
+ 		for (Robot r: GameInfoCache.allyCombat) {
+ 			if (!scoreMap.containsKey(r)) {
+ 				scoreFight(r);
+ 			}
+ 		}
+ 	}
 		
 	public static void run() {
-		long time = 0;
 		for (Robot r: GameInfoCache.allyCombat) {
 			if (!r.location().isOnMap() || r.location().isInGarrison() || r.location().isInSpace()) {
 				continue;
@@ -152,106 +188,54 @@ public class Micro {
 					}
 				}
 			}
-
-			long start = System.nanoTime();
-			if (Game.isMoveReady(r)) {
-				Direction best = null;
-				int bestScore = 0;
-				for (Direction d: Game.directions) {
-					if ((Game.isPassableTerrainAt(r.tile().add(d)) && Game.canMove(r, d)) || d == Direction.Center) {
-						int current = -1 * Constants.INFINITY;
-						switch (r.unitType()) {
-							case Ranger:
-								current = scoreRangers(r, r.tile().add(d), target);
-								break;
-							case Healer:
-								current = scoreHealers(r, r.tile().add(d), target);
-								break;
-							default:
-								break;
-						}
-						
-						if (best == null || current > bestScore) {
-							bestScore = current;
-							best = d;
-						}
-					}
-				}
-				if (best != null && Game.canMove(r, best)) {
-					Game.moveRobot(r, best);
-				}
-			}
-			time += System.nanoTime() - start;
-			if (r.unitType() == UnitType.Healer && Game.isHealReady(r)) {
-				Robot best = null;
-				Robot[] healee = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.TEAM);
-				for (Robot ally: healee) {
-					if (ally.health() < ally.maxHealth()) {
-						if (best == null || (ally.health() < best.health())) {
-							best = ally;
-						}
-					}
-				}
-				if (best != null && Game.canHeal(r, best)) {
-					Game.heal(r, best);
-				}
-			}
-			else if (Game.isAttackReady(r)) {
-				Robot[] fact = Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Factory, Game.enemy());
-				if (fact.length > 0) {
-					Robot best = null;
-					for (Robot enemy: fact) {
-						if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-							if (enemy.health() > 0) {
-								if (best == null || (enemy.health() <  (best.health()))) {
-									best = enemy;
-								}
-							}
-						}
-					}
-					if (best != null && Game.canAttack(r, best)) {
-						newHelpRequests.add(best);
-						Game.attack(r, best);
+			if (r.unitType() == UnitType.Ranger) {
+				Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.enemy());
+				if (enemies.length == 0) {
+					Direction d = Pathfinding.path(r.tile(), target);
+					if (Game.canMove(r, d)) {
+						Game.moveRobot(r, d);
+						shoot(r);
 					}
 				} else {
-					Robot[] combat = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy());
-					if (combat.length > 0) {
-						Robot best = null;
-						for (Robot enemy: combat) {
-							if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-								if (enemy.health() > 0) {
-									if (best == null || enemy.health() < best.health()) {
-										best = enemy;
-									}
-								}
-							}
-						}
-						if (best != null && Game.canAttack(r, best)) {
-							newHelpRequests.add(best);
-							Game.attack(r, best);
+					if (scoreMap.get(r) > 400 && r.health() > 30) {
+						Direction move = Utilities.findNearestOccupiableDir(r.tile(), getAverageEnemyDirection(r));
+						if (Game.canMove(r, move)) {
+							Game.moveRobot(r, move);
+							shoot(r);
 						}
 					} else {
-						Robot[] civilian = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy());
-						if (civilian.length > 0) {
-							Robot best = null;
-							for (Robot enemy: civilian) {
-								if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-									if (enemy.health() > 0) {
-										if (best == null || (enemy.health() <  best.health())) {
-											best = enemy;
-										}
-									}
-								}
-							}
-							if (best != null && Game.canAttack(r, best)) {
-								newHelpRequests.add(best);
-								Game.attack(r, best);
-							}
+						Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
+						if (Game.canMove(r, move)) {
+							shoot(r);
+							Game.moveRobot(r, move);
 						}
 					}
 				}
+				shoot(r);
+			}
+			else if (r.unitType() == UnitType.Healer) {
+				Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.enemy());
+				if (enemies.length == 0) {
+					Direction d = Pathfinding.path(r.tile(), target);
+					if (Game.canMove(r, d)) {
+						Game.moveRobot(r, d);
+					}
+				} else {
+					if (scoreMap.get(r) > 400) {
+						Direction move = Utilities.findNearestOccupiableDir(r.tile(), getAverageAllyDirection(r));
+						if (Game.canMove(r, move)) {
+							Game.moveRobot(r, move);
+						}
+					} else {
+						Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
+						if (Game.canMove(r, move)) {
+							heal(r);
+							Game.moveRobot(r, move);
+						}
+					}
+				}
+				heal(r);
 			}
 		}
-		System.out.println("Finding target " + time / 1000000.0);
 	}
 }

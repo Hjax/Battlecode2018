@@ -56,6 +56,7 @@ public class Player
                 Micro.run();
                 Timing.end("Micro");
         	} catch (Exception e) {
+        		e.printStackTrace();
         	}
         	try {
                 Timing.start("Rocket");
