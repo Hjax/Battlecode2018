@@ -95,19 +95,19 @@ public class Game {
 	}
 	
 	public static void attack(Robot robot, Robot target) {
-		gc.attack(robot.id(), target.id());
-		target.forceUpdate();
-		robot.forceUpdate();
+		if (robot.unitType() == UnitType.Healer) {
+			heal(robot, target);
+		} else {
+			gc.attack(robot.id(), target.id());
+		}
 	}
 	
 	public static void beginSnipe(Robot ranger, Tile location) {
 		gc.beginSnipe(ranger.id(), location.location);
-		ranger.forceUpdate();
 	}
 	
 	public static void blink(Robot mage, Tile location) {
 		gc.blink(mage.id(), location.location);
-		mage.forceUpdate();
 	}
 	
 	public static void blueprint(Robot worker, UnitType structure, Direction direction) {
@@ -116,11 +116,14 @@ public class Game {
 	
 	public static void build(Robot worker, Robot blueprint) {
 		gc.build(worker.id(), blueprint.id());
-		blueprint.forceUpdate();
 	}
 	
 	public static boolean canAttack(Robot robot, Robot target) {
-		return gc.canAttack(robot.id(), target.id());
+		if (robot.unitType() == UnitType.Healer) {
+			return canHeal(robot, target);
+		} else {
+			return gc.canAttack(robot.id(), target.id());			
+		}
 	}
 	
 	public static boolean canBeginSnipe(Robot ranger, Tile location) {
@@ -197,7 +200,6 @@ public class Game {
 	
 	public static void disintegrateUnit(Robot unit) {
 		gc.disintegrateUnit(unit.id());
-		unit.forceUpdate();
 	}
 	
 	public static Veci32 getTeamArray(Planet planet) {
@@ -214,8 +216,6 @@ public class Game {
 	
 	public static void heal(Robot healer, Robot target) {
 		gc.heal(healer.id(), target.id());
-		healer.forceUpdate();
-		target.forceUpdate();
 	}
 	
 	public static boolean isAttackReady(Robot unit) {
@@ -256,8 +256,6 @@ public class Game {
 	
 	public static void javelin(Robot knight, Robot target) {
 		gc.javelin(knight.id(), target.id());
-		knight.forceUpdate();
-		target.forceUpdate();
 	}
 	
 	public static long karbonite() {
@@ -270,18 +268,14 @@ public class Game {
 	
 	public static void launchRocket(Robot rocket, Tile location) {
 		gc.launchRocket(rocket.id(), location.location);
-		rocket.forceUpdate();
 	}
 	
 	public static void load(Robot structure, Robot unit) {
 		gc.load(structure.id(), unit.id());
-		unit.forceUpdate();
-		structure.forceUpdate();
 	}
 	
 	public static void moveRobot(Robot robot, Direction direction) {
 		gc.moveRobot(robot.id(), direction);
-		robot.forceUpdate();
 	}
 	
 	public static Robot[] myUnits() {
@@ -289,6 +283,7 @@ public class Game {
 		Robot[] units = new Robot[(int) myUnits.size()];
 		for (int i = 0; i < myUnits.size(); i++) {
 		}
+		myUnits.delete();
 		return units;
 	}
 	
@@ -303,8 +298,6 @@ public class Game {
 	
 	public static void overcharge(Robot healer, Robot target) {
 		gc.overcharge(healer.id(), target.id());
-		healer.forceUpdate();
-		target.forceUpdate();
 	}
 	
 	public static Planet planet() {
@@ -313,7 +306,6 @@ public class Game {
 	
 	public static void produceRobot(Robot factory, UnitType type) {
 		gc.produceRobot(factory.id(), type);
-		factory.forceUpdate();
 	}
 	
 	public static short queueResearch(UnitType branch) {
@@ -322,12 +314,10 @@ public class Game {
 	
 	public static void repair(Robot worker, Robot structure) {
 		gc.repair(worker.id(), structure.id());
-		worker.forceUpdate();
 	}
 	
 	public static void replicate(Robot worker, Direction direction) {
 		gc.replicate(worker.id(), direction);
-		worker.forceUpdate();
 	}
 	
 	public static ResearchInfo researchInfo() {
@@ -352,6 +342,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
+		result.delete();
 		return units;
 	}
 	
@@ -361,6 +352,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
+		result.delete();
 		return units;
 	}
 	
@@ -370,6 +362,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
+		result.delete();
 		return units;
 	}
 	
@@ -381,6 +374,7 @@ public class Game {
 				units.add(Robot.getInstance(result.get(i)));
 			}
 		}
+		result.delete();
 		return units.toArray(new Robot[0]);
 	}
 	
@@ -412,6 +406,7 @@ public class Game {
 				units.add(Robot.getInstance(result.get(i)));
 			}
 		}
+		result.delete();
 		return units.toArray(new Robot[0]);
 	}
 	
@@ -445,6 +440,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
+		result.delete();
 		return units;
 	}
 	
@@ -454,14 +450,14 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
+		result.delete();
 		return units;
 	}
 	
 	public static void unload(Robot structure, Direction direction) {
 		Robot[] garrison = structure.structureGarrison();
 		if (garrison.length > 0) {
-			gc.unload(structure.id(), direction);
-			garrison[0].forceUpdate();			
+			gc.unload(structure.id(), direction);		
 		}
 	}
 	
@@ -493,11 +489,11 @@ public class Game {
 		
 	}
 	
-	public static Robot[] getInitialUnits() {
+	public static Tile[] getInitialUnits() {
 		VecUnit result = startingMap(Planet.Earth).getInitial_units();
-		Robot[] units = new Robot[(int) result.size()];
+		Tile[] units = new Tile[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+			units[i] = Tile.getInstance(result.get(i).location().mapLocation());
 		}
 		return units;
 	}

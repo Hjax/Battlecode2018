@@ -186,7 +186,9 @@ public class Rocket
 		for (Robot rocket: GameInfoCache.allyRockets)
 		{
 			System.out.printf("rocket has %d units loaded\n", rocket.structureGarrison().length);
-			if ((launchedRockets == 0 && rocket.structureGarrison().length > 1) || (rocket.structureGarrison().length == rocket.structureMaxCapacity() || Game.round == 749))
+			if ((launchedRockets == 0 && rocket.structureGarrison().length > 1) || 
+					(rocket.structureGarrison().length == rocket.structureMaxCapacity() || Game.round == 749) || 
+					Game.senseCombatUnits(rocket.tile(), Constants.RANGERRANGE, Game.enemy()).length * Constants.RANGERDAMAGE >= rocket.health())
 			{
 				if (Game.canLaunchRocket(rocket, landingGrid.peek())) 
 				{

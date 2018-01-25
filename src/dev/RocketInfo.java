@@ -1,6 +1,4 @@
 package dev;
-
-import java.util.*;
 import bc.*;
 
 public class RocketInfo {
