@@ -189,7 +189,8 @@ public class Pathfinding {
 	public static int pathLength(Tile source, Tile dest) {
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
 		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
-		if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
+		if (!(cache.containsKey(destInt) || cache.containsKey(sourceInt))) {
+		//if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
 			bfs(dest);
 		}
 		if (cache.containsKey(destInt)) {

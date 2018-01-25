@@ -10,7 +10,7 @@ import bc.*;
 public class Worker 
 {
 	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
-	private static PriorityQueue<Tile> factoryGrid;
+	public static PriorityQueue<Tile> factoryGrid;
 	private static Tile factoryGridCenter = Rocket.landingGridCenter;
 	private static Random rng = new Random(5468);
 	public static int rockets = 0;
@@ -90,7 +90,7 @@ public class Worker
 		public int compare(Tile arg0, Tile arg1) {
 			int dist1 = Pathfinding.pathLength(arg0, factoryGridCenter);
 			int dist2 = Pathfinding.pathLength(arg1, factoryGridCenter);
-			if (dist1 < dist2)
+			if (dist1 < dist2 && dist1 != -1)
 			{
 				return -1;
 			}
@@ -378,7 +378,7 @@ public class Worker
 		{
 			return false;
 		}
-		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 100)
+		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 100 && GameInfoCache.currentBlueprints.size() <= 2)
 		{
 			return true;
 		}
@@ -498,6 +498,15 @@ public class Worker
 		}
 	}
 	
+	private static boolean shouldLoadRocket() 
+	{
+		if (GameInfoCache.allyCombat.size() == 0 || Rocket.launchedRockets == 0 || Game.getTeamArray(Planet.Mars).get(1) + Rocket.flyingWorkers < Constants.MARSWORKERGOAL)
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	private static boolean shouldBuildRocket()
 	{
 		
@@ -517,7 +526,7 @@ public class Worker
 			return true;
 		}
 		
-		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYLIMIT && Game.karbonite() > 150 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
+		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYGOAL && Game.karbonite() > 75 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
 		{
 			return true;
 		}
@@ -593,7 +602,9 @@ public class Worker
 			
 			if (Game.PLANET == Planet.Earth)
 			{
-				loadRocket();
+				if (shouldLoadRocket()) {
+					loadRocket();
+				}
 			}
 			replicateWorkers();
 			if (Game.PLANET == Planet.Earth)

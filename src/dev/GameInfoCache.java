@@ -261,6 +261,9 @@ public class GameInfoCache
 		{
 			Game.writeTeamArray(0, 1);
 		}
+		if (Game.planet() == Planet.Mars) {
+			Game.writeTeamArray(1, allyWorkers.size());
+		}
 		
 	}
 	
