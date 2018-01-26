@@ -122,6 +122,14 @@ public class GameInfoCache
 				}
 			}
 		}
+		for (int y = Game.HEIGHT - 1; y >=0; y--)
+		{
+			for (int x = 0; x < Game.WIDTH; x++)
+			{
+				System.out.printf("%d|", nearestKarbonite[x + y * Game.WIDTH]);
+			}
+			System.out.printf("\n");
+		}
 	}
 	
 	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
@@ -229,7 +237,7 @@ public class GameInfoCache
 		{
 			for (int x = 0; x < Game.WIDTH * Game.HEIGHT; x++)
 			{
-				if (!karboniteLocations.contains(nearestKarbonite[x]))
+				if (nearestKarbonite[x] != -1 && !karboniteLocations.contains(nearestKarbonite[x]))
 				{
 					karboniteQueue.add(x);
 					queuedIndices.add(x);
