@@ -216,11 +216,9 @@ public class Worker
 		int distance = -1;
 		if (worker.abilityHeat() >= 10)
 		{
-			System.out.printf("(%d,%d) has heat %d\n", worker.tile().getX(), worker.tile().getY(), worker.abilityHeat());
 			return -1;
 		}
 		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
-		System.out.printf("limit is %d, weight is %d\n", Constants.WORKERLIMIT, Constants.WORKERLIMITWEIGHT);
 		if (Game.round() >= 750 || Game.getTeamArray(Planet.Earth).get(0) == 1)
 		{
 			score += Constants.INFINITY;
@@ -233,9 +231,7 @@ public class Worker
 				score += Constants.FACTORYREPLICATEPRESSURE / distance;
 			}
 		}
-		System.out.printf("score before deposits = %d, ", score);
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
-		System.out.printf("score before workers = %d, ", score);
 		for (Robot otherWorker:GameInfoCache.allyWorkers)
 		{
 			if (otherWorker == worker || !otherWorker.location().isOnMap())
@@ -249,7 +245,6 @@ public class Worker
 			}
 			
 		}
-		System.out.printf("score at end = %d (%d,%d)\n", score, worker.tile().getX(), worker.tile().getY());
 		return score;
 		
 	}

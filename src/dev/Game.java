@@ -283,7 +283,7 @@ public class Game {
 		Robot[] units = new Robot[(int) myUnits.size()];
 		for (int i = 0; i < myUnits.size(); i++) {
 		}
-		myUnits.delete();
+		free(myUnits);
 		return units;
 	}
 	
@@ -342,7 +342,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
-		result.delete();
+		free(result);
 		return units;
 	}
 	
@@ -352,7 +352,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
-		result.delete();
+		free(result);
 		return units;
 	}
 	
@@ -362,7 +362,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
-		result.delete();
+		free(result);
 		return units;
 	}
 	
@@ -374,7 +374,7 @@ public class Game {
 				units.add(Robot.getInstance(result.get(i)));
 			}
 		}
-		result.delete();
+		free(result);
 		return units.toArray(new Robot[0]);
 	}
 	
@@ -406,7 +406,7 @@ public class Game {
 				units.add(Robot.getInstance(result.get(i)));
 			}
 		}
-		result.delete();
+		free(result);
 		return units.toArray(new Robot[0]);
 	}
 	
@@ -440,7 +440,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
-		result.delete();
+		free(result);
 		return units;
 	}
 	
@@ -450,7 +450,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Robot.getInstance(result.get(i));
 		}
-		result.delete();
+		free(result);
 		return units;
 	}
 	
@@ -495,6 +495,7 @@ public class Game {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = Tile.getInstance(result.get(i).location().mapLocation());
 		}
+		free(result);
 		return units;
 	}
 	
@@ -516,6 +517,13 @@ public class Game {
 			 y = rand.nextInt((int) startingMap(plnt).getHeight());
 		} while (!isPassableTerrainAt(Tile.getInstance(new MapLocation(plnt, x, y))));
 		return Tile.getInstance(new MapLocation(plnt, x, y));
+	}
+	
+	public static void free(VecUnit u) {
+		for (int i = 0; i < u.size(); i++) {
+			u.get(i).delete();
+		}
+		u.delete();
 	}
 
 }

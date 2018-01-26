@@ -1,70 +1,103 @@
 package dev;
 
 import bc.*;
-import java.util.*;
 
 public class Robot {
-	private long round;
 	private int id;
 	private int gcId;
 	private static int nextId = 0;
-	private static Map<Integer, Robot> box;
+	private static Robot[] box;
 	static {
-		box = new HashMap<>();
+		box = new Robot[65536];
 	}
 	public static Robot getInstance(Unit unit) {
-		if (box.containsKey(unit.id())) {
-			return box.get(unit.id());
+		if (box[unit.id()] != null) {
+			return box[unit.id()];
 		}
 		Robot r = new Robot(unit);
-		box.put(unit.id(), r);
+		box[unit.id()] = r;
 		return r;
 	}
 	
 	public Robot(Unit unit) {
-		round = Game.round();
 		this.gcId = unit.id();
 		this.id = nextId++;
 	}
 	
 	long abilityCooldown()  {
-		return Game.gc.unit(gcId).abilityCooldown();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.abilityCooldown();
+		u.delete();
+		return result;
 	}
 	long abilityHeat() {
-		return Game.gc.unit(gcId).abilityHeat();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.abilityHeat();
+		u.delete();
+		return result;
 	}
 	long abilityRange() {
-		return Game.gc.unit(gcId).abilityRange();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.abilityRange();
+		u.delete();
+		return result;
 	}
 	long attackCooldown() {
-		return Game.gc.unit(gcId).attackCooldown();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.attackCooldown();
+		u.delete();
+		return result;
 	}
 	long attackHeat() {
-		return Game.gc.unit(gcId).attackHeat();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.attackHeat();
+		u.delete();
+		return result;
 	}
 	long attackRange() {
-		return Game.gc.unit(gcId).attackRange();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.attackRange();
+		u.delete();
+		return result;
 	}
 	int damage() {
-		return Game.gc.unit(gcId).damage();
+		Unit u = Game.gc.unit(gcId);
+		int result = u.damage();
+		u.delete();
+		return result;
 	}
 	boolean equals(Robot other) {
 		return gcId == other.gcId;
 	}
 	long factoryMaxRoundsLeft() {
-		return Game.gc.unit(gcId).factoryMaxRoundsLeft();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.factoryMaxRoundsLeft();
+		u.delete();
+		return result;
 	}
 	long factoryRoundsLeft()  {
-		return Game.gc.unit(gcId).factoryRoundsLeft();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.factoryRoundsLeft();
+		u.delete();
+		return result;
 	}
 	UnitType factoryUnitType() {
-		return Game.gc.unit(gcId).factoryUnitType();
+		Unit u = Game.gc.unit(gcId);
+		UnitType result = u.factoryUnitType();
+		u.delete();
+		return result;
 	}
 	long healerSelfHealAmount() {
-		return Game.gc.unit(gcId).healerSelfHealAmount();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.healerSelfHealAmount();
+		u.delete();
+		return result;
 	}
 	long health() {
-		return Game.gc.unit(gcId).health();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.health();
+		u.delete();
+		return result;
 	}
 	int id() {
 		return gcId;
@@ -73,55 +106,106 @@ public class Robot {
 		return id;
 	}
 	short isAbilityUnlocked() {
-		return Game.gc.unit(gcId).isAbilityUnlocked();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.isAbilityUnlocked();
+		u.delete();
+		return result;
 	}
 	short isFactoryProducing() {
-		return Game.gc.unit(gcId).isFactoryProducing();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.isFactoryProducing();
+		u.delete();
+		return result;
 	}
 	long knightDefense() {
-		return Game.gc.unit(gcId).knightDefense();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.knightDefense();
+		u.delete();
+		return result;
 	}
 	Location location() {
-		return Game.gc.unit(gcId).location();
+		Unit u = Game.gc.unit(gcId);
+		Location result = u.location();
+		u.delete();
+		return result;
 	}
 	Tile tile() {
-		return Tile.getInstance(Game.gc.unit(gcId).location().mapLocation());
+		Unit u = Game.gc.unit(gcId);
+		Tile result = Tile.getInstance(u.location().mapLocation());
+		u.delete();
+		return result;
 	}
 	long maxHealth() {
-		return Game.gc.unit(gcId).maxHealth();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.maxHealth();
+		u.delete();
+		return result;
 	}
 	long movementCooldown() {
-		return Game.gc.unit(gcId).movementCooldown();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.movementCooldown();
+		u.delete();
+		return result;
 	}
 	long movementHeat() {
-		return Game.gc.unit(gcId).movementHeat();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.movementHeat();
+		u.delete();
+		return result;
 	}
 	long rangerCannotAttackRange() {
-		return Game.gc.unit(gcId).rangerCannotAttackRange();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.rangerCannotAttackRange();
+		u.delete();
+		return result;
 	}
 	long rangerCountdown() {
-		return Game.gc.unit(gcId).rangerCountdown();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.rangerCountdown();
+		u.delete();
+		return result;
 	}
 	short rangerIsSniping() {
-		return Game.gc.unit(gcId).rangerIsSniping();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.rangerIsSniping();
+		u.delete();
+		return result;
 	}
 	long rangerMaxCountdown() {
-		return Game.gc.unit(gcId).rangerMaxCountdown();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.rangerMaxCountdown();
+		u.delete();
+		return result;
 	}
-	MapLocation rangerTargetLocation() {
-		return Game.gc.unit(gcId).rangerTargetLocation();
+	Tile rangerTargetLocation() {
+		Unit u = Game.gc.unit(gcId);
+		Tile result = Tile.getInstance(u.rangerTargetLocation());
+		u.delete();
+		return result;
 	}
 	long researchLevel() {
-		return Game.gc.unit(gcId).researchLevel();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.researchLevel();
+		u.delete();
+		return result;
 	}
 	int rocketBlastDamage() {
-		return Game.gc.unit(gcId).rocketBlastDamage();
+		Unit u = Game.gc.unit(gcId);
+		int result = u.rocketBlastDamage();
+		u.delete();
+		return result;
 	}
 	short rocketIsUsed() {
-		return Game.gc.unit(gcId).rocketIsUsed();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.rocketIsUsed();
+		u.delete();
+		return result;
 	}
 	long rocketTravelTimeDecrease() {
-		return Game.gc.unit(gcId).rocketTravelTimeDecrease();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.rocketTravelTimeDecrease();
+		u.delete();
+		return result;
 	}
 	Robot[] structureGarrison() {
 		VecUnitID result = Game.gc.unit(gcId).structureGarrison();
@@ -129,33 +213,61 @@ public class Robot {
 		for (int i = 0; i < result.size(); i++) {
 			units[i] = new Robot(Game.gc.unit(result.get(i)));
 		}
+		result.delete();
 		return units;
 	}
 	short structureIsBuilt() {
-		return Game.gc.unit(gcId).structureIsBuilt();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.structureIsBuilt();
+		u.delete();
+		return result;
 	}
 	long structureMaxCapacity() {
-		return Game.gc.unit(gcId).structureMaxCapacity();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.structureMaxCapacity();
+		u.delete();
+		return result;
 	}
 	Team team() {
-		return Game.gc.unit(gcId).team();
+		Unit u = Game.gc.unit(gcId);
+		Team result = u.team();
+		u.delete();
+		return result;
 	}
 	UnitType unitType() {
-		return Game.gc.unit(gcId).unitType();
+		Unit u = Game.gc.unit(gcId);
+		UnitType result = u.unitType();
+		u.delete();
+		return result;
 	}
 	long visionRange() {
-		return Game.gc.unit(gcId).visionRange();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.visionRange();
+		u.delete();
+		return result;
 	}
 	long workerBuildHealth() {
-		return Game.gc.unit(gcId).workerBuildHealth();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.workerBuildHealth();
+		u.delete();
+		return result;
 	}
 	long workerHarvestAmount() {
-		return Game.gc.unit(gcId).workerBuildHealth();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.workerHarvestAmount();
+		u.delete();
+		return result;
 	}
 	short workerHasActed() {
-		return Game.gc.unit(gcId).workerHasActed();
+		Unit u = Game.gc.unit(gcId);
+		short result = u.workerHasActed();
+		u.delete();
+		return result;
 	}
 	long workerRepairHealth() {
-		return Game.gc.unit(gcId).workerRepairHealth();
+		Unit u = Game.gc.unit(gcId);
+		long result = u.workerRepairHealth();
+		u.delete();
+		return result;
 	}
 }

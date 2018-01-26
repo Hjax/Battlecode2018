@@ -22,11 +22,15 @@ public class Player
     	}
         while (true) 
         {
+        	
         	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) 
         	{
         		System.out.println("Low on time, ending turn");
         		Game.nextTurn();
         		continue;
+        	}
+        	if (Game.round() % 50 == 0) {
+        		System.gc();
         	}
         	long start = System.nanoTime();
         	try {

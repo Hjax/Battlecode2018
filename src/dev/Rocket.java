@@ -114,7 +114,12 @@ public class Rocket
 	private static void cleanUpAssignments() {
 		Set<Robot> toRemove = new HashSet<>();
 		for (Robot r: assignments.keySet()) {
-			if (!assignments.get(r).location().isOnMap() || assignments.get(r).health() <= 0) {
+			try {
+				if (!assignments.get(r).location().isOnMap() || assignments.get(r).health() <= 0) {
+					toRemove.add(r);
+					assignmentCount.put(r, assignmentCount.getOrDefault(r, 0) - 1);
+				}
+			} catch (Exception e) {
 				toRemove.add(r);
 				assignmentCount.put(r, assignmentCount.getOrDefault(r, 0) - 1);
 			}

@@ -5,15 +5,18 @@ import bc.*;
 import java.util.*;
 
 public class Pathfinding {
-	private static Map<Integer, Map<Integer, Integer>> cache;
+	private static int[][] cache;;
 	private static Random rng = new Random(1486);
 	static {
-		cache = new HashMap<>();
+		cache = new int[Game.WIDTH*Game.HEIGHT][Game.WIDTH*Game.HEIGHT];
+		for (int[] row: cache) {
+			Arrays.fill(row, -1);
+		}
 	}
 	private static int[] directions = {1, 1 - Game.WIDTH, -1 * Game.WIDTH, -1 - Game.WIDTH, -1, Game.WIDTH - 1, Game.WIDTH, Game.WIDTH + 1};
 	
 	private static void bfs(Tile dest) {
-		Map<Integer, Integer> current_map = new HashMap<>();
+
 		Queue<Integer> open = new LinkedList<>();
 		Set<Integer> closed = new HashSet<>();
 		 
@@ -22,7 +25,7 @@ public class Pathfinding {
 		 
 		open.add(destination);
 		closed.add(destination);
-		current_map.put(destination, 0);
+		cache[destination][destination] = 0;
 		while (open.size() > 0) {
 			Integer current = open.poll();
 			// for each direction 
@@ -31,33 +34,33 @@ public class Pathfinding {
 				if (!closed.contains(test) && !open.contains(test)) {
 					if (Math.abs(test % Game.WIDTH - current % Game.WIDTH) <= 1 && test >= 0 && test < size && Game.pathMap[test]) {
 						 open.add(test);
-						 current_map.put(test, current_map.get(current) + 1);
+						 cache[destination][test] = cache[destination][current] + 1;
 					}
 				}
 				closed.add(current);
 			}
 		}
-		cache.put(destination, current_map);
 	}
 	
 	public static Direction path(Tile source, Tile dest) 
 	{
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
 		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
-		if (!cache.containsKey(destInt)) {
+		if (cache[destInt][destInt] == -1) {
 			bfs(dest);
 		}
-		if (!cache.get(destInt).containsKey(sourceInt)) {
+		if (cache[destInt][sourceInt] == -1) {
 			return Direction.Center;
 		}
 		int best = 0;
 		for (int direction: directions) {
 			int test = sourceInt + direction;
+			
 			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
-				if (best == 0 && (cache.get(destInt).get(sourceInt + best)) >= cache.get(destInt).get(test)) {
+				if (best == 0 && (cache[destInt][sourceInt + best]) >= cache[destInt][test]) {
 					best = direction;
 				}
-				else if (cache.get(destInt).get(sourceInt + best) > cache.get(destInt).get(test)) {
+				else if (cache[destInt][sourceInt + best] > cache[destInt][test]) {
 					best = direction;
 				}
 			}
@@ -189,20 +192,20 @@ public class Pathfinding {
 	public static int pathLength(Tile source, Tile dest) {
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
 		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
-		if (!(cache.containsKey(destInt) || cache.containsKey(sourceInt))) {
+		if (!(cache[destInt][destInt] != -1 || cache[sourceInt][sourceInt] != -1)) {
 		//if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
 			bfs(dest);
 		}
-		if (cache.containsKey(destInt)) {
-			if (!cache.get(destInt).containsKey(sourceInt)) {
+		if (cache[destInt][destInt] != -1) {
+			if (cache[destInt][sourceInt] == -1) {
 				return -1;
 			}
-			return cache.get(destInt).get(sourceInt);
+			return cache[destInt][sourceInt];
 		} else {
-			if (!cache.get(sourceInt).containsKey(destInt)) {
+			if (cache[sourceInt][destInt] == -1) {
 				return -1;
 			}
-			return cache.get(sourceInt).get(destInt);
+			return cache[sourceInt][destInt];
 		}
 	}
 	
