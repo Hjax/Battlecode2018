@@ -136,12 +136,11 @@ public class Worker
 				Constants.WORKERREPLICATEDEPOSITWEIGHT = 1;
 				Constants.WORKERLIMITWEIGHT = 0;
 			}
+			
 			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker, buildDir);
 			System.out.printf("building in direction %s\n", buildDir.name());
 			if (buildDir != Direction.Center)
 			{
-				Game.blueprint(Game.senseUnitAtLocation(bestWorker.worker), UnitType.Factory, buildDir);
-				idleWorkers.remove(bestWorker.worker);
 				factoryGridCenter = Utilities.offsetInDirection(bestWorker.worker, buildDir, 1);
 				initializeBuildGrid();
 			}
@@ -156,8 +155,6 @@ public class Worker
 						{
 							continue;
 						}
-						Game.blueprint(worker, UnitType.Factory, buildDir);
-						idleWorkers.remove(worker);
 						factoryGridCenter = Utilities.offsetInDirection(worker.tile(), buildDir, 1);
 						initializeBuildGrid();
 					}

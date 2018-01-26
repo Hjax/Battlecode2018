@@ -12,21 +12,13 @@ public class Micro {
 			targets.add(loc);
 		}
 	}
-	private static ArrayList<Robot> enemyFactories = new ArrayList<>();
-	private static ArrayList<Robot> helpRequests = new ArrayList<>();
-	private static ArrayList<Robot> newHelpRequests = new ArrayList<>();
+	private static ArrayList<Tile> helpRequests = new ArrayList<>();
+	private static ArrayList<Tile> newHelpRequests = new ArrayList<>();
 	
 	public static void startTurn() {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
-		ArrayList<Robot> oldEnemyFactories = enemyFactories;
-		enemyFactories = new ArrayList<>();
-		for (int i = 0; i < oldEnemyFactories.size(); i++) {
-			if (oldEnemyFactories.get(i).health() > 0) {
-				enemyFactories.add(oldEnemyFactories.get(i));
-			}
-		}
 	}
 	public static int scoreRangers(Robot r, Tile square, Tile target) {
 		int score = 0;
@@ -54,7 +46,6 @@ public class Micro {
 			{
 				score -= 5/square.distanceSquaredTo(a.tile());
 			}
-			
 		}
 		score += nearbyHealers.length * 3;
 		
@@ -124,16 +115,11 @@ public class Micro {
 				target = Rocket.assignments.get(r).tile();
 					
 			}
-			else if (helpRequests.size() + enemyFactories.size() > 0) {
+			else if (helpRequests.size() > 0) {
 				// TODO this is probably slow
-				for (Robot help: helpRequests) {
-					if (target == null || Pathfinding.pathLength(r.tile(), help.tile()) < Pathfinding.pathLength(r.tile(), target)) {
-						target = help.tile();
-					}
-				}
-				for (Robot fact: enemyFactories) {
-					if (target == null || Pathfinding.pathLength(r.tile(), fact.tile()) < Pathfinding.pathLength(r.tile(), target)) {
-						target = fact.tile();
+				for (Tile help: helpRequests) {
+					if (target == null || Pathfinding.pathLength(r.tile(), help) < Pathfinding.pathLength(r.tile(), target)) {
+						target = help;
 					}
 				}
 			} else {
@@ -210,7 +196,7 @@ public class Micro {
 						}
 					}
 					if (best != null && Game.canAttack(r, best)) {
-						newHelpRequests.add(best);
+						newHelpRequests.add(best.tile());
 						Game.attack(r, best);
 					}
 				} else {
@@ -227,7 +213,7 @@ public class Micro {
 							}
 						}
 						if (best != null && Game.canAttack(r, best)) {
-							newHelpRequests.add(best);
+							newHelpRequests.add(best.tile());
 							Game.attack(r, best);
 						}
 					} else {
@@ -244,7 +230,7 @@ public class Micro {
 								}
 							}
 							if (best != null && Game.canAttack(r, best)) {
-								newHelpRequests.add(best);
+								newHelpRequests.add(best.tile());
 								Game.attack(r, best);
 							}
 						}
