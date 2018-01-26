@@ -134,7 +134,6 @@ public class Worker
 				Constants.FACTORYBUILDRANGE = 4;
 				Constants.FACTORYREPLICATEPRESSURE = 150;
 				Constants.WORKERREPLICATEDEPOSITWEIGHT = 1;
-				Constants.WORKERLIMITWEIGHT = 0;
 			}
 			
 			buildDir = Utilities.findNearestOccupiableDir(bestWorker.worker, buildDir);
@@ -217,9 +216,11 @@ public class Worker
 		int distance = -1;
 		if (worker.abilityHeat() >= 10)
 		{
+			System.out.printf("(%d,%d) has heat %d\n", worker.tile().getX(), worker.tile().getY(), worker.abilityHeat());
 			return -1;
 		}
 		score += (Constants.WORKERLIMIT - GameInfoCache.allyWorkers.size()) * Constants.WORKERLIMITWEIGHT;
+		System.out.printf("limit is %d, weight is %d\n", Constants.WORKERLIMIT, Constants.WORKERLIMITWEIGHT);
 		if (Game.round() >= 750 || Game.getTeamArray(Planet.Earth).get(0) == 1)
 		{
 			score += Constants.INFINITY;
@@ -232,7 +233,9 @@ public class Worker
 				score += Constants.FACTORYREPLICATEPRESSURE / distance;
 			}
 		}
+		System.out.printf("score before deposits = %d, ", score);
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
+		System.out.printf("score before workers = %d, ", score);
 		for (Robot otherWorker:GameInfoCache.allyWorkers)
 		{
 			if (otherWorker == worker || !otherWorker.location().isOnMap())
@@ -242,10 +245,11 @@ public class Worker
 			distance = Pathfinding.pathLength(otherWorker.tile(), worker.tile());
 			if (distance != -1)
 			{
-				score -= 20/distance;
+				score -= 80/distance;
 			}
 			
 		}
+		System.out.printf("score at end = %d (%d,%d)\n", score, worker.tile().getX(), worker.tile().getY());
 		return score;
 		
 	}
@@ -375,11 +379,15 @@ public class Worker
 		{
 			return false;
 		}
-		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 100 && GameInfoCache.currentBlueprints.size() <= 2)
+		if (GameInfoCache.currentBlueprints.size() > 1)
+		{
+			return false;
+		}
+		if (GameInfoCache.allyFactories.size() < Constants.FACTORYGOAL && Game.karbonite() >= 200)
 		{
 			return true;
 		}
-		else if (Game.karbonite() >=(160) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		else if (Game.karbonite() >=(320) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
 		{
 			return true;
 		}
@@ -527,7 +535,7 @@ public class Worker
 			return true;
 		}
 		
-		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYGOAL && Game.karbonite() > 75 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
+		if (GameInfoCache.allyFactories.size() >= Constants.FACTORYGOAL && Game.karbonite() > 150 && Game.researchInfo().getLevel(UnitType.Rocket) > 0)
 		{
 			return true;
 		}

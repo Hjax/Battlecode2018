@@ -40,26 +40,26 @@ public class Constants {
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 25;
-	public static final int WORKERLIMIT = 10;
-	public static int WORKERLIMITWEIGHT = 10;
-	public static int WORKERREPLICATEDEPOSITWEIGHT = 2;
+	public static final int WORKERLIMIT = 4;
+	public static int WORKERLIMITWEIGHT = 5;
+	public static int WORKERREPLICATEDEPOSITWEIGHT = 20;
 	public static final int FACTORYLIMIT = 9;
-	public static final int FACTORYGOAL = 3;
+	public static final int FACTORYGOAL = 4;
 	public static int FACTORYBUILDRANGE = 3;
-	public static int FACTORYREPLICATEPRESSURE = 50;
+	public static int FACTORYREPLICATEPRESSURE = 120;
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int COMBATLIMIT = 50;
 	public static final int FACTORYHALTROUND = 700; 
 	// if we are below this amount of time, skip turn
 	public static final int CLOCKBUFFER = 200;
-	public static final int MARSWORKERGOAL = 10;
+	public static final int MARSWORKERGOAL = 3;
 	
-	public static final int REPLICATECOST = 15;
-	public static final int WORKERCOST = 25;
-	public static final int RANGERCOST = 20;
-	public static final int KNIGHTCOST = 20;
-	public static final int MAGECOST = 20;
-	public static final int HEALERCOST = 20;
+	public static final int REPLICATECOST = 60;
+	public static final int WORKERCOST = 50;
+	public static final int RANGERCOST = 40;
+	public static final int KNIGHTCOST = 40;
+	public static final int MAGECOST = 40;
+	public static final int HEALERCOST = 40;
 	public static final int RANGERRANGE = 50;
 	public static final int HEALERRANGE = 30;
 	
