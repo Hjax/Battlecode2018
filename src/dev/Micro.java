@@ -148,12 +148,19 @@ public class Micro {
 
 			long start = System.nanoTime();
 			if (Game.isMoveReady(r)) {
-				Direction best = null;
-				int bestScore = 0;
-				for (Direction d: Game.directions) {
-					if ((Game.isPassableTerrainAt(r.tile().add(d)) && Game.canMove(r, d)) || d == Direction.Center) {
-						int current = -1 * Constants.INFINITY;
-						switch (r.unitType()) {
+				Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE + 2), 2), Game.enemy());
+				if (enemies.length == 0) {
+					Direction move = Utilities.findNearestOccupiableDir(r.tile(), Pathfinding.path(r.tile(), target));
+					if (Game.canMove(r, move)) {
+						Game.moveRobot(r, move);
+					}
+				} else {
+					Direction best = null;
+					int bestScore = 0;
+					for (Direction d: Game.directions) {
+						if ((Game.isPassableTerrainAt(r.tile().add(d)) && Game.canMove(r, d)) || d == Direction.Center) {
+							int current = -1 * Constants.INFINITY;
+							switch (r.unitType()) {
 							case Ranger:
 								current = scoreRangers(r, r.tile().add(d), target);
 								break;
@@ -164,16 +171,17 @@ public class Micro {
 								current = scoreKnights(r, r.tile().add(d), target);
 							default:
 								break;
-						}
-						
-						if (best == null || current > bestScore) {
-							bestScore = current;
-							best = d;
+							}
+
+							if (best == null || current > bestScore) {
+								bestScore = current;
+								best = d;
+							}
 						}
 					}
-				}
-				if (best != null && Game.canMove(r, best)) {
-					Game.moveRobot(r, best);
+					if (best != null && Game.canMove(r, best)) {
+						Game.moveRobot(r, best);
+					}
 				}
 			}
 			time += System.nanoTime() - start;
