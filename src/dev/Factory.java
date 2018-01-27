@@ -8,20 +8,20 @@ public class Factory {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
 				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
-					if (GlobalStrategy.rush)
-					{
-						if (Game.canProduceRobot(r, UnitType.Knight)) {
-							Game.produceRobot(r, UnitType.Knight);
-						} 
-					}
-					else if (GameInfoCache.allyWorkers.size() == 0) {
+					if (GameInfoCache.allyWorkers.size() == 0) {
 						if (Game.canProduceRobot(r, UnitType.Worker)) {
 							Game.produceRobot(r, UnitType.Worker);
 						} 
 					}
-					else if (GameInfoCache.allyRangers.size() > (3 * (GameInfoCache.allyHealers.size() + 1))) {
+					else if (GameInfoCache.allyRangers.size() + GameInfoCache.allyKnights.size() > (3 * (GameInfoCache.allyHealers.size() + 1))) {
 						if (Game.canProduceRobot(r, UnitType.Healer)) {
 							Game.produceRobot(r, UnitType.Healer);
+						} 
+					} 
+					else if (GlobalStrategy.rush)
+					{
+						if (Game.canProduceRobot(r, UnitType.Knight)) {
+							Game.produceRobot(r, UnitType.Knight);
 						} 
 					} else if (Game.canProduceRobot(r, UnitType.Ranger)) {
 						Game.produceRobot(r, UnitType.Ranger);

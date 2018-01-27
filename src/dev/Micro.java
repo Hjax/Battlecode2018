@@ -237,6 +237,61 @@ public class Micro {
 					}
 				}
 			}
+			if (r.unitType() == UnitType.Knight && Game.researchInfo().getLevel(UnitType.Knight) >= 3 && Game.isJavelinReady(r)) {
+				Robot[] fact = Game.senseNearbyUnits(r.tile(), r.abilityRange(), UnitType.Factory, Game.enemy());
+				if (fact.length > 0) {
+					Robot best = null;
+					for (Robot enemy: fact) {
+						if (enemy.location().isOnMap() && Game.canJavelin(r, enemy)) {
+							if (enemy.health() > 0) {
+								if (best == null || (enemy.health() <  (best.health()))) {
+									best = enemy;
+								}
+							}
+						}
+					}
+					if (best != null && Game.canJavelin(r, best)) {
+						newHelpRequests.add(best.tile());
+						Game.javelin(r, best);
+					}
+				} else {
+					Robot[] combat = Game.senseCombatUnits(r.tile(), r.abilityRange(), Game.enemy());
+					if (combat.length > 0) {
+						Robot best = null;
+						for (Robot enemy: combat) {
+							if (enemy.location().isOnMap() && Game.canJavelin(r, enemy)) {
+								if (enemy.health() > 0) {
+									if (best == null || enemy.health() < best.health()) {
+										best = enemy;
+									}
+								}
+							}
+						}
+						if (best != null && Game.canJavelin(r, best)) {
+							newHelpRequests.add(best.tile());
+							Game.javelin(r, best);
+						}
+					} else {
+						Robot[] civilian = Game.senseNearbyUnits(r.tile(), r.abilityRange(), Game.enemy());
+						if (civilian.length > 0) {
+							Robot best = null;
+							for (Robot enemy: civilian) {
+								if (enemy.location().isOnMap() && Game.canJavelin(r, enemy)) {
+									if (enemy.health() > 0) {
+										if (best == null || (enemy.health() <  best.health())) {
+											best = enemy;
+										}
+									}
+								}
+							}
+							if (best != null && Game.canJavelin(r, best)) {
+								newHelpRequests.add(best.tile());
+								Game.javelin(r, best);
+							}
+						}
+					}
+				}
+			}
 		}
 		System.out.println("Finding target " + time / 1000000.0);
 	}

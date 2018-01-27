@@ -179,6 +179,22 @@ public class Worker
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
 				initializeBuildGrid();
+				System.out.printf("\t\t\tRESETTING RESEARCH\n");
+				Game.resetResearch();
+				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX() + bestWorker.worker.getY() * Game.WIDTH).size() > 15)
+				{
+					Game.queueResearch(UnitType.Worker);
+				}
+				Game.queueResearch(UnitType.Knight);
+				Game.queueResearch(UnitType.Knight);
+				Game.queueResearch(UnitType.Knight);
+				Game.queueResearch(UnitType.Healer);
+				Game.queueResearch(UnitType.Healer);
+				Game.queueResearch(UnitType.Healer);
+				Game.queueResearch(UnitType.Rocket);
+				Game.queueResearch(UnitType.Rocket);
+				Game.queueResearch(UnitType.Rocket);
+				
 				return;
 			}
 			
@@ -473,12 +489,21 @@ public class Worker
 			if (placement == null)
 			{
 				placement = Constants.startingEnemiesLocation[0];
+				if (Game.hasUnitAtLocation(placement))
+				{
+					Robot thing = Game.senseUnitAtLocation(placement);
+					if (thing.unitType() == UnitType.Factory && thing.team() == Game.TEAM)
+					{
+						placement = factoryGrid.peek();
+					}
+				}
 			}
 			else
 			{
-				placement = Utilities.offsetInDirection(placement, Pathfinding.path(placement, closestWorker.tile()), 1);
-				placement = Utilities.offsetInDirection(placement, Pathfinding.path(placement, closestWorker.tile()), 1);
+				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
+				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
 			}
+
 		}
 		
 		

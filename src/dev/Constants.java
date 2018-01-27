@@ -43,7 +43,7 @@ public class Constants {
 	}
 
 	public static final int INFINITY = 99999999;
-	public static final int RUSHTHRESHOLD = 25;
+	public static final int RUSHTHRESHOLD = 30;
 	public static int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 2;
 	public static int WORKERREPLICATEDEPOSITWEIGHT = 10;
