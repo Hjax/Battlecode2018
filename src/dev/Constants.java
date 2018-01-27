@@ -38,19 +38,19 @@ public class Constants {
 		else
 		{
 			startingAlliesLocation = new Tile[0];
-			startingEnemiesLocation = new Tile[1];
+			startingEnemiesLocation = new Tile[0];
 		}
 	}
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 25;
 	public static int WORKERLIMIT = 4;
-	public static int WORKERLIMITWEIGHT = 5;
-	public static int WORKERREPLICATEDEPOSITWEIGHT = 20;
+	public static int WORKERLIMITWEIGHT = 2;
+	public static int WORKERREPLICATEDEPOSITWEIGHT = 10;
 	public static final int FACTORYLIMIT = 9;
 	public static final int FACTORYGOAL = 4;
 	public static int FACTORYBUILDRANGE = 3;
-	public static int FACTORYREPLICATEPRESSURE = 120;
+	public static int FACTORYREPLICATEPRESSURE = 300;
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int COMBATLIMIT = 50;
 	public static final int FACTORYHALTROUND = 700; 
