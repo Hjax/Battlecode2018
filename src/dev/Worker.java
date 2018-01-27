@@ -166,7 +166,7 @@ public class Worker
 			{
 				buildDir = bestWorker.worker.directionTo(nearestEnemy);
 			}
-			if (bestWorker.score > Constants.RUSHTHRESHOLD)
+			if (bestWorker.score > Constants.RUSHTHRESHOLD || bestWorker.score == -1)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
