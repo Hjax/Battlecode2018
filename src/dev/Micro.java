@@ -70,26 +70,27 @@ public class Micro {
 	}
 	
 	public static int scoreKnights(Robot r, Tile square, Tile target) {
+		System.out.printf("\tSCORING KNIGHT\n");
 		int score = 0;
 		Robot[] enemies = Game.senseNearbyUnits(square, 2, UnitType.Factory, Game.enemy());
 		if (enemies.length > 0)
 		{
-			score += 1000;
+			score += 10000;
 		}
 		enemies = Game.senseCombatUnits(square, Constants.RANGERRANGE, Game.enemy());
-		if (enemies.length > 0) {
-			for (Robot enemy: enemies) {
-				score += 30/enemy.tile().distanceSquaredTo(square);
-			}
+		for (Robot enemy: enemies) {
+			score += 1000/enemy.tile().distanceSquaredTo(square);
 		}
 		
 		enemies = Game.senseNearbyUnits(square, Constants.RANGERRANGE, UnitType.Worker, Game.enemy());
-		if (enemies.length > 0) {
-			for (Robot enemy: enemies) {
-				score += 2/enemy.tile().distanceSquaredTo(square);
-			}
+		System.out.printf("there are %d enemy workers\n", enemies.length);
+		for (Robot enemy: enemies) {
+			score += 100/enemy.tile().distanceSquaredTo(square);
 		}
-		
+		enemies = Game.senseNearbyUnits(square, Constants.RANGERRANGE, UnitType.Rocket, Game.enemy());
+		for (Robot enemy: enemies) {
+			score += 100/enemy.tile().distanceSquaredTo(square);
+		}
 
 		if (target != null) {
 			score -= Pathfinding.pathLength(square,  target);
@@ -148,7 +149,7 @@ public class Micro {
 
 			long start = System.nanoTime();
 			if (Game.isMoveReady(r)) {
-				Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE + 2), 2), Game.enemy());
+				Robot[] enemies = Game.senseNearbyUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE + 2), 2), Game.enemy());
 				if (enemies.length == 0) {
 					Direction move = Utilities.findNearestOccupiableDir(r.tile(), Pathfinding.path(r.tile(), target));
 					if (Game.canMove(r, move)) {

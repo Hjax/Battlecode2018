@@ -490,11 +490,7 @@ public class Worker
 				placement = Constants.startingEnemiesLocation[0];
 				if (Game.hasUnitAtLocation(placement))
 				{
-					Robot thing = Game.senseUnitAtLocation(placement);
-					if (thing.unitType() == UnitType.Factory && thing.team() == Game.TEAM)
-					{
-						placement = factoryGrid.peek();
-					}
+					placement = factoryGrid.peek();
 				}
 			}
 			else
@@ -816,7 +812,6 @@ public class Worker
 		}
 		while (idleWorkers.size() > 0)
 		{
-			System.out.printf("we have %d idle workers\n", idleWorkers.size());
 			
 			if (shouldBuildRocket())
 			{
