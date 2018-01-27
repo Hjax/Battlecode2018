@@ -179,14 +179,11 @@ public class Worker
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
 				initializeBuildGrid();
-				System.out.printf("\t\t\tRESETTING RESEARCH\n");
 				Game.resetResearch();
 				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX()/Constants.QUADRANTSIZE + bestWorker.worker.getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size() > 15)
 				{
-					System.out.printf("queueing worker\n");
 					Game.queueResearch(UnitType.Worker);
 				}
-				System.out.printf("queueing rest\n");
 				Game.queueResearch(UnitType.Knight);
 				Game.queueResearch(UnitType.Knight);
 				Game.queueResearch(UnitType.Knight);
