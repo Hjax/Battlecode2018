@@ -1,4 +1,4 @@
-package prototype;
+package workerRush;
 
 import java.util.*;
 

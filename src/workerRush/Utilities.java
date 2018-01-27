@@ -1,4 +1,4 @@
-package prototype;
+package workerRush;
 
 import bc.*;
 
@@ -92,6 +92,34 @@ public class Utilities
 			return left;
 		}
 		return Direction.Center;
+	}
+	
+	public static boolean isSwarmed(Tile target)
+	{
+		for (Direction dir: Game.moveDirections)
+		{
+			Tile test = offsetInDirection(target, dir, 1);
+			if (Game.isPassableTerrainAt(test))
+			{
+				if (!Game.canSenseLocation(test))
+				{
+					System.out.printf("can't sense around (%d,%d)\n", target.getX(), target.getY());
+					return false;
+				}
+				if (Game.isPassableTerrainAt(test))
+				{
+					if (!(Game.hasUnitAtLocation(test) && Game.senseUnitAtLocation(test).team() == Game.TEAM))
+					{
+						System.out.printf("can occupy around (%d,%d)\n", target.getX(), target.getY());
+						return false;
+					}
+					
+				}
+			}
+
+		}
+		System.out.printf("(%d,%d) is swarmed\n", target.getX(), target.getY());
+		return true;
 	}
 	
 	public static Direction findNearestOccupiableDir(Tile start, Direction dir)

@@ -1,4 +1,4 @@
-package prototype;
+package workerRush;
 
 import bc.UnitType;
 import bc.*;
@@ -7,10 +7,8 @@ public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
-				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyRangers.size() < Constants.RANGERLIMIT) {
-					
-					if (GameInfoCache.allyWorkers.size() == 0)
-					{
+				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
+					if (GameInfoCache.allyWorkers.size() == 0) {
 						if (Game.canProduceRobot(r, UnitType.Worker)) {
 							Game.produceRobot(r, UnitType.Worker);
 						} 
@@ -23,7 +21,6 @@ public class Factory {
 						Game.produceRobot(r, UnitType.Ranger);
 					}
 				}
-
 			}
 			if (r.structureGarrison().length > 0) {
 				for (Direction d: Game.moveDirections) {

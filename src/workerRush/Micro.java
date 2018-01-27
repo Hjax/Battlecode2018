@@ -1,55 +1,60 @@
-package prototype;
+package workerRush;
 
 import java.util.*;
 import bc.*;
 
 public class Micro {
-
+	// TODO shoot before moving when it makes sense
 	private static Map<Robot, Tile> randomTargets = new HashMap<>();
 	private static ArrayList<Tile> targets = new ArrayList<>();
-	private static int[] damage = new int[5000];
 	static {
 		for (Tile loc:Constants.startingEnemiesLocation) {
 			targets.add(loc);
 		}
 	}
-	private static ArrayList<Robot> enemyFactories = new ArrayList<>();
-	private static ArrayList<Robot> helpRequests = new ArrayList<>();
-	private static ArrayList<Robot> newHelpRequests = new ArrayList<>();
+	private static ArrayList<Tile> helpRequests = new ArrayList<>();
+	private static ArrayList<Tile> newHelpRequests = new ArrayList<>();
 	
-	private static void startTurn() {
+	public static void startTurn() {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
-		ArrayList<Robot> oldEnemyFactories = enemyFactories;
-		enemyFactories = new ArrayList<>();
-		for (int i = 0; i < oldEnemyFactories.size(); i++) {
-			if (oldEnemyFactories.get(i).health() > 0) {
-				enemyFactories.add(oldEnemyFactories.get(i));
-			}
-		}
-		damage = new int[5000];
 	}
 	public static int scoreRangers(Robot r, Tile square, Tile target) {
 		int score = 0;
 		// todo account for unit types other than ranger
 		// todo check if enemy threats is even helping
-		Robot[] enemies = Game.senseCombatUnits(square, r.attackRange(), Game.enemy());
-		Robot[] tooClose = Game.senseCombatUnits(square, 10, Game.enemy());
-		if (enemies.length * r.damage() > r.health()) {
-			score -= 100;
+
+		Robot[] enemies = Game.senseCombatUnits(square, (long) Math.pow(Math.sqrt(r.attackRange()) + 1, 2), Game.enemy());
+		Robot[] nearbyRangers = Game.senseNearbyUnits(square, 4, UnitType.Ranger, Game.team());
+		Robot[] nearbyHealers = Game.senseNearbyUnits(square, Constants.HEALERRANGE, UnitType.Healer, Game.team());
+		
+		if (enemies.length * r.damage() >= r.health()) {
+			score -= 200;
 		}
-		if (enemies.length == 1) {
-			score += 40;
-			if (enemies[0].health() < r.health()) {
-				score += 60;
+		
+		for (Robot e: enemies) {
+			score -= 250/square.distanceSquaredTo(e.tile());
+			if (square.distanceSquaredTo(e.tile()) >= (r.attackRange() - 12)) {
+				score += 20;
 			}
 		}
-		score -= enemies.length * 2;
-		score -= tooClose.length;
+		
+		for (Robot a:nearbyRangers)
+		{
+			if (a != r)
+			{
+				score -= 5/square.distanceSquaredTo(a.tile());
+			}
+		}
+		score += nearbyHealers.length * 3;
+		
+		if (r.attackHeat() >= 10) {
+			score -= 5 * enemies.length;
+		}
 
 		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target) * 10;
+			score -= Pathfinding.pathLength(square,  target);
 		}
 		return score;
 	}
@@ -65,20 +70,36 @@ public class Micro {
 			enemy_score = enemy_score / enemies.length;
 			score -= enemy_score;
 		}
-		Robot[] allies = Game.senseCombatUnits(square, r.attackRange(), Game.team());
+		Robot[] allyRangers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Ranger, Game.team());
+		Robot[] allyHealers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Healer, Game.team());
+		for (Robot a:allyRangers)
+		{
+			if (a != r)
+			{
+				score += 2/square.distanceSquaredTo(a.tile());
+			}
+			
+		}
+		
 		if (enemies.length * r.damage() > r.health()) {
 			score -= 100;
 		}
-		score += allies.length;
+		for (Robot a:allyHealers)
+		{
+			if (a != r)
+			{
+				score -= 2/square.distanceSquaredTo(a.tile());
+			}
+			
+		};
 
 		if (target != null) {
-			score -= Pathfinding.pathLength(square,  target) * 10;
+			score -= Pathfinding.pathLength(square,  target);
 		}
 		return score;
 	}
 		
 	public static void run() {
-		startTurn();
 		long time = 0;
 		for (Robot r: GameInfoCache.allyCombat) {
 			if (!r.location().isOnMap() || r.location().isInGarrison() || r.location().isInSpace()) {
@@ -94,21 +115,16 @@ public class Micro {
 				target = Rocket.assignments.get(r).tile();
 					
 			}
-			else if (helpRequests.size() + enemyFactories.size() > 0) {
+			else if (helpRequests.size() > 0) {
 				// TODO this is probably slow
-				for (Robot help: helpRequests) {
-					if (target == null || Pathfinding.pathLength(r.tile(), help.tile()) < Pathfinding.pathLength(r.tile(), target)) {
-						target = help.tile();
-					}
-				}
-				for (Robot fact: enemyFactories) {
-					if (target == null || Pathfinding.pathLength(r.tile(), fact.tile()) < Pathfinding.pathLength(r.tile(), target)) {
-						target = fact.tile();
+				for (Tile help: helpRequests) {
+					if (target == null || Pathfinding.pathLength(r.tile(), help) < Pathfinding.pathLength(r.tile(), target)) {
+						target = help;
 					}
 				}
 			} else {
 				if (targets.size() == 0) {
-					if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 0) {
+					if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2) {
 						target = randomTargets.get(r);
 					} else {
 						randomTargets.put(r, Game.getRandomLocation());
@@ -157,50 +173,47 @@ public class Micro {
 				Robot[] healee = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.TEAM);
 				for (Robot ally: healee) {
 					if (ally.health() < ally.maxHealth()) {
-						if (best == null || (ally.health() - damage[ally.predictableId()] < best.health())) {
+						if (best == null || (ally.health() < best.health())) {
 							best = ally;
 						}
 					}
 				}
 				if (best != null && Game.canHeal(r, best)) {
 					Game.heal(r, best);
-					damage[best.predictableId()] += r.damage();
 				}
 			}
 			else if (Game.isAttackReady(r)) {
-				Robot[] combat = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy());
-				if (combat.length > 0) {
+				Robot[] fact = Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Factory, Game.enemy());
+				if (fact.length > 0) {
 					Robot best = null;
-					for (Robot enemy: combat) {
+					for (Robot enemy: fact) {
 						if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-							if (enemy.health() - damage[enemy.predictableId()] > 0) {
-								if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+							if (enemy.health() > 0) {
+								if (best == null || (enemy.health() <  (best.health()))) {
 									best = enemy;
 								}
 							}
 						}
 					}
 					if (best != null && Game.canAttack(r, best)) {
-						newHelpRequests.add(best);
-						damage[best.predictableId()] += r.damage();
+						newHelpRequests.add(best.tile());
 						Game.attack(r, best);
 					}
 				} else {
-					Robot[] fact = Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Factory, Game.enemy());
-					if (fact.length > 0) {
+					Robot[] combat = Game.senseCombatUnits(r.tile(), r.attackRange(), Game.enemy());
+					if (combat.length > 0) {
 						Robot best = null;
-						for (Robot enemy: fact) {
+						for (Robot enemy: combat) {
 							if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-								if (enemy.health() - damage[enemy.predictableId()] > 0) {
-									if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+								if (enemy.health() > 0) {
+									if (best == null || enemy.health() < best.health()) {
 										best = enemy;
 									}
 								}
 							}
 						}
 						if (best != null && Game.canAttack(r, best)) {
-							newHelpRequests.add(best);
-							damage[best.predictableId()] += r.damage();
+							newHelpRequests.add(best.tile());
 							Game.attack(r, best);
 						}
 					} else {
@@ -209,16 +222,15 @@ public class Micro {
 							Robot best = null;
 							for (Robot enemy: civilian) {
 								if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
-									if (enemy.health() - damage[enemy.predictableId()] > 0) {
-										if (best == null || ((enemy.health() - damage[enemy.predictableId()]) <  (best.health() - damage[best.predictableId()]))) {
+									if (enemy.health() > 0) {
+										if (best == null || (enemy.health() <  best.health())) {
 											best = enemy;
 										}
 									}
 								}
 							}
 							if (best != null && Game.canAttack(r, best)) {
-								newHelpRequests.add(best);
-								damage[best.predictableId()] += r.damage();
+								newHelpRequests.add(best.tile());
 								Game.attack(r, best);
 							}
 						}

@@ -1,6 +1,4 @@
-package dev;
-
-import bc.Planet;
+package workerRush;
 
 public class Constants {
 	
@@ -10,41 +8,39 @@ public class Constants {
 
 	static
 	{
-		if (Game.PLANET == Planet.Earth)
+		int allyIndex = 0;
+		int enemyIndex = 0;
+		for (Tile worker:startingRobotLocation)
 		{
-			int allyIndex = 0;
-			int enemyIndex = 0;
-			startingAlliesLocation = new Tile[startingRobotLocation.length / 2];
-			startingEnemiesLocation = new Tile[startingRobotLocation.length / 2];
-			for (Tile worker:startingRobotLocation)
+			if (Game.hasUnitAtLocation(worker))
 			{
-				if (Game.hasUnitAtLocation(worker))
-				{
-					if (Game.senseUnitAtLocation(worker).team() == Game.TEAM)
-					{
-						startingAlliesLocation[allyIndex++] = worker;
-					}
-					else
-					{
-						startingEnemiesLocation[enemyIndex++] = worker;
-					}
-				}
-				else
-				{
-					startingEnemiesLocation[enemyIndex++] = worker;
-				}
+				allyIndex++;
+			}
+			else
+			{
+				enemyIndex++;
 			}
 		}
-		else
+		startingAlliesLocation = new Tile[allyIndex];
+		startingEnemiesLocation = new Tile[enemyIndex];
+		allyIndex = 0;
+		enemyIndex = 0;
+		for (Tile worker:startingRobotLocation)
 		{
-			startingAlliesLocation = new Tile[0];
-			startingEnemiesLocation = new Tile[1];
+			if (Game.hasUnitAtLocation(worker))
+			{
+				startingAlliesLocation[allyIndex++] = worker;
+			}
+			else
+			{
+				startingEnemiesLocation[enemyIndex++] = worker;
+			}
 		}
 	}
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 25;
-	public static int WORKERLIMIT = 4;
+	public static final int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 5;
 	public static int WORKERREPLICATEDEPOSITWEIGHT = 20;
 	public static final int FACTORYLIMIT = 9;

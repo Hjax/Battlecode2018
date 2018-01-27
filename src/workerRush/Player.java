@@ -1,4 +1,4 @@
-package dev;
+package workerRush;
 
 
 import bc.*;
@@ -48,6 +48,7 @@ public class Player
             	Worker.run();
             	Timing.end("Worker");
         	} catch (Exception e) {
+        		e.printStackTrace();
         	}
         	try {
             	Timing.start("Factory");
@@ -66,7 +67,6 @@ public class Player
                 Rocket.run();
                 Timing.end("Rocket");
         	} catch (Exception e) {
-        		System.out.println("An error has occured");
         	}
 
             start = System.nanoTime() - start;
