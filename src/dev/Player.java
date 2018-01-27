@@ -22,7 +22,7 @@ public class Player
     	}
         while (true) 
         {
-        	
+        	System.out.printf("\t\tremaining time is %d, longest %f, average %f\n", Game.gc.getTimeLeftMs(), longest / 1000000.0, (totalTime / Game.round()) / 1000000.0);
         	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) 
         	{
         		System.out.println("Low on time, ending turn");
@@ -48,7 +48,6 @@ public class Player
             	Worker.run();
             	Timing.end("Worker");
         	} catch (Exception e) {
-        		e.printStackTrace();
         	}
         	try {
             	Timing.start("Factory");
@@ -73,7 +72,6 @@ public class Player
             start = System.nanoTime() - start;
             if (start > longest) longest = start;
             totalTime += start;
-            System.out.printf("\t\tremaining time is %d, longest %f, average %f\n", Game.gc.getTimeLeftMs(), longest / 1000000.0, (totalTime / Game.round()) / 1000000.0);
             Game.nextTurn();
         }
     }
