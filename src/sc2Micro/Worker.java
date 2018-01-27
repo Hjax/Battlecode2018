@@ -166,7 +166,7 @@ public class Worker
 			{
 				buildDir = bestWorker.worker.directionTo(nearestEnemy);
 			}
-			if (bestWorker.score > Constants.RUSHTHRESHOLD)
+			if (bestWorker.score > Constants.RUSHTHRESHOLD || bestWorker.score == -1)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
 			}
@@ -179,9 +179,8 @@ public class Worker
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
 				initializeBuildGrid();
-				System.out.printf("\t\t\tRESETTING RESEARCH\n");
 				Game.resetResearch();
-				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX() + bestWorker.worker.getY() * Game.WIDTH).size() > 15)
+				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX()/Constants.QUADRANTSIZE + bestWorker.worker.getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size() > 15)
 				{
 					Game.queueResearch(UnitType.Worker);
 				}
@@ -491,11 +490,7 @@ public class Worker
 				placement = Constants.startingEnemiesLocation[0];
 				if (Game.hasUnitAtLocation(placement))
 				{
-					Robot thing = Game.senseUnitAtLocation(placement);
-					if (thing.unitType() == UnitType.Factory && thing.team() == Game.TEAM)
-					{
-						placement = factoryGrid.peek();
-					}
+					placement = factoryGrid.peek();
 				}
 			}
 			else
@@ -592,6 +587,10 @@ public class Worker
 			if (Game.canReplicate(closestWorker, bestDir))
 			{
 				Game.replicate(closestWorker, bestDir);
+				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
+				{
+					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
+				}
 			}
 		}
 	}
@@ -807,13 +806,12 @@ public class Worker
 			}
 			
 		}
+		if (Game.planet() == Planet.Earth)
+		{
+			buildOrder();
+		}
 		while (idleWorkers.size() > 0)
 		{
-			System.out.printf("we have %d idle workers\n", idleWorkers.size());
-			if (Game.planet() == Planet.Earth)
-			{
-				buildOrder();
-			}
 			
 			if (shouldBuildRocket())
 			{

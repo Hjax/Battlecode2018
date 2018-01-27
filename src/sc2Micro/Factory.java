@@ -3,6 +3,7 @@ package sc2Micro;
 import bc.UnitType;
 import bc.*;
 
+
 public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
@@ -32,6 +33,25 @@ public class Factory {
 				for (Direction d: Game.moveDirections) {
 					if (Game.canUnload(r, d)) {
 						Game.unload(r, d);
+					}
+				}
+			}
+			if (r.structureGarrison().length > 0)
+			{
+				for (Direction d: Game.moveDirections) {
+					Tile targetTile = Utilities.offsetInDirection(r.tile(), d, 1);
+					if (Game.hasUnitAtLocation(targetTile))
+					{
+						Robot blockingUnit = Game.senseUnitAtLocation(targetTile);
+						if (blockingUnit.unitType() == UnitType.Worker && blockingUnit.team() == Game.TEAM && Game.canLoad(r, blockingUnit))
+						{
+							Game.load(r, blockingUnit);
+							if (Game.canUnload(r, d)) {
+								Game.unload(r, d);
+								break;
+							}
+						}
+						
 					}
 				}
 			}

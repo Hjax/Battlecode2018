@@ -96,7 +96,7 @@ public class Micro {
 			}
 		}
  		if (best != null) {
- 			Direction m = Pathfinding.path(best.tile(), r.tile());
+ 			Direction m = Pathfinding.path(r.tile(), best.tile());
  			if (m != null && Game.canMove(r, m)) {
  				Game.moveRobot(r, m);
  			}
