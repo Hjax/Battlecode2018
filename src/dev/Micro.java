@@ -19,39 +19,26 @@ public class Micro {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
+		//System.out.println("Requests: " + helpRequests.size());
+		//System.out.println("Random Targets: " + randomTargets.size());
 	}
 	public static int scoreRangers(Robot r, Tile square, Tile target) {
 		int score = 0;
 		// todo account for unit types other than ranger
 		// todo check if enemy threats is even helping
-
-		Robot[] enemies = Game.senseCombatUnits(square, (long) Math.pow(Math.sqrt(r.attackRange()) + 1, 2), Game.enemy());
-		Robot[] nearbyRangers = Game.senseNearbyUnits(square, 4, UnitType.Ranger, Game.team());
-		Robot[] nearbyHealers = Game.senseNearbyUnits(square, Constants.HEALERRANGE, UnitType.Healer, Game.team());
-		
-		if (enemies.length * r.damage() >= r.health()) {
-			score -= 200;
+		Robot[] enemies = Game.senseCombatUnits(square, r.attackRange(), Game.enemy());
+		Robot[] tooClose = Game.senseCombatUnits(square, 10, Game.enemy());
+		if (enemies.length * r.damage() > r.health()) {
+			score -= 100;
 		}
-		
-		for (Robot e: enemies) {
-			score -= 250/square.distanceSquaredTo(e.tile());
-			if (square.distanceSquaredTo(e.tile()) >= (r.attackRange() - 12)) {
-				score += 20;
+		if (enemies.length == 1) {
+			score += 20;
+			if (enemies[0].health() <= r.health()) {
+				score += 30;
 			}
 		}
-		
-		for (Robot a:nearbyRangers)
-		{
-			if (a != r)
-			{
-				score -= 5/square.distanceSquaredTo(a.tile());
-			}
-		}
-		score += nearbyHealers.length * 3;
-		
-		if (r.attackHeat() >= 10) {
-			score -= 5 * enemies.length;
-		}
+		score -= enemies.length * 2;
+		score -= tooClose.length;
 
 		if (target != null) {
 			score -= Pathfinding.pathLength(square,  target);
@@ -70,28 +57,11 @@ public class Micro {
 			enemy_score = enemy_score / enemies.length;
 			score -= enemy_score;
 		}
-		Robot[] allyRangers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Ranger, Game.team());
-		Robot[] allyHealers = Game.senseNearbyUnits(square, r.attackRange(), UnitType.Healer, Game.team());
-		for (Robot a:allyRangers)
-		{
-			if (a != r)
-			{
-				score += 2/square.distanceSquaredTo(a.tile());
-			}
-			
-		}
-		
+		Robot[] allies = Game.senseCombatUnits(square, r.attackRange(), Game.team());
 		if (enemies.length * r.damage() > r.health()) {
 			score -= 100;
 		}
-		for (Robot a:allyHealers)
-		{
-			if (a != r)
-			{
-				score -= 2/square.distanceSquaredTo(a.tile());
-			}
-			
-		};
+		score += allies.length;
 
 		if (target != null) {
 			score -= Pathfinding.pathLength(square,  target);
