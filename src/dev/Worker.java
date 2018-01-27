@@ -181,10 +181,12 @@ public class Worker
 				initializeBuildGrid();
 				System.out.printf("\t\t\tRESETTING RESEARCH\n");
 				Game.resetResearch();
-				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX() + bestWorker.worker.getY() * Game.WIDTH).size() > 15)
+				if (GameInfoCache.karboniteDeposits.get(bestWorker.worker.getX()/Constants.QUADRANTSIZE + bestWorker.worker.getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size() > 15)
 				{
+					System.out.printf("queueing worker\n");
 					Game.queueResearch(UnitType.Worker);
 				}
+				System.out.printf("queueing rest\n");
 				Game.queueResearch(UnitType.Knight);
 				Game.queueResearch(UnitType.Knight);
 				Game.queueResearch(UnitType.Knight);
@@ -592,6 +594,10 @@ public class Worker
 			if (Game.canReplicate(closestWorker, bestDir))
 			{
 				Game.replicate(closestWorker, bestDir);
+				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
+				{
+					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
+				}
 			}
 		}
 	}
@@ -807,13 +813,13 @@ public class Worker
 			}
 			
 		}
+		if (Game.planet() == Planet.Earth)
+		{
+			buildOrder();
+		}
 		while (idleWorkers.size() > 0)
 		{
 			System.out.printf("we have %d idle workers\n", idleWorkers.size());
-			if (Game.planet() == Planet.Earth)
-			{
-				buildOrder();
-			}
 			
 			if (shouldBuildRocket())
 			{
