@@ -25,8 +25,8 @@ public class Rocket
 	private static class LandingTileComparator implements Comparator<Tile>
 	{
 		public int compare(Tile arg0, Tile arg1) {
-			int dist1 = Pathfinding.pathLength(arg0, landingGridCenter);
-			int dist2 = Pathfinding.pathLength(arg1, landingGridCenter);
+			long dist1 = arg0.distanceSquaredTo(landingGridCenter);
+			long dist2 = arg1.distanceSquaredTo(landingGridCenter);
 			if (dist1 < dist2)
 			{
 				return -1;
