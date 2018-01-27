@@ -272,7 +272,7 @@ public class GameInfoCache
 		for (Robot bot:Game.senseNearbyUnits(type))
 			{
 				allCache.add(bot);
-				if (( type == UnitType.Rocket || type == UnitType.Factory) && bot.structureIsBuilt() != 1)
+				if (bot.team() == Game.TEAM && ( type == UnitType.Rocket || type == UnitType.Factory) && bot.structureIsBuilt() != 1)
 				{
 					currentBlueprints.add(bot);
 				}

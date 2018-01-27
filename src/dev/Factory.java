@@ -8,7 +8,13 @@ public class Factory {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
 				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
-					if (GameInfoCache.allyWorkers.size() == 0) {
+					if (GlobalStrategy.rush)
+					{
+						if (Game.canProduceRobot(r, UnitType.Knight)) {
+							Game.produceRobot(r, UnitType.Knight);
+						} 
+					}
+					else if (GameInfoCache.allyWorkers.size() == 0) {
 						if (Game.canProduceRobot(r, UnitType.Worker)) {
 							Game.produceRobot(r, UnitType.Worker);
 						} 

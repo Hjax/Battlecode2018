@@ -68,6 +68,34 @@ public class Micro {
 		}
 		return score;
 	}
+	
+	public static int scoreKnights(Robot r, Tile square, Tile target) {
+		int score = 0;
+		Robot[] enemies = Game.senseNearbyUnits(square, 2, UnitType.Factory, Game.enemy());
+		if (enemies.length > 0)
+		{
+			score += 1000;
+		}
+		enemies = Game.senseCombatUnits(square, Constants.RANGERRANGE, Game.enemy());
+		if (enemies.length > 0) {
+			for (Robot enemy: enemies) {
+				score += 30/enemy.tile().distanceSquaredTo(square);
+			}
+		}
+		
+		enemies = Game.senseNearbyUnits(square, Constants.RANGERRANGE, UnitType.Worker, Game.enemy());
+		if (enemies.length > 0) {
+			for (Robot enemy: enemies) {
+				score += 2/enemy.tile().distanceSquaredTo(square);
+			}
+		}
+		
+
+		if (target != null) {
+			score -= Pathfinding.pathLength(square,  target);
+		}
+		return score;
+	}
 		
 	public static void run() {
 		long time = 0;
@@ -123,6 +151,8 @@ public class Micro {
 							case Healer:
 								current = scoreHealers(r, r.tile().add(d), target);
 								break;
+							case Knight:
+								current = scoreKnights(r, r.tile().add(d), target);
 							default:
 								break;
 						}
