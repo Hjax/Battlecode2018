@@ -1,9 +1,6 @@
 package dev;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 import bc.*;
 
@@ -16,7 +13,7 @@ public class GameInfoCache
 	
 	private static HashSet<Integer> queuedIndices = new HashSet<Integer>();
 	private static LinkedList<Integer> karboniteQueue = new LinkedList<Integer>();
-	
+	public static Set<Tile> factoryCache = new HashSet<>();
 	static
 	{
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
@@ -152,8 +149,26 @@ public class GameInfoCache
 	public static ArrayList<Robot> allFactories = new ArrayList<Robot>();
 	public static ArrayList<Robot> allRockets = new ArrayList<Robot>();
 	
+	public static void cleanUpFactories() {
+		// idk what senseUnitAtLocation returns, so im checking for null AND error
+		List<Tile> toRemove = new ArrayList<>();
+		for (Tile f: factoryCache) {
+			try {
+				if (Game.canSenseLocation(f) && Game.senseUnitAtLocation(f) == null) {
+					toRemove.add(f);
+				}
+			} catch (Exception e) {
+				toRemove.add(f);
+			}
+			
+		}
+		for (Tile f: toRemove) factoryCache.remove(f);
+	}
+	
 	public static void updateCache()
 	{
+		cleanUpFactories();
+		
 		allyWorkers = new ArrayList<Robot>();
 		allyKnights = new ArrayList<Robot>();
 		allyRangers = new ArrayList<Robot>();
@@ -275,6 +290,9 @@ public class GameInfoCache
 				if (bot.team() == Game.TEAM && ( type == UnitType.Rocket || type == UnitType.Factory) && bot.structureIsBuilt() != 1)
 				{
 					currentBlueprints.add(bot);
+				}
+				if (bot.team() == Game.enemy() && (type == UnitType.Factory)) {
+					factoryCache.add(bot.tile());
 				}
 				if (bot.team() == Game.team())
 				{

@@ -121,7 +121,7 @@ public class Micro {
 					}
 				}
 			} else {
-				if (targets.size() == 0) {
+				if (targets.size() == 0 && GameInfoCache.factoryCache.size() == 0) {
 					if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2) {
 						target = randomTargets.get(r);
 					} else {
@@ -129,7 +129,16 @@ public class Micro {
 						target = randomTargets.get(r);
 					}
 				} else {
-					if (Pathfinding.pathLength(targets.get(0), r.tile()) <= 2) {
+					if (GameInfoCache.factoryCache.size() > 0) {
+						Tile best = null;
+						for (Tile f: GameInfoCache.factoryCache) {
+							if (best == null || Pathfinding.pathLength(r.tile(), best) > Pathfinding.pathLength(r.tile(), f)) {
+								best = f;
+							}
+						}
+						target = best;
+					}
+					else if (Pathfinding.pathLength(targets.get(0), r.tile()) <= 2) {
 						targets.remove(0);
 					} else {
 						target = targets.get(0);
