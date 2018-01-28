@@ -457,6 +457,10 @@ public class Worker
 		{
 			return true;
 		}
+		if (Game.karbonite() > 2000)
+		{
+			return true;
+		}
 		if (GameInfoCache.currentBlueprints.size() > 1)
 		{
 			return false;
@@ -466,6 +470,10 @@ public class Worker
 			return true;
 		}
 		else if (Game.karbonite() >=(320) && GameInfoCache.allyFactories.size() < Constants.FACTORYLIMIT)
+		{
+			return true;
+		}
+		else if (Game.karbonite() >= 1000)
 		{
 			return true;
 		}
