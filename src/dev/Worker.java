@@ -9,7 +9,8 @@ import bc.*;
 
 public class Worker 
 {
-	private static HashSet<Robot> idleWorkers = new HashSet<Robot>();
+	private static HashSet<Robot> moveableWorkers = new HashSet<Robot>();
+	private static HashSet<Robot> actionableWorkers = new HashSet<Robot>();
 	public static PriorityQueue<Tile> factoryGrid;
 	private static Tile factoryGridCenter = Rocket.landingGridCenter;
 	private static Random rng = new Random(5468);
@@ -230,7 +231,8 @@ public class Worker
 					{
 						Robot disintegratedWorker = GameInfoCache.allyWorkers.get(0);
 						GameInfoCache.allyWorkers.remove(0);
-						idleWorkers.remove(disintegratedWorker);
+						actionableWorkers.remove(disintegratedWorker);
+						moveableWorkers.remove(disintegratedWorker);
 						Game.disintegrateUnit(disintegratedWorker);
 					}
 				}
@@ -367,7 +369,7 @@ public class Worker
 	private static void giveWorkersOrders()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
-		workerLabel: for (Robot worker:idleWorkers)
+		workerLabel: for (Robot worker:moveableWorkers)
 		{
 			Robot closestBlueprint = null;
 			long mostHealth = -1;
@@ -397,6 +399,7 @@ public class Worker
 					if (Game.canBuild(worker, closestBlueprint))
 					{
 						Game.build(worker, closestBlueprint);
+						actionableWorkers.remove(worker);
 					}
 					removeWorkers.add(worker);
 				}
@@ -405,7 +408,7 @@ public class Worker
 		}
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			moveableWorkers.remove(worker);
 		}
 	}
 	
@@ -416,14 +419,14 @@ public class Worker
 		{
 			return;
 		}
-		worker: for (Robot worker:idleWorkers)
+		worker: for (Robot worker:actionableWorkers)
 		{
 			Direction moveDir = Direction.Center;
 			moveDir = Pathfinding.karbonitePath(worker.tile());
 			if (Game.canMove(worker, moveDir))
 			{
 				Game.moveRobot(worker, moveDir);
-				removeWorkers.add(worker);
+				moveableWorkers.remove(worker);
 			}
 			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
 			if (GameInfoCache.karboniteDistance[index] <= 1)
@@ -439,7 +442,7 @@ public class Worker
 		}
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			actionableWorkers.remove(worker);
 		}
 	}
 	
@@ -504,7 +507,7 @@ public class Worker
 		{
 			score -= 100;
 		}
-		nearbyEnemies = Game.senseNearbyUnits(worker.tile(), Constants.RANGERRANGE + 15, UnitType.Factory, Game.ENEMY);
+		nearbyEnemies = Game.senseNearbyUnits(worker.tile(), Constants.RANGERRANGE + 50, UnitType.Factory, Game.ENEMY);
 		if (nearbyEnemies.length > 0)
 		{
 			score -= 50;
@@ -527,7 +530,7 @@ public class Worker
 		{   //place at the opponent's base and use closest worker to it
 			placement = Constants.startingEnemiesLocation[0];
 			
-			for (Robot worker:idleWorkers)
+			for (Robot worker:actionableWorkers)
 			{
 				currentDistance = Pathfinding.pathLength(worker.tile(), placement);
 				if (currentDistance < bestDistance)
@@ -572,7 +575,7 @@ public class Worker
 		else
 		{
 			PriorityQueue<WorkerScoreTuple> workerOrder = new PriorityQueue<WorkerScoreTuple>(GameInfoCache.allyWorkers.size()+1, new WorkerScoreTuple(0,null));
-			for (Robot worker:idleWorkers)
+			for (Robot worker:actionableWorkers)
 			{
 				if (worker.location().isOnMap())
 				{
@@ -622,6 +625,7 @@ public class Worker
 			if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 			{
 				Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+				actionableWorkers.remove(closestWorker);
 				
 				
 				if (structure == UnitType.Rocket)
@@ -646,6 +650,7 @@ public class Worker
 					if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 					{
 						Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+						actionableWorkers.remove(closestWorker);
 						if (structure == UnitType.Rocket)
 						{
 							factoryGrid.poll();
@@ -673,6 +678,7 @@ public class Worker
 						if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 						{
 							Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+							actionableWorkers.remove(closestWorker);
 							factoryGrid.poll();
 							if (structure == UnitType.Rocket)
 							{
@@ -689,7 +695,7 @@ public class Worker
 			}
 			
 		}
-		idleWorkers.remove(closestWorker);
+		moveableWorkers.remove(closestWorker);
 		
 		if (GlobalStrategy.rush && Game.karbonite() >= 100 && (Pathfinding.pathLength(closestWorker.tile(), placement) > 3 + Constants.RUSHDISTANCE / 2 || Game.karbonite() > 260))
 		{
@@ -709,7 +715,7 @@ public class Worker
 	private static void tryBuildFactory()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
-		worker: for (Robot worker:GameInfoCache.allyWorkers)
+		worker: for (Robot worker:actionableWorkers)
 		{
 			for (Robot thing: GameInfoCache.currentBlueprints)
 			{
@@ -723,7 +729,7 @@ public class Worker
 		}
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			actionableWorkers.remove(worker);
 		}
 	}
 	
@@ -763,7 +769,7 @@ public class Worker
 	private static void moveRandomly()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
-		for (Robot worker:idleWorkers)
+		for (Robot worker:moveableWorkers)
 		{
 			Direction randomDir = Utilities.findNearestOccupiableDir(worker.tile(), Direction.swigToEnum(rng.nextInt(8)));
 			if (Game.canMove(worker, randomDir))
@@ -774,14 +780,14 @@ public class Worker
 		}
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			moveableWorkers.remove(worker);
 		}
 	}
 	
 	private static void loadRocket()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
-		worker: for (Robot worker:idleWorkers)
+		worker: for (Robot worker:moveableWorkers)
 		{
 			for (Robot thing: Game.senseNearbyUnits(worker.tile(), 2, UnitType.Rocket))
 			{
@@ -795,13 +801,15 @@ public class Worker
 		}
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			moveableWorkers.remove(worker);
+			actionableWorkers.remove(worker);
 		}
 	}
 	
 	private static void tryHarvest()
 	{
-		for (Robot worker:GameInfoCache.allyWorkers)
+		HashSet<Robot> removeWorkers = new HashSet<>();
+		for (Robot worker:actionableWorkers)
 		{
 			int loc = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
 			for (int dir: directions)
@@ -812,10 +820,15 @@ public class Worker
 					if (Game.canHarvest(worker, intToDir(dir)))
 					{
 						Game.harvest(worker, intToDir(dir));
+						removeWorkers.add(worker);
 						break;
 					}
 				}
 			}
+		}
+		for (Robot worker: removeWorkers)
+		{
+			actionableWorkers.remove(worker);
 		}
 	}
 	
@@ -827,7 +840,7 @@ public class Worker
 		{
 			if (factory.health() < factory.maxHealth())
 			{
-				for (Robot worker:idleWorkers)
+				for (Robot worker:moveableWorkers)
 				{
 					if (Pathfinding.pathLength(worker.tile(), factory.tile()) <= Constants.FACTORYBUILDRANGE)
 					{
@@ -854,7 +867,8 @@ public class Worker
 		
 		for (Robot worker: removeWorkers)
 		{
-			idleWorkers.remove(worker);
+			actionableWorkers.remove(worker);
+			moveableWorkers.remove(worker);
 		}
 	}
 	
@@ -865,7 +879,7 @@ public class Worker
 		Robot closestWorker = null;
 		int targetIndex = GameInfoCache.nearestKarbonite[Constants.startingEnemiesLocation[0].getX() + Constants.startingEnemiesLocation[0].getY() * Game.WIDTH];
 		Tile target = Tile.getInstance(Game.PLANET, targetIndex % Game.WIDTH, targetIndex / Game.WIDTH);
-		for (Robot worker:idleWorkers)
+		for (Robot worker:moveableWorkers)
 		{
 			if (worker.abilityHeat() < 10)
 			{
@@ -886,7 +900,7 @@ public class Worker
 				if (Game.canMove(closestWorker, bestDir))
 				{
 					Game.moveRobot(closestWorker, bestDir);
-					idleWorkers.remove(closestWorker);
+					moveableWorkers.remove(closestWorker);
 				}
 				bestDir = Pathfinding.path(closestWorker.tile(), target);
 				if (Game.canReplicate(closestWorker, bestDir))
@@ -906,12 +920,17 @@ public class Worker
 	
 	public static void run() 
 	{
-		idleWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
+		moveableWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
+		actionableWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
 		for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			if (!worker.location().isInGarrison())
 			{
-				idleWorkers.add(worker);
+				actionableWorkers.add(worker);
+				if (worker.movementHeat() < 10)
+				{
+					moveableWorkers.add(worker);
+				}
 			}
 			
 		}
@@ -919,7 +938,7 @@ public class Worker
 		{
 			buildOrder();
 		}
-		while (idleWorkers.size() > 0)
+		while (actionableWorkers.size() > 0)
 		{
 			if (Game.round() <= Constants.AGGRESSIVEHARVESTTIMER && !GlobalStrategy.rush && GameInfoCache.karboniteLocations.size() > 30)
 			{
@@ -951,8 +970,10 @@ public class Worker
 			tryHarvest();
 			replicateWorkers();
 			moveRandomly();
-			idleWorkers = new HashSet<Robot>();
-			idleWorkers.addAll(replicatedWorkers);
+			actionableWorkers = new HashSet<Robot>();
+			moveableWorkers = new HashSet<Robot>();
+			actionableWorkers.addAll(replicatedWorkers);
+			moveableWorkers.addAll(replicatedWorkers);
 			replicatedWorkers = new HashSet<Robot>();
 			
 		}

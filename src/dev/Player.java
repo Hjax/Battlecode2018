@@ -8,6 +8,7 @@ public class Player
 {
 	public static long totalTime;
 	public static long longest = 0;
+	
     public static void main(String[] args) {
     	System.out.println("v1.0.2");
     	if (Game.planet() == Planet.Earth) {
