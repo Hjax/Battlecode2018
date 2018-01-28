@@ -505,92 +505,55 @@ public class Worker
 		int currentDistance;
 		Tile placement = null;
 		
-		
-		if (GlobalStrategy.rush && GameInfoCache.allyFactories.size() == 0)
-		{   //place at the opponent's base and use closest worker to it
-			placement = null;
-			for (Robot factory:GameInfoCache.enemyFactories)
-			{
+		if (structure == UnitType.Rocket)
+		{
+			
+		}
+		else
+		{
+			if (GlobalStrategy.rush && GameInfoCache.allyFactories.size() == 0)
+			{   //place at the opponent's base and use closest worker to it
+				placement = null;
+				for (Robot factory:GameInfoCache.enemyFactories)
+				{
+					for (Robot worker:idleWorkers)
+					{
+						currentDistance = Pathfinding.pathLength(worker.tile(), factory.tile());
+						if (currentDistance < bestDistance)
+						{
+							bestDistance = currentDistance;
+							closestWorker = worker;
+							placement = factory.tile();
+						}
+					}
+				}
+				if (placement == null)
+				{
+					placement = Constants.startingEnemiesLocation[0];
+					if (Game.hasUnitAtLocation(placement))
+					{
+						placement = factoryGrid.peek();
+					}
+				}
+				else
+				{
+					placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
+					placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
+				}
 				for (Robot worker:idleWorkers)
 				{
-					currentDistance = Pathfinding.pathLength(worker.tile(), factory.tile());
+					currentDistance = Pathfinding.pathLength(worker.tile(), placement);
 					if (currentDistance < bestDistance)
 					{
 						bestDistance = currentDistance;
 						closestWorker = worker;
-						placement = factory.tile();
 					}
 				}
-			}
-			if (placement == null)
-			{
-				placement = Constants.startingEnemiesLocation[0];
-				if (Game.hasUnitAtLocation(placement))
+				if (closestWorker == null)
 				{
-					placement = factoryGrid.peek();
+					return;
 				}
-			}
-			else
-			{
-				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
-				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
-			}
-			for (Robot worker:idleWorkers)
-			{
-				currentDistance = Pathfinding.pathLength(worker.tile(), placement);
-				if (currentDistance < bestDistance)
-				{
-					bestDistance = currentDistance;
-					closestWorker = worker;
-				}
-			}
-			if (closestWorker == null)
-			{
-				return;
-			}
-			if (Pathfinding.pathLength(closestWorker.tile(), placement) < 4)
-			{
-				Tile bestPlacement = null;
-				int bestScore = 0;
-				Tile test = null;
-				int testScore = 0;
-				for (Direction dir:Game.moveDirections)
-				{
-					test = Utilities.offsetInDirection(closestWorker.tile(), dir, 1);
-					if (Game.isOccupiable(test) == 0)
-					{
-						continue;
-					}
-					testScore = Utilities.passableSurroundings(test);
-					if (testScore > bestScore)
-					{
-						bestScore = testScore;
-						bestPlacement = test;
-					}
-				}
-				placement = bestPlacement;
-				bestDistance = 1;
-			}
-
-		}
-		else
-		{
-			PriorityQueue<WorkerScoreTuple> workerOrder = new PriorityQueue<WorkerScoreTuple>(GameInfoCache.allyWorkers.size()+1, new WorkerScoreTuple(0,null));
-			for (Robot worker:idleWorkers)
-			{
-				if (worker.location().isOnMap())
-				{
-					workerOrder.add(new WorkerScoreTuple(builderScore(worker), worker.tile()));
-				}
-			}
-			while (placement == null)
-			{
-				closestWorker = Game.senseUnitAtLocation(workerOrder.peek().worker);
-				if (closestWorker.movementHeat() < 10)
-				{
-					placement = workerOrder.peek().worker;
-				}
-				else
+				if (Pathfinding.pathLength(closestWorker.tile(), placement) < 4)
 				{
 					Tile bestPlacement = null;
 					int bestScore = 0;
@@ -599,7 +562,7 @@ public class Worker
 					for (Direction dir:Game.moveDirections)
 					{
 						test = Utilities.offsetInDirection(closestWorker.tile(), dir, 1);
-						if (Game.isOccupiable(test) == 0)
+						if (!Game.onMap(test, Game.PLANET) || Game.isOccupiable(test) == 0)
 						{
 							continue;
 						}
@@ -610,14 +573,59 @@ public class Worker
 							bestPlacement = test;
 						}
 					}
-					if (bestScore > 2)
+					placement = bestPlacement;
+					bestDistance = 1;
+				}
+
+			}
+			else
+			{
+				PriorityQueue<WorkerScoreTuple> workerOrder = new PriorityQueue<WorkerScoreTuple>(GameInfoCache.allyWorkers.size()+1, new WorkerScoreTuple(0,null));
+				for (Robot worker:idleWorkers)
+				{
+					if (worker.location().isOnMap())
 					{
-						placement = bestPlacement;
+						workerOrder.add(new WorkerScoreTuple(builderScore(worker), worker.tile()));
 					}
 				}
-				workerOrder.poll();
+				while (placement == null)
+				{
+					closestWorker = Game.senseUnitAtLocation(workerOrder.peek().worker);
+					if (closestWorker.movementHeat() < 10)
+					{
+						placement = workerOrder.peek().worker;
+					}
+					else
+					{
+						Tile bestPlacement = null;
+						int bestScore = 0;
+						Tile test = null;
+						int testScore = 0;
+						for (Direction dir:Game.moveDirections)
+						{
+							test = Utilities.offsetInDirection(closestWorker.tile(), dir, 1);
+							if (Game.isOccupiable(test) == 0)
+							{
+								continue;
+							}
+							testScore = Utilities.passableSurroundings(test);
+							if (testScore > bestScore)
+							{
+								bestScore = testScore;
+								bestPlacement = test;
+							}
+						}
+						if (bestScore > 2)
+						{
+							placement = bestPlacement;
+						}
+					}
+					workerOrder.poll();
+				}
 			}
 		}
+		
+		
 		
 		
 		
@@ -633,7 +641,11 @@ public class Worker
 					rockets++;
 				}
 			}
-			factoryGrid.poll();
+			if (structure == UnitType.Rocket)
+			{
+				factoryGrid.poll();
+			}
+			
 		}
 		else if (bestDistance == 0)
 		{
@@ -646,7 +658,10 @@ public class Worker
 					if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
 					{
 						Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
-						factoryGrid.poll();
+						if (structure == UnitType.Rocket)
+						{
+							factoryGrid.poll();
+						}
 						if (structure == UnitType.Rocket)
 						{
 							rockets++;

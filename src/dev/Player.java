@@ -48,6 +48,7 @@ public class Player
             	Worker.run();
             	Timing.end("Worker");
         	} catch (Exception e) {
+        		e.printStackTrace();
         	}
         	try {
             	Timing.start("Factory");
