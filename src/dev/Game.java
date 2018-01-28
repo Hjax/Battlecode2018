@@ -84,6 +84,7 @@ public class Game {
 		GameInfoCache.updateCache();
 		Rocket.startTurn();
 		Micro.startTurn();
+		GlobalStrategy.run();
 	}
 
 	public static VecMapLocation allLocationsWithin(Tile location, long radis_squared) {

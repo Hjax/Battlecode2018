@@ -13,9 +13,9 @@ public class Player
         	Game.queueResearch(UnitType.Worker);
         	Game.queueResearch(UnitType.Ranger);
         	Game.queueResearch(UnitType.Healer);    	
+        	Game.queueResearch(UnitType.Healer);
+        	Game.queueResearch(UnitType.Healer);
         	Game.queueResearch(UnitType.Rocket);
-        	Game.queueResearch(UnitType.Healer);
-        	Game.queueResearch(UnitType.Healer);
         	Game.queueResearch(UnitType.Rocket);
         	Game.queueResearch(UnitType.Ranger);
         	Game.queueResearch(UnitType.Rocket);
