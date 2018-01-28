@@ -1,9 +1,10 @@
 package dev;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -84,16 +85,20 @@ public class Rocket
 	public static void startTurn()
 	{
 		flyingWorkers = 0;
+		List<RocketInfo> toRemove = new ArrayList<>();
 		for (RocketInfo rocket: radar)
 		{
 			if (Game.round() >= rocket.landRound + 50) //50 turns for communication delay
 			{
-				radar.remove(rocket);
+				toRemove.add(rocket);
 			}
 			else
 			{
 				flyingWorkers += rocket.workerCount;
 			}
+		}
+		for (RocketInfo rocket: toRemove) {
+			radar.remove(rocket);
 		}
 	}
 	

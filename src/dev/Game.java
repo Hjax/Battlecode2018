@@ -81,6 +81,7 @@ public class Game {
     }
 	public static void startTurn() 
 	{
+		Timing.reset();
 		GameInfoCache.updateCache();
 		Rocket.startTurn();
 		Micro.startTurn();
