@@ -62,15 +62,15 @@ public class Micro {
 		}
  	}
 
- 	public static void target(Robot r, UnitType u) {
+ 	public static void target(Robot r) {
  		if (r.attackHeat() >= 10) return;
-		Robot[] targets = Game.senseNearbyUnits(r.tile(), r.attackRange(), u, Game.enemy());
+		Robot[] targets = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.enemy());
 		if (targets.length > 0) {
 			Robot best = null;
 			for (Robot enemy: targets) {
 				if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
 					if (enemy.health() > 0) {
-						if (best == null || enemy.health() < best.health()) {
+						if (best == null || (enemy.health() < best.health() && scoreRanger(enemy.unitType()) >= scoreRanger(best.unitType()))) {
 							best = enemy;
 						}
 					}
@@ -86,33 +86,55 @@ public class Micro {
 		}
  	}
  	
- 	public static void shoot(Robot r) {
- 		target(r, UnitType.Factory);
- 		target(r, UnitType.Rocket);
- 		target(r, UnitType.Mage);
- 		target(r, UnitType.Healer);
- 		target(r, UnitType.Ranger);
- 		target(r, UnitType.Knight);
- 		target(r, UnitType.Worker);
+ 	public static int scoreRanger(UnitType r) {
+ 		switch (r) {
+ 			case Factory:
+ 				return 10;
+ 			case Rocket:
+ 				return 9;
+ 			case Mage:
+ 				return 8;
+ 			case Healer:
+ 				return 7;
+ 			case Ranger:
+ 				return 6;
+ 			case Knight:
+ 				return 5;
+ 			case Worker:
+ 				return 4;
+ 			default:
+ 				return 3;
+ 		}
  	}
  	
- 	public static void knightMicro(Robot r) {
- 		knightTarget(r, UnitType.Factory);
- 		knightTarget(r, UnitType.Knight);
- 		knightTarget(r, UnitType.Ranger);
- 		knightTarget(r, UnitType.Mage);
- 		knightTarget(r, UnitType.Rocket);
- 		knightTarget(r, UnitType.Worker);
- 		knightTarget(r, UnitType.Healer);
+ 	public static int scoreKnight(UnitType r) {
+ 		switch (r) {
+ 			case Factory:
+ 				return 10;
+ 			case Knight:
+ 				return 9;
+ 			case Ranger:
+ 				return 8;
+ 			case Mage:
+ 				return 7;
+ 			case Rocket:
+ 				return 6;
+ 			case Worker:
+ 				return 5;
+ 			case Healer:
+ 				return 4;
+ 			default:
+ 				return 3;
+ 		}
  	}
  	
- 	public static void knightTarget(Robot r, UnitType u) {
+ 	public static void knightTarget(Robot r) {
  		if (r.movementHeat() >= 10) return;
- 		Robot[] nearby = Game.senseNearbyUnits(r.tile(), Constants.RANGERVISION, u, Game.enemy());
+ 		Robot[] nearby = Game.senseNearbyUnits(r.tile(), Constants.RANGERVISION, Game.enemy());
  		Robot best = null;
  		for (Robot enemy: nearby) {
 			if (enemy.health() > 0) {
-				if (enemy.location().isOnMap() && (best == null || Pathfinding.pathLength(enemy.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile()))) {
+				if (enemy.location().isOnMap() && (best == null || (Pathfinding.pathLength(enemy.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile()) && scoreKnight(enemy.unitType()) >= scoreKnight(best.unitType())))) {
 					best = enemy;
 				}
 			}
@@ -192,24 +214,24 @@ public class Micro {
 		}
 		if (r.unitType() == UnitType.Ranger) {
 			Robot[] enemies = Game.senseCombatUnits(r.tile(), Constants.RANGERRANGE, Game.enemy());
-			if (enemies.length == 0) {
+			if (enemies.length == 0 && target != null) {
 				Direction d = Pathfinding.path(r.tile(), target);
 				if (Game.canMove(r, d)) {
 					Game.moveRobot(r, d);
-					shoot(r);
+					target(r);
 				}
 			} else if (enemies.length * Constants.RANGERDAMAGE >= r.health() || (GameInfoCache.enemyKnights.size() > 0 && Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Knight, Game.enemy()).length > 0)){
 				Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
-				shoot(r);
+				target(r);
 				if (Game.canMove(r, move)) {
 					Game.moveRobot(r, move);
 				}
 			}
-			shoot(r);
+			target(r);
 		}
 		else if (r.unitType() == UnitType.Healer) {
 			Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.enemy());
-			if (enemies.length == 0) {
+			if (enemies.length == 0 && target != null) {
 				Direction d = Pathfinding.path(r.tile(), target);
 				if (Game.canMove(r, d)) {
 					Game.moveRobot(r, d);
@@ -226,15 +248,15 @@ public class Micro {
 		}
 		else if (r.unitType() == UnitType.Knight) {
 			Robot[] enemies = Game.senseNearbyUnits(r.tile(), Constants.RANGERVISION, Game.enemy());
-			if (enemies.length == 0) {
+			if (enemies.length == 0 && target != null) {
 				Direction d = Pathfinding.path(r.tile(), target);
 				if (Game.canMove(r, d)) {
 					Game.moveRobot(r, d);
 				}
 			} else {
-				knightMicro(r);
+				knightTarget(r);
 			}
-			shoot(r);
+			target(r);
 		}
  	}
  	
