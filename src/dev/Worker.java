@@ -93,7 +93,7 @@ public class Worker
 		WorkerScoreTuple closeWorker = new WorkerScoreTuple(Constants.INFINITY, null);
 		WorkerScoreTuple farWorker = new WorkerScoreTuple(-1, null);
 		
-		for (int ally = 0; ally < Constants.startingAlliesLocation.length; ally++)
+		all: for (int ally = 0; ally < Constants.startingAlliesLocation.length; ally++)
 		{
 			for (int enemy = 0; enemy < Constants.startingEnemiesLocation.length; enemy++)
 			{
@@ -105,6 +105,13 @@ public class Worker
 				if (pathDistance < min && pathDistance != -1)
 				{
 					min = pathDistance;
+				}
+				else if (pathDistance == -1)
+				{
+					min = Constants.INFINITY;
+					max = Constants.INFINITY;
+					farWorker.worker = Constants.startingAlliesLocation[ally];
+					break all;
 				}
 			}
 			if (max < closeWorker.score)
