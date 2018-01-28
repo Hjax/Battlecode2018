@@ -27,12 +27,20 @@ public class Micro {
 		if (!Game.isOverchargeReady(r) || r.abilityHeat() >= 10) return;
 		Robot[] chargee = Game.senseCombatUnits(r.tile(), r.abilityRange(), Game.team());
 		for (Robot t: chargee) {
-			if (Game.senseNearbyUnits(t.tile(), (long) Math.pow(Math.sqrt(t.attackRange()) + 1, 2), Game.enemy()).length > 0) {
+			if (Game.senseNearbyUnits(t.tile(), t.attackRange(), Game.enemy()).length > 0) {
 				if (Game.canOvercharge(r, t)) {
 					Game.overcharge(r, t);
 					micro(t);
 					return;
 				}
+			}
+		}
+		chargee = Game.senseNearbyUnits(r.tile(), r.abilityRange(), UnitType.Knight, Game.team());
+		for (Robot t: chargee) {
+			if (Game.canOvercharge(r, t)) {
+				Game.overcharge(r, t);
+				micro(t);
+				return;
 			}
 		}
 		
@@ -71,7 +79,7 @@ public class Micro {
 			if (best != null && Game.canAttack(r, best)) {
 				newHelpRequests.add(best.tile());
 				Game.attack(r, best);
-				if (Game.canJavelin(r, best)) {
+				if (Game.canJavelin(r, best) && r.abilityHeat() <= 10) {
 					Game.javelin(r, best);
 				}
 			}
@@ -232,6 +240,10 @@ public class Micro {
  	
 	public static void run() {
 		for (Robot r: GameInfoCache.allyCombat) {
+			if (r.unitType() == UnitType.Healer) continue;
+			micro(r);
+		}
+		for (Robot r: GameInfoCache.allyHealers) {
 			micro(r);
 		}
 	}
