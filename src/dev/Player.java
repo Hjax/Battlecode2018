@@ -15,9 +15,9 @@ public class Player
         	Game.queueResearch(UnitType.Healer);    	
         	Game.queueResearch(UnitType.Rocket);
         	Game.queueResearch(UnitType.Healer);
-        	Game.queueResearch(UnitType.Ranger);
-        	Game.queueResearch(UnitType.Rocket);
         	Game.queueResearch(UnitType.Healer);
+        	Game.queueResearch(UnitType.Rocket);
+        	Game.queueResearch(UnitType.Ranger);
         	Game.queueResearch(UnitType.Rocket);
     	}
         while (true) 
