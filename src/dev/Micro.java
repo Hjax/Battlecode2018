@@ -35,6 +35,14 @@ public class Micro {
 				}
 			}
 		}
+		chargee = Game.senseNearbyUnits(r.tile(), r.abilityRange(), UnitType.Knight, Game.team());
+		for (Robot t: chargee) {
+			if (Game.canOvercharge(r, t)) {
+				Game.overcharge(r, t);
+				micro(t);
+				return;
+			}
+		}
 		
 	}
 
