@@ -505,12 +505,12 @@ public class Worker
 		int currentDistance;
 		Tile placement = null;
 		
-		if (structure == UnitType.Rocket)
+		/*if (structure == UnitType.Rocket)
 		{
 			placement = factoryGrid.peek();
 		}
 		else
-		{
+		{*/
 			if (GlobalStrategy.rush && GameInfoCache.allyFactories.size() == 0)
 			{   //place at the opponent's base and use closest worker to it
 				placement = null;
@@ -625,7 +625,7 @@ public class Worker
 					workerOrder.poll();
 				}
 			}
-		}
+		//}
 		
 		if (bestDistance == 1)
 		{
