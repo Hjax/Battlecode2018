@@ -55,7 +55,7 @@ public class Constants {
 	public static int FACTORYREPLICATEPRESSURE = 300;
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int FACTORYHALTROUND = 700;
-	
+	public static final int TIMELOW = 1000;
 	public static final int AGGRESSIVEHARVESTTIMER = 80;
 	public static final int HARVESTABORTROUND = 300;
 	

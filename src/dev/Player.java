@@ -10,7 +10,7 @@ public class Player
 	public static long longest = 0;
 	
     public static void main(String[] args) {
-    	System.out.println("v1.0.2");
+    	System.out.println("v1.1.1");
     	if (Game.planet() == Planet.Earth) {
         	Game.queueResearch(UnitType.Worker);
         	Game.queueResearch(UnitType.Ranger);

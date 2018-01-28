@@ -7,12 +7,14 @@ public class GlobalStrategy {
 	public static void run() {
 		if (GameInfoCache.enemyMages.size() > 0) rush = false;
 		if (GameInfoCache.turnsSinceLastEnemy >= 100) {
-			System.out.println("We won earth");
 			COMBATLIMIT = 20;
 			rocketRush = true;
 		} else {
 			COMBATLIMIT = 50;
 			rocketRush = false;
+		}
+		if (Game.gc.getTimeLeftMs() < Constants.TIMELOW) {
+			COMBATLIMIT = 20;
 		}
 	}
 }
