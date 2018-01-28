@@ -44,6 +44,8 @@ public class Constants {
 
 	public static final int INFINITY = 99999999;
 	public static final int RUSHTHRESHOLD = 30;
+	public static int RUSHDISTANCE = INFINITY;
+	
 	public static int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 2;
 	public static int WORKERREPLICATEDEPOSITWEIGHT = 10;
@@ -52,7 +54,10 @@ public class Constants {
 	public static int FACTORYBUILDRANGE = 3;
 	public static int FACTORYREPLICATEPRESSURE = 300;
 	public static final int ROCKETBUILDRANGE = 50;
-	public static final int FACTORYHALTROUND = 700; 
+	public static final int FACTORYHALTROUND = 700;
+	
+	public static final int AGGRESSIVEHARVESTTIMER = 80;
+	
 	// if we are below this amount of time, skip turn
 	public static final int CLOCKBUFFER = 600;
 	public static final int MARSWORKERGOAL = 3;

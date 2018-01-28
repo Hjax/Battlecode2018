@@ -173,6 +173,7 @@ public class Worker
 			{
 				buildDir = bestWorker.worker.directionTo(nearestEnemy);
 			}
+			Constants.RUSHDISTANCE = bestWorker.score;
 			if (bestWorker.score > Constants.RUSHTHRESHOLD || bestWorker.score == -1)
 			{
 				buildDir = Utilities.oppositeDir(buildDir);
@@ -356,6 +357,7 @@ public class Worker
 				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(worker.tile(), replicateDir, 1)))
 				{
 					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(worker.tile(), replicateDir, 1)));
+					GameInfoCache.allyWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(worker.tile(), replicateDir, 1)));
 				}
 				
 			}
@@ -489,8 +491,16 @@ public class Worker
 		score -= worker.abilityHeat() / nearbyWorkers.length;
 		int passable = Utilities.passableSurroundings(worker.tile());
 		score += 30 * passable;
-		Robot[] nearbyEnemies = Game.senseCombatUnits(worker.tile(), 8, Game.ENEMY);
-		score -= nearbyEnemies.length * 20;
+		Robot[] nearbyEnemies = Game.senseCombatUnits(worker.tile(), Constants.RANGERRANGE + 15, Game.ENEMY);
+		if (nearbyEnemies.length > 0)
+		{
+			score -= 100;
+		}
+		nearbyEnemies = Game.senseNearbyUnits(worker.tile(), Constants.RANGERRANGE + 15, UnitType.Factory, Game.ENEMY);
+		if (nearbyEnemies.length > 0)
+		{
+			score -= 50;
+		}
 		if (passable < 4)
 		{
 			score -= 200;
@@ -507,33 +517,8 @@ public class Worker
 		
 		if (GlobalStrategy.rush && GameInfoCache.allyFactories.size() == 0)
 		{   //place at the opponent's base and use closest worker to it
-			placement = null;
-			for (Robot factory:GameInfoCache.enemyFactories)
-			{
-				for (Robot worker:idleWorkers)
-				{
-					currentDistance = Pathfinding.pathLength(worker.tile(), factory.tile());
-					if (currentDistance < bestDistance)
-					{
-						bestDistance = currentDistance;
-						closestWorker = worker;
-						placement = factory.tile();
-					}
-				}
-			}
-			if (placement == null)
-			{
-				placement = Constants.startingEnemiesLocation[0];
-				if (Game.hasUnitAtLocation(placement))
-				{
-					placement = factoryGrid.peek();
-				}
-			}
-			else
-			{
-				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
-				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
-			}
+			placement = Constants.startingEnemiesLocation[0];
+			
 			for (Robot worker:idleWorkers)
 			{
 				currentDistance = Pathfinding.pathLength(worker.tile(), placement);
@@ -547,7 +532,12 @@ public class Worker
 			{
 				return;
 			}
-			if (Pathfinding.pathLength(closestWorker.tile(), placement) < 4)
+			if (Game.hasUnitAtLocation(placement))
+			{
+				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
+				placement = Utilities.offsetInDirection(placement, Pathfinding.ghostPath(placement, closestWorker.tile()), 1);
+			}
+			if (Pathfinding.pathLength(closestWorker.tile(), placement) < Constants.RUSHDISTANCE / 2)
 			{
 				Tile bestPlacement = null;
 				int bestScore = 0;
@@ -691,8 +681,9 @@ public class Worker
 			}
 			
 		}
+		idleWorkers.remove(closestWorker);
 		
-		if (GlobalStrategy.rush && Game.karbonite() >= 100 && (Pathfinding.pathLength(closestWorker.tile(), placement) > 5 || Game.karbonite() > 260))
+		if (GlobalStrategy.rush && Game.karbonite() >= 100 && (Pathfinding.pathLength(closestWorker.tile(), placement) > 3 + Constants.RUSHDISTANCE / 2 || Game.karbonite() > 260))
 		{
 			Direction bestDir = Pathfinding.path(closestWorker.tile(), placement);
 			if (Game.canReplicate(closestWorker, bestDir))
@@ -701,6 +692,7 @@ public class Worker
 				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
 				{
 					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
+					GameInfoCache.allyWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
 				}
 			}
 		}
@@ -801,7 +793,7 @@ public class Worker
 	
 	private static void tryHarvest()
 	{
-		for (Robot worker:idleWorkers)
+		for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			int loc = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
 			for (int dir: directions)
@@ -858,6 +850,52 @@ public class Worker
 		}
 	}
 	
+	private static void aggressivelyHarvest()
+	{
+		int currentDistance = 0;
+		int bestDistance = Constants.INFINITY;
+		Robot closestWorker = null;
+		int targetIndex = GameInfoCache.nearestKarbonite[Constants.startingEnemiesLocation[0].getX() + Constants.startingEnemiesLocation[0].getY() * Game.WIDTH];
+		Tile target = Tile.getInstance(Game.PLANET, targetIndex % Game.WIDTH, targetIndex / Game.WIDTH);
+		for (Robot worker:idleWorkers)
+		{
+			if (worker.abilityHeat() < 10)
+			{
+				currentDistance = Pathfinding.pathLength(worker.tile(), target);
+				if (currentDistance < bestDistance)
+				{
+					bestDistance = currentDistance;
+					closestWorker = worker;
+				}
+			}
+		}
+		if (bestDistance > 5)
+		{
+			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.RANGERRANGE, Game.ENEMY);
+			if (nearbyEnemies.length == 0)
+			{
+				Direction bestDir = Pathfinding.path(closestWorker.tile(), target);
+				if (Game.canMove(closestWorker, bestDir))
+				{
+					Game.moveRobot(closestWorker, bestDir);
+					idleWorkers.remove(closestWorker);
+				}
+				bestDir = Pathfinding.path(closestWorker.tile(), target);
+				if (Game.canReplicate(closestWorker, bestDir))
+				{
+					Game.replicate(closestWorker, bestDir);
+					if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
+					{
+						replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
+						GameInfoCache.allyWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
 	public static void run() 
 	{
 		idleWorkers = new HashSet<Robot>(GameInfoCache.allyWorkers.size());
@@ -875,7 +913,10 @@ public class Worker
 		}
 		while (idleWorkers.size() > 0)
 		{
-			
+			if (Game.round() <= Constants.AGGRESSIVEHARVESTTIMER && !GlobalStrategy.rush && GameInfoCache.karboniteLocations.size() > 30)
+			{
+				aggressivelyHarvest();
+			}
 			if (shouldBuildRocket())
 			{
 				placeStructure(UnitType.Rocket);
@@ -893,7 +934,6 @@ public class Worker
 					loadRocket();
 				}
 			}
-			replicateWorkers();
 			if (Game.PLANET == Planet.Earth)
 			{
 				giveWorkersOrders();
@@ -901,6 +941,7 @@ public class Worker
 			}
 			harvest();
 			tryHarvest();
+			replicateWorkers();
 			moveRandomly();
 			idleWorkers = new HashSet<Robot>();
 			idleWorkers.addAll(replicatedWorkers);
