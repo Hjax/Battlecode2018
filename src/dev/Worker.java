@@ -709,7 +709,7 @@ public class Worker
 	private static void tryBuildFactory()
 	{
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
-		worker: for (Robot worker:idleWorkers)
+		worker: for (Robot worker:GameInfoCache.allyWorkers)
 		{
 			for (Robot thing: GameInfoCache.currentBlueprints)
 			{
