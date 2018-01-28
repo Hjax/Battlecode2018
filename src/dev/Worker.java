@@ -598,7 +598,7 @@ public class Worker
 					for (Direction dir:Game.moveDirections)
 					{
 						test = Utilities.offsetInDirection(closestWorker.tile(), dir, 1);
-						if (Game.isOccupiable(test) == 0)
+						if (!Game.onMap(test, Game.PLANET) || Game.isOccupiable(test) == 0)
 						{
 							continue;
 						}
