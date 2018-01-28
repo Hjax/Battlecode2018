@@ -23,6 +23,20 @@ public class Micro {
 		//System.out.println("Random Targets: " + randomTargets.size());
 	}
 	
+	public static void overchargeTarget(Robot r) {
+		if (!Game.isOverchargeReady(r) || r.abilityHeat() >= 10) return;
+		Robot[] chargee = Game.senseCombatUnits(r.tile(), r.abilityRange(), Game.team());
+		for (Robot t: chargee) {
+			if (Game.senseNearbyUnits(t.tile(), (long) Math.pow(Math.sqrt(t.attackRange()) + 1, 2), Game.enemy()).length > 0) {
+				if (Game.canOvercharge(r, t)) {
+					Game.overcharge(r, t);
+					micro(t);
+					return;
+				}
+			}
+		}
+		
+	}
 
  	public static void heal(Robot r) {
  		if (r.attackHeat() >= 10) return;
@@ -123,97 +137,102 @@ public class Micro {
  		return r.tile().directionTo(Tile.getInstance(Game.planet(), x / nearby.length, y / nearby.length));
  	}
 		
-	public static void run() {
-		for (Robot r: GameInfoCache.allyCombat) {
-			if (!r.location().isOnMap() || r.location().isInGarrison() || r.location().isInSpace()) {
-				continue;
+ 	public static void micro(Robot r) {
+ 		if (!r.location().isOnMap() || r.location().isInGarrison() || r.location().isInSpace()) {
+			return;
+		}
+		Tile target = null;
+		if (Rocket.assignments.containsKey(r)) {
+			if (Game.canLoad(Rocket.assignments.get(r), r)) {
+				Game.load(Rocket.assignments.get(r), r);
+				return;
 			}
-			Tile target = null;
-			if (Rocket.assignments.containsKey(r)) {
-				if (Game.canLoad(Rocket.assignments.get(r), r)) {
-					Game.load(Rocket.assignments.get(r), r);
-					continue;
+			target = Rocket.assignments.get(r).tile();
+				
+		}
+		else if (helpRequests.size() > 0) {
+			// TODO this is probably slow
+			for (Tile help: helpRequests) {
+				if (target == null || Pathfinding.pathLength(r.tile(), help) < Pathfinding.pathLength(r.tile(), target)) {
+					target = help;
 				}
-				target = Rocket.assignments.get(r).tile();
-					
 			}
-			else if (helpRequests.size() > 0) {
-				// TODO this is probably slow
-				for (Tile help: helpRequests) {
-					if (target == null || Pathfinding.pathLength(r.tile(), help) < Pathfinding.pathLength(r.tile(), target)) {
-						target = help;
-					}
+		} else {
+			if (targets.size() == 0 && GameInfoCache.factoryCache.size() == 0) {
+				if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2) {
+					target = randomTargets.get(r);
+				} else {
+					randomTargets.put(r, Game.getRandomLocation());
+					target = randomTargets.get(r);
 				}
 			} else {
-				if (targets.size() == 0 && GameInfoCache.factoryCache.size() == 0) {
-					if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2) {
-						target = randomTargets.get(r);
-					} else {
-						randomTargets.put(r, Game.getRandomLocation());
-						target = randomTargets.get(r);
-					}
-				} else {
-					if (GameInfoCache.factoryCache.size() > 0) {
-						Tile best = null;
-						for (Tile f: GameInfoCache.factoryCache) {
-							if (best == null || Pathfinding.pathLength(r.tile(), best) > Pathfinding.pathLength(r.tile(), f)) {
-								best = f;
-							}
+				if (GameInfoCache.factoryCache.size() > 0) {
+					Tile best = null;
+					for (Tile f: GameInfoCache.factoryCache) {
+						if (best == null || Pathfinding.pathLength(r.tile(), best) > Pathfinding.pathLength(r.tile(), f)) {
+							best = f;
 						}
-						target = best;
 					}
-					else if (Pathfinding.pathLength(targets.get(0), r.tile()) <= 2) {
-						targets.remove(0);
-					} else {
-						target = targets.get(0);
-					}
+					target = best;
+				}
+				else if (Pathfinding.pathLength(targets.get(0), r.tile()) <= 2) {
+					targets.remove(0);
+				} else {
+					target = targets.get(0);
 				}
 			}
-			if (r.unitType() == UnitType.Ranger) {
-				Robot[] enemies = Game.senseCombatUnits(r.tile(), Constants.RANGERRANGE, Game.enemy());
-				if (enemies.length == 0) {
-					Direction d = Pathfinding.path(r.tile(), target);
-					if (Game.canMove(r, d)) {
-						Game.moveRobot(r, d);
-						shoot(r);
-					}
-				} else if (enemies.length * Constants.RANGERDAMAGE >= r.health()){
-					Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
+		}
+		if (r.unitType() == UnitType.Ranger) {
+			Robot[] enemies = Game.senseCombatUnits(r.tile(), Constants.RANGERRANGE, Game.enemy());
+			if (enemies.length == 0) {
+				Direction d = Pathfinding.path(r.tile(), target);
+				if (Game.canMove(r, d)) {
+					Game.moveRobot(r, d);
 					shoot(r);
-					if (Game.canMove(r, move)) {
-						Game.moveRobot(r, move);
-					}
 				}
+			} else if (enemies.length * Constants.RANGERDAMAGE >= r.health()){
+				Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
 				shoot(r);
-			}
-			else if (r.unitType() == UnitType.Healer) {
-				Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.enemy());
-				if (enemies.length == 0) {
-					Direction d = Pathfinding.path(r.tile(), target);
-					if (Game.canMove(r, d)) {
-						Game.moveRobot(r, d);
-					}
-				} else {
-					Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
-					if (Game.canMove(r, move)) {
-						heal(r);
-						Game.moveRobot(r, move);
-					}
+				if (Game.canMove(r, move)) {
+					Game.moveRobot(r, move);
 				}
-				heal(r);
 			}
-			else if (r.unitType() == UnitType.Knight) {
-				Robot[] enemies = Game.senseNearbyUnits(r.tile(), Constants.RANGERVISION, Game.enemy());
-				if (enemies.length == 0) {
-					Direction d = Pathfinding.path(r.tile(), target);
-					if (Game.canMove(r, d)) {
-						Game.moveRobot(r, d);
-					}
-				} else {
-					knightMicro(r);
+			shoot(r);
+		}
+		else if (r.unitType() == UnitType.Healer) {
+			Robot[] enemies = Game.senseCombatUnits(r.tile(), (long) Math.pow(Math.sqrt(Constants.RANGERRANGE) + 1, 2), Game.enemy());
+			if (enemies.length == 0) {
+				Direction d = Pathfinding.path(r.tile(), target);
+				if (Game.canMove(r, d)) {
+					Game.moveRobot(r, d);
 				}
-				shoot(r);
+			} else {
+				Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
+				if (Game.canMove(r, move)) {
+					heal(r);
+					Game.moveRobot(r, move);
+				}
 			}
+			overchargeTarget(r);
+			heal(r);
+		}
+		else if (r.unitType() == UnitType.Knight) {
+			Robot[] enemies = Game.senseNearbyUnits(r.tile(), Constants.RANGERVISION, Game.enemy());
+			if (enemies.length == 0) {
+				Direction d = Pathfinding.path(r.tile(), target);
+				if (Game.canMove(r, d)) {
+					Game.moveRobot(r, d);
+				}
+			} else {
+				knightMicro(r);
+			}
+			shoot(r);
+		}
+ 	}
+ 	
+	public static void run() {
+		for (Robot r: GameInfoCache.allyCombat) {
+			micro(r);
 		}
 	}
 }

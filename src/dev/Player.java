@@ -9,6 +9,7 @@ public class Player
 	public static long totalTime;
 	public static long longest = 0;
     public static void main(String[] args) {
+    	System.out.println("v1.0.2");
     	if (Game.planet() == Planet.Earth) {
         	Game.queueResearch(UnitType.Worker);
         	Game.queueResearch(UnitType.Ranger);
@@ -22,58 +23,106 @@ public class Player
     	}
         while (true) 
         {
-        	System.out.printf("\t\tremaining time is %d, longest %f, average %f\n", Game.gc.getTimeLeftMs(), longest / 1000000.0, (totalTime / Game.round()) / 1000000.0);
-        	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) 
-        	{
-        		System.out.println("Low on time, ending turn");
-        		Game.nextTurn();
-        		continue;
-        	}
-        	if (Game.round() % 50 == 0) {
-        		System.gc();
-        	}
         	long start = System.nanoTime();
-        	try {
-            	if (Game.round() % 20 == 0) {
-            		System.gc();
-            	}
-            	System.out.println("Current round: "+ Game.round());
-            	Timing.start("StartTurn");
-            	Game.startTurn();
-            	Timing.end("StartTurn");
-        	} catch (Exception e) {
-        	}
-        	try {
-            	Timing.start("Worker");
-            	Worker.run();
-            	Timing.end("Worker");
-        	} catch (Exception e) {
-        		e.printStackTrace();
-        	}
-        	try {
-            	Timing.start("Factory");
-                Factory.run();
-                Timing.end("Factory");
-        	} catch (Exception e) {
-        	}
-        	try {
-                Timing.start("Micro");
-                Micro.run();
-                Timing.end("Micro");
-        	} catch (Exception e) {
-        		e.printStackTrace();
-        	}
-        	try {
-                Timing.start("Rocket");
-                Rocket.run();
-                Timing.end("Rocket");
-        	} catch (Exception e) {
+        	turnStart();
+
+        	if (Game.gc.getTimeLeftMs() < Constants.CLOCKBUFFER) {
+        		cheapTurn();
+        	} else if (Game.gc.getTimeLeftMs() < Constants.EMERGENCYCLOCKBUFFER) {
+        		instantTurn();
+        	} else {
+        		regularTurn();
         	}
 
             start = System.nanoTime() - start;
             if (start > longest) longest = start;
             totalTime += start;
+            System.out.printf("\t\tremaining time is %d, longest %f, average %f\n", Game.gc.getTimeLeftMs(), longest / 1000000.0, (totalTime / Game.round()) / 1000000.0);
             Game.nextTurn();
         }
+    }
+    
+    public static void turnStart() {
+    	if (Game.round() % 50 == 0) {
+    		System.gc();
+    	}
+    	try {
+        	if (Game.round() % 20 == 0) {
+        		System.gc();
+        	}
+        	System.out.println("Current round: "+ Game.round());
+        	Timing.start("StartTurn");
+        	Game.startTurn();
+        	Timing.end("StartTurn");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    public static void regularTurn() {
+    	try {
+        	Timing.start("Worker");
+        	Worker.run();
+        	Timing.end("Worker");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
+        	Timing.start("Factory");
+            Factory.run();
+            Timing.end("Factory");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
+            Timing.start("Micro");
+            Micro.run();
+            Timing.end("Micro");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
+            Timing.start("Rocket");
+            Rocket.run();
+            Timing.end("Rocket");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    public static void cheapTurn() {
+    	System.out.println("Running cheap turn");
+    	try {
+        	Timing.start("Factory");
+            Factory.run();
+            Timing.end("Factory");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
+            Timing.start("Micro");
+            CheapMicro.run();
+            Timing.end("Micro");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
+            Timing.start("Rocket");
+            Rocket.run();
+            Timing.end("Rocket");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    public static void instantTurn() {
+    	System.out.println("Running instant turn");
+    	try {
+            Timing.start("Rocket");
+            Rocket.run();
+            Timing.end("Rocket");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
 }

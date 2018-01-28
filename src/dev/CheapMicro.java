@@ -3,6 +3,7 @@ package dev;
 public class CheapMicro {
 	public static void run() {
 		for (Robot r: GameInfoCache.allyCombat) {
+			if (!Game.isAttackReady(r) || r.attackHeat() >= 10) continue;
 			switch (r.unitType()) {
 				case Healer:
 					Robot[] allies = Game.senseNearbyUnits(r.tile(), r.attackRange(), Game.team());
