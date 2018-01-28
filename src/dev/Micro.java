@@ -79,7 +79,7 @@ public class Micro {
 			if (best != null && Game.canAttack(r, best)) {
 				newHelpRequests.add(best.tile());
 				Game.attack(r, best);
-				if (Game.canJavelin(r, best) && r.abilityHeat() <= 10) {
+				if (Game.canJavelin(r, best) && r.abilityHeat() < 10) {
 					Game.javelin(r, best);
 				}
 			}
