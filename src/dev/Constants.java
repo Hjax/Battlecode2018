@@ -73,5 +73,6 @@ public class Constants {
 	public static final int QUADRANTCOLUMNSIZE = (int) Math.ceil(Game.HEIGHT / (double) QUADRANTSIZE);
 	public static final int RANGERDAMAGE = 30;
 	public static final int ROCKETBUILDLIMIT = 4;
+	public static final long RANGERVISION = 70;
 	
 }
