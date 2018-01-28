@@ -507,7 +507,7 @@ public class Worker
 		
 		if (structure == UnitType.Rocket)
 		{
-			
+			placement = factoryGrid.peek();
 		}
 		else
 		{
@@ -594,6 +594,7 @@ public class Worker
 					if (closestWorker.movementHeat() < 10)
 					{
 						placement = workerOrder.peek().worker;
+						bestDistance = 0;
 					}
 					else
 					{
@@ -618,16 +619,13 @@ public class Worker
 						if (bestScore > 2)
 						{
 							placement = bestPlacement;
+							bestDistance = 1;
 						}
 					}
 					workerOrder.poll();
 				}
 			}
 		}
-		
-		
-		
-		
 		
 		if (bestDistance == 1)
 		{
