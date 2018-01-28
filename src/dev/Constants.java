@@ -57,6 +57,7 @@ public class Constants {
 	public static final int FACTORYHALTROUND = 700;
 	
 	public static final int AGGRESSIVEHARVESTTIMER = 80;
+	public static final int HARVESTABORTROUND = 300;
 	
 	// if we are below this amount of time, skip turn
 	public static final int CLOCKBUFFER = 600;

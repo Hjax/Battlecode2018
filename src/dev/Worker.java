@@ -421,6 +421,11 @@ public class Worker
 		}
 		worker: for (Robot worker:actionableWorkers)
 		{
+			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
+			if (Game.round() > Constants.HARVESTABORTROUND && !Game.canSenseLocation(Tile.getInstance(Game.PLANET, GameInfoCache.nearestKarbonite[index] % Game.WIDTH, GameInfoCache.nearestKarbonite[index] / Game.WIDTH)))
+			{
+				continue;
+			}
 			Direction moveDir = Direction.Center;
 			moveDir = Pathfinding.karbonitePath(worker.tile());
 			if (Game.canMove(worker, moveDir))
@@ -428,7 +433,6 @@ public class Worker
 				Game.moveRobot(worker, moveDir);
 				moveableWorkers.remove(worker);
 			}
-			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
 			if (GameInfoCache.karboniteDistance[index] <= 1)
 			{
 				Direction dir = worker.tile().directionTo(Tile.getInstance(Game.planet(), GameInfoCache.nearestKarbonite[index] % Game.WIDTH, GameInfoCache.nearestKarbonite[index] / Game.WIDTH));
@@ -610,7 +614,7 @@ public class Worker
 							bestPlacement = test;
 						}
 					}
-					if (bestScore > 2)
+					if (bestScore > 2 && Utilities.passableSurroundings(closestWorker.tile()) > 2)
 					{
 						placement = bestPlacement;
 						bestDistance = 1;
@@ -714,6 +718,7 @@ public class Worker
 	
 	private static void tryBuildFactory()
 	{
+		System.out.printf("we have %d actionable workers\n", actionableWorkers.size());
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
 		worker: for (Robot worker:actionableWorkers)
 		{
@@ -838,7 +843,7 @@ public class Worker
 		HashSet<Robot> removeWorkers = new HashSet<>();
 		for (Robot factory: GameInfoCache.allyFactories)
 		{
-			if (factory.health() < factory.maxHealth())
+			if (factory.health() < factory.maxHealth() && factory.structureIsBuilt() == 1)
 			{
 				for (Robot worker:moveableWorkers)
 				{
@@ -854,7 +859,7 @@ public class Worker
 						if (Game.canRepair(worker, factory))
 						{
 							Game.repair(worker, factory);
-							removeWorkers.add(worker);
+							actionableWorkers.remove(worker);
 						}
 						if (count >= 7)
 						{
@@ -867,7 +872,6 @@ public class Worker
 		
 		for (Robot worker: removeWorkers)
 		{
-			actionableWorkers.remove(worker);
 			moveableWorkers.remove(worker);
 		}
 	}
@@ -952,9 +956,7 @@ public class Worker
 			{
 				placeStructure(UnitType.Factory);
 			}
-			
 			repair();
-			
 			if (Game.PLANET == Planet.Earth)
 			{
 				if (shouldLoadRocket()) {
