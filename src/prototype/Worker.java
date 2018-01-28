@@ -1,4 +1,4 @@
-package dev;
+package prototype;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -183,7 +183,7 @@ public class Worker
 				GlobalStrategy.rush = true;
 				Constants.FACTORYBUILDRANGE = 4;
 				Constants.FACTORYREPLICATEPRESSURE = 500;
-				Constants.WORKERREPLICATEDEPOSITWEIGHT = 0;
+				Constants.WORKERREPLICATEDEPOSITWEIGHT = 3;
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
 				initializeBuildGrid();
@@ -302,7 +302,9 @@ public class Worker
 		}
 		score += Game.karbonite() / 25;
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
-		for (Robot otherWorker:GameInfoCache.allyWorkers)
+		
+		Robot[] nearbyAllies = Game.senseNearbyUnits(worker.tile(), 30);
+		for (Robot otherWorker:nearbyAllies)
 		{
 			if (otherWorker == worker || !otherWorker.location().isOnMap())
 			{
@@ -877,7 +879,7 @@ public class Worker
 				}
 			}
 		}
-		if (closestWorker != null && bestDistance > 5)
+		if (bestDistance > 5)
 		{
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.RANGERRANGE, Game.ENEMY);
 			if (nearbyEnemies.length == 0)
