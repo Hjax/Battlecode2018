@@ -190,7 +190,7 @@ public class Micro {
 					Game.moveRobot(r, d);
 					shoot(r);
 				}
-			} else if (enemies.length * Constants.RANGERDAMAGE >= r.health()){
+			} else if (enemies.length * Constants.RANGERDAMAGE >= r.health() || (GameInfoCache.enemyKnights.size() > 0 && Game.senseNearbyUnits(r.tile(), r.attackRange(), UnitType.Knight, Game.enemy()).length > 0)){
 				Direction move = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
 				shoot(r);
 				if (Game.canMove(r, move)) {

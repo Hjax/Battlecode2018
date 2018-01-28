@@ -53,7 +53,7 @@ public class Player
         	System.out.println("Current round: "+ Game.round());
         	Timing.start("StartTurn");
         	Game.startTurn();
-        	Timing.end("StartTurn");
+        	Timing.endAndPrint("StartTurn");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
@@ -63,28 +63,28 @@ public class Player
     	try {
         	Timing.start("Worker");
         	Worker.run();
-        	Timing.end("Worker");
+        	Timing.endAndPrint("Worker");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
     	try {
         	Timing.start("Factory");
             Factory.run();
-            Timing.end("Factory");
+            Timing.endAndPrint("Factory");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
     	try {
             Timing.start("Micro");
             Micro.run();
-            Timing.end("Micro");
+            Timing.endAndPrint("Micro");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
     	try {
             Timing.start("Rocket");
             Rocket.run();
-            Timing.end("Rocket");
+            Timing.endAndPrint("Rocket");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
@@ -95,21 +95,21 @@ public class Player
     	try {
         	Timing.start("Factory");
             Factory.run();
-            Timing.end("Factory");
+            Timing.endAndPrint("Factory");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
     	try {
             Timing.start("Micro");
             CheapMicro.run();
-            Timing.end("Micro");
+            Timing.endAndPrint("Micro");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
     	try {
             Timing.start("Rocket");
             Rocket.run();
-            Timing.end("Rocket");
+            Timing.endAndPrint("Rocket");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
@@ -120,7 +120,7 @@ public class Player
     	try {
             Timing.start("Rocket");
             Rocket.run();
-            Timing.end("Rocket");
+            Timing.endAndPrint("Rocket");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
