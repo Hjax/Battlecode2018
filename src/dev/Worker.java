@@ -304,19 +304,8 @@ public class Worker
 		}
 		score += Game.karbonite() / 25;
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * GameInfoCache.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
-		for (Robot otherWorker:GameInfoCache.allyWorkers)
-		{
-			if (otherWorker == worker || !otherWorker.location().isOnMap())
-			{
-				continue;
-			}
-			distance = Pathfinding.pathLength(otherWorker.tile(), worker.tile());
-			if (distance != -1)
-			{
-				score -= 80/distance;
-			}
-			
-		}
+		Robot[] nearbyWorkers = Game.senseNearbyUnits(worker.tile(), 30, UnitType.Worker, Game.TEAM);
+		score -= nearbyWorkers.length * 5;
 		return score;
 		
 	}
@@ -509,12 +498,12 @@ public class Worker
 		Robot[] nearbyEnemies = Game.senseCombatUnits(worker.tile(), Constants.RANGERRANGE + 15, Game.ENEMY);
 		if (nearbyEnemies.length > 0)
 		{
-			score -= 100;
+			score -= 200;
 		}
 		nearbyEnemies = Game.senseNearbyUnits(worker.tile(), Constants.RANGERRANGE + 50, UnitType.Factory, Game.ENEMY);
 		if (nearbyEnemies.length > 0)
 		{
-			score -= 50;
+			score -= 150;
 		}
 		if (passable < 4)
 		{
@@ -883,9 +872,10 @@ public class Worker
 		Robot closestWorker = null;
 		int targetIndex = GameInfoCache.nearestKarbonite[Constants.startingEnemiesLocation[0].getX() + Constants.startingEnemiesLocation[0].getY() * Game.WIDTH];
 		Tile target = Tile.getInstance(Game.PLANET, targetIndex % Game.WIDTH, targetIndex / Game.WIDTH);
-		for (Robot worker:moveableWorkers)
+		for (Robot worker:actionableWorkers)
 		{
-			if (worker.abilityHeat() < 10)
+			System.out.printf("has %d abilityHeat\n", worker.abilityHeat());
+			if (worker.abilityHeat() <= 10)
 			{
 				currentDistance = Pathfinding.pathLength(worker.tile(), target);
 				if (currentDistance < bestDistance)
@@ -897,18 +887,23 @@ public class Worker
 		}
 		if (closestWorker != null && bestDistance > 5)
 		{
+			System.out.printf("found a worker to rush with (%d,%d)\n", closestWorker.tile().getX(), closestWorker.tile().getY());
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.RANGERRANGE, Game.ENEMY);
 			if (nearbyEnemies.length == 0)
 			{
 				Direction bestDir = Pathfinding.path(closestWorker.tile(), target);
+				System.out.printf("\trush in direction %s\n", bestDir.name());
 				if (Game.canMove(closestWorker, bestDir))
 				{
+					System.out.printf("moving\n");
 					Game.moveRobot(closestWorker, bestDir);
 					moveableWorkers.remove(closestWorker);
 				}
 				bestDir = Pathfinding.path(closestWorker.tile(), target);
+				System.out.printf("\trush replicate in direction %s\n", bestDir.name());
 				if (Game.canReplicate(closestWorker, bestDir))
 				{
+					System.out.printf("replicating\n");
 					Game.replicate(closestWorker, bestDir);
 					if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
 					{
@@ -969,8 +964,16 @@ public class Worker
 				tryBuildFactory ();
 			}
 			harvest();
-			tryHarvest();
-			replicateWorkers();
+			if (GameInfoCache.karboniteLocations.size() > 0)
+			{
+				tryHarvest();
+			}
+			
+			if (GameInfoCache.allyWorkers.size() < Constants.WORKERHARDCAP)
+			{
+				replicateWorkers();
+			}
+			
 			moveRandomly();
 			actionableWorkers = new HashSet<Robot>();
 			moveableWorkers = new HashSet<Robot>();

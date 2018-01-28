@@ -47,7 +47,8 @@ public class Constants {
 	public static int RUSHDISTANCE = INFINITY;
 	
 	public static int WORKERLIMIT = 4;
-	public static int WORKERLIMITWEIGHT = 2;
+	public static int WORKERLIMITWEIGHT = 3;
+	public static int WORKERHARDCAP = 50;
 	public static int WORKERREPLICATEDEPOSITWEIGHT = 10;
 	public static final int FACTORYLIMIT = 9;
 	public static final int FACTORYGOAL = 4;
@@ -56,7 +57,8 @@ public class Constants {
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int FACTORYHALTROUND = 700;
 	public static final int TIMELOW = 1000;
-	public static final int AGGRESSIVEHARVESTTIMER = 80;
+	
+	public static final int AGGRESSIVEHARVESTTIMER = 50;
 	public static final int HARVESTABORTROUND = 300;
 	
 	// if we are below this amount of time, skip turn
@@ -75,7 +77,7 @@ public class Constants {
 	public static final int EMERGENCYCLOCKBUFFER = 200;
 	
 	
-	public static final int QUADRANTSIZE = 4;
+	public static final int QUADRANTSIZE = 2;
 	public static final int QUADRANTROWSIZE = (int) Math.ceil(Game.WIDTH / (double) QUADRANTSIZE);
 	public static final int QUADRANTCOLUMNSIZE = (int) Math.ceil(Game.HEIGHT / (double) QUADRANTSIZE);
 	public static final int RANGERDAMAGE = 30;
