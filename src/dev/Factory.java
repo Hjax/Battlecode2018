@@ -8,7 +8,7 @@ public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!(r.isFactoryProducing() > 0)) {
-				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < Constants.COMBATLIMIT) {
+				if (Game.round < Constants.FACTORYHALTROUND && GameInfoCache.allyCombat.size() < GlobalStrategy.COMBATLIMIT) {
 					if (GameInfoCache.allyWorkers.size() == 0) {
 						if (Game.canProduceRobot(r, UnitType.Worker)) {
 							Game.produceRobot(r, UnitType.Worker);

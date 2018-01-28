@@ -11,6 +11,8 @@ public class GameInfoCache
 	public static int[] nearestKarbonite = new int[Game.WIDTH * Game.HEIGHT];
 	public static HashSet<Integer> karboniteLocations = new HashSet<Integer>();
 	
+	public static int turnsSinceLastEnemy = 0;
+	
 	private static HashSet<Integer> queuedIndices = new HashSet<Integer>();
 	private static LinkedList<Integer> karboniteQueue = new LinkedList<Integer>();
 	public static Set<Tile> factoryCache = new HashSet<>();
@@ -169,6 +171,8 @@ public class GameInfoCache
 	{
 		cleanUpFactories();
 		
+		turnsSinceLastEnemy++;
+		
 		allyWorkers = new ArrayList<Robot>();
 		allyKnights = new ArrayList<Robot>();
 		allyRangers = new ArrayList<Robot>();
@@ -293,6 +297,9 @@ public class GameInfoCache
 				}
 				if (bot.team() == Game.enemy() && (type == UnitType.Factory)) {
 					factoryCache.add(bot.tile());
+				}
+				if (bot.team() == Game.enemy()) {
+					turnsSinceLastEnemy = 0;
 				}
 				if (bot.team() == Game.team())
 				{
