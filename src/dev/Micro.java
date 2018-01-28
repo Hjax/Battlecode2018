@@ -70,7 +70,7 @@ public class Micro {
 			for (Robot enemy: targets) {
 				if (enemy.location().isOnMap() && Game.canAttack(r, enemy)) {
 					if (enemy.health() > 0) {
-						if (best == null || (enemy.health() < best.health() && scoreRanger(enemy.unitType()) >= scoreRanger(best.unitType()))) {
+						if (best == null || ((enemy.health() < best.health() && scoreRanger(enemy.unitType()) >= scoreRanger(best.unitType())) || scoreRanger(enemy.unitType()) > scoreRanger(best.unitType()))) {
 							best = enemy;
 						}
 					}
@@ -134,7 +134,7 @@ public class Micro {
  		Robot best = null;
  		for (Robot enemy: nearby) {
 			if (enemy.health() > 0) {
-				if (enemy.location().isOnMap() && (best == null || (Pathfinding.pathLength(enemy.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile()) && scoreKnight(enemy.unitType()) >= scoreKnight(best.unitType())))) {
+				if (enemy.location().isOnMap() && (best == null || (Pathfinding.pathLength(enemy.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile()) && scoreKnight(enemy.unitType()) >= scoreKnight(best.unitType())) || scoreKnight(enemy.unitType()) > scoreKnight(best.unitType()))) {
 					best = enemy;
 				}
 			}
