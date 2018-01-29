@@ -12,7 +12,10 @@ public class Player
     public static void main(String[] args) {
     	System.out.println("v1.2.0");
     	if (Game.planet() == Planet.Earth) {
-        	Game.queueResearch(UnitType.Worker);
+    		if (GameInfoCache.karboniteLocations.size() > 30)
+    		{
+    			Game.queueResearch(UnitType.Worker);
+    		}
         	Game.queueResearch(UnitType.Ranger);
         	Game.queueResearch(UnitType.Healer);    	
         	Game.queueResearch(UnitType.Healer);
