@@ -110,9 +110,9 @@ public class Micro {
  	public static int scoreKnight(UnitType r) {
  		switch (r) {
  			case Factory:
- 				return 10;
- 			case Knight:
  				return 9;
+ 			case Knight:
+ 				return 10;
  			case Ranger:
  				return 8;
  			case Mage:
