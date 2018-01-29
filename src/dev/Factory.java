@@ -14,7 +14,7 @@ public class Factory {
 							Game.produceRobot(r, UnitType.Worker);
 						} 
 					}
-					else if (GameInfoCache.allyRangers.size() + GameInfoCache.allyKnights.size() > (3 * (GameInfoCache.allyHealers.size() + 1))) {
+					else if (GameInfoCache.allyRangers.size() + GameInfoCache.allyKnights.size() > (2 * (GameInfoCache.allyHealers.size() + 1))) {
 						if (Game.canProduceRobot(r, UnitType.Healer)) {
 							Game.produceRobot(r, UnitType.Healer);
 						} 
