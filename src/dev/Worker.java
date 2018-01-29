@@ -561,10 +561,13 @@ public class Worker
 						bestPlacement = test;
 					}
 				}
-				placement = bestPlacement;
-				bestDistance = 1;
+				if (bestScore > 2 && Utilities.passableSurroundings(closestWorker.tile()) > 2)
+				{
+					placement = bestPlacement;
+					bestDistance = 1;
+				}
 			}
-			}
+		}
 		else
 		{
 			PriorityQueue<WorkerScoreTuple> workerOrder = new PriorityQueue<WorkerScoreTuple>(GameInfoCache.allyWorkers.size()+1, new WorkerScoreTuple(0,null));
@@ -707,7 +710,6 @@ public class Worker
 	
 	private static void tryBuildFactory()
 	{
-		System.out.printf("we have %d actionable workers\n", actionableWorkers.size());
 		HashSet<Robot> removeWorkers = new HashSet<Robot>();
 		worker: for (Robot worker:actionableWorkers)
 		{
@@ -874,7 +876,6 @@ public class Worker
 		Tile target = Tile.getInstance(Game.PLANET, targetIndex % Game.WIDTH, targetIndex / Game.WIDTH);
 		for (Robot worker:actionableWorkers)
 		{
-			System.out.printf("has %d abilityHeat\n", worker.abilityHeat());
 			if (worker.abilityHeat() <= 10)
 			{
 				currentDistance = Pathfinding.pathLength(worker.tile(), target);
@@ -887,23 +888,18 @@ public class Worker
 		}
 		if (closestWorker != null && bestDistance > 5)
 		{
-			System.out.printf("found a worker to rush with (%d,%d)\n", closestWorker.tile().getX(), closestWorker.tile().getY());
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.RANGERRANGE, Game.ENEMY);
 			if (nearbyEnemies.length == 0)
 			{
 				Direction bestDir = Pathfinding.path(closestWorker.tile(), target);
-				System.out.printf("\trush in direction %s\n", bestDir.name());
 				if (Game.canMove(closestWorker, bestDir))
 				{
-					System.out.printf("moving\n");
 					Game.moveRobot(closestWorker, bestDir);
 					moveableWorkers.remove(closestWorker);
 				}
 				bestDir = Pathfinding.path(closestWorker.tile(), target);
-				System.out.printf("\trush replicate in direction %s\n", bestDir.name());
 				if (Game.canReplicate(closestWorker, bestDir))
 				{
-					System.out.printf("replicating\n");
 					Game.replicate(closestWorker, bestDir);
 					if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
 					{
@@ -968,7 +964,6 @@ public class Worker
 			{
 				tryHarvest();
 			}
-			
 			if (GameInfoCache.allyWorkers.size() < Constants.WORKERHARDCAP)
 			{
 				replicateWorkers();
