@@ -7,7 +7,7 @@ public class GlobalStrategy {
 	public static boolean rocketRush = false;
 	public static int COMBATLIMIT = 50;
 	public static void run() {
-		if (GameInfoCache.enemyMages.size() > 0) 
+		if (GameInfoCache.enemyMages.size() > 0 && rush == true) 
 		{
 			rush = false;
 			if (Game.researchInfo().getLevel(UnitType.Knight) < 3)
