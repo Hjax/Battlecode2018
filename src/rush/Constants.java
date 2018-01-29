@@ -1,4 +1,4 @@
-package dev;
+package rush;
 
 import bc.Planet;
 
