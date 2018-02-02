@@ -618,9 +618,9 @@ public class Worker
 		
 		if (bestDistance == 1)
 		{
-			if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
+			if (closestWorker.canBlueprint(structure, closestWorker.tile().directionTo(placement)))
 			{
-				Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+				closestWorker.blueprint(structure, closestWorker.tile().directionTo(placement));
 				actionableWorkers.remove(closestWorker);
 				
 				
@@ -640,12 +640,12 @@ public class Worker
 			Direction moveDir = Utilities.findOccupiableDir(closestWorker.tile());
 			if (moveDir != Direction.Center)
 			{
-				if (Game.canMove(closestWorker, moveDir))
+				if (closestWorker.canMove(moveDir))
 				{
-					Game.moveRobot(closestWorker, moveDir);
-					if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
+					closestWorker.move(moveDir);
+					if (closestWorker.canBlueprint(structure, closestWorker.tile().directionTo(placement)))
 					{
-						Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+						closestWorker.blueprint(structure, closestWorker.tile().directionTo(placement));
 						actionableWorkers.remove(closestWorker);
 						if (structure == UnitType.Rocket)
 						{
@@ -666,14 +666,14 @@ public class Worker
 			Direction moveDir = Pathfinding.path(closestWorker.tile(), placement);
 			if (moveDir != Direction.Center)
 			{
-				if (Game.canMove(closestWorker, moveDir))
+				if (closestWorker.canMove(moveDir))
 				{
-					Game.moveRobot(closestWorker, moveDir);
+					closestWorker.move(moveDir);
 					if (Pathfinding.pathLength(closestWorker.tile(), placement) == 1)
 					{
-						if (Game.canBlueprint(closestWorker, structure, closestWorker.tile().directionTo(placement)))
+						if (closestWorker.canBlueprint(structure, closestWorker.tile().directionTo(placement)))
 						{
-							Game.blueprint(closestWorker, structure, closestWorker.tile().directionTo(placement));
+							closestWorker.blueprint(structure, closestWorker.tile().directionTo(placement));
 							actionableWorkers.remove(closestWorker);
 							factoryGrid.poll();
 							if (structure == UnitType.Rocket)
@@ -696,9 +696,9 @@ public class Worker
 		if (GlobalStrategy.rush && Game.karbonite() >= 100 && (Pathfinding.pathLength(closestWorker.tile(), placement) > 3 + Constants.RUSHDISTANCE / 2 || Game.karbonite() > 260))
 		{
 			Direction bestDir = Pathfinding.path(closestWorker.tile(), placement);
-			if (Game.canReplicate(closestWorker, bestDir))
+			if (closestWorker.canUseAbililty(bestDir))
 			{
-				Game.replicate(closestWorker, bestDir);
+				closestWorker.useAbility(bestDir);
 				if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
 				{
 					replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));
@@ -715,9 +715,9 @@ public class Worker
 		{
 			for (Robot thing: Game.currentBlueprints)
 			{
-				if (Game.canBuild(worker, thing))
+				if (worker.canBuild(thing))
 				{
-					Game.build(worker, thing);
+					worker.build(thing);
 					removeWorkers.add(worker);
 					continue worker;
 				}
@@ -768,9 +768,9 @@ public class Worker
 		for (Robot worker:moveableWorkers)
 		{
 			Direction randomDir = Utilities.findNearestOccupiableDir(worker.tile(), Direction.swigToEnum(rng.nextInt(8)));
-			if (Game.canMove(worker, randomDir))
+			if (worker.canMove(randomDir))
 			{
-				Game.moveRobot(worker, randomDir);
+				worker.move(randomDir);
 				removeWorkers.add(worker);
 			}
 		}
@@ -787,9 +787,9 @@ public class Worker
 		{
 			for (Robot thing: Game.senseNearbyUnits(worker.tile(), 2, UnitType.Rocket))
 			{
-				if (Game.canLoad(thing, worker))
+				if (thing.canLoad(worker))
 				{
-					Game.load(thing, worker);
+					thing.load(worker);
 					removeWorkers.add(worker);
 					continue worker;
 				}
@@ -813,9 +813,9 @@ public class Worker
 				int test = loc + dir;
 				if (Game.karboniteLocations.contains(test))
 				{
-					if (Game.canHarvest(worker, intToDir(dir)))
+					if (worker.canHarvest(intToDir(dir)))
 					{
-						Game.harvest(worker, intToDir(dir));
+						worker.harvest(intToDir(dir));
 						removeWorkers.add(worker);
 						break;
 					}
@@ -842,14 +842,14 @@ public class Worker
 					{
 						count++;
 						Direction bestDir = Pathfinding.path(worker.tile(), factory.tile());
-						if (Game.canMove(worker, bestDir))
+						if (worker.canMove(bestDir))
 						{
-							Game.moveRobot(worker, bestDir);
+							worker.move(bestDir);
 							removeWorkers.add(worker);
 						}
-						if (Game.canRepair(worker, factory))
+						if (worker.canRepair(factory))
 						{
-							Game.repair(worker, factory);
+							worker.repair(factory);
 							actionableWorkers.remove(worker);
 						}
 						if (count >= 7)
@@ -892,15 +892,15 @@ public class Worker
 			if (nearbyEnemies.length == 0)
 			{
 				Direction bestDir = Pathfinding.path(closestWorker.tile(), target);
-				if (Game.canMove(closestWorker, bestDir))
+				if (closestWorker.canMove(bestDir))
 				{
-					Game.moveRobot(closestWorker, bestDir);
+					closestWorker.move(bestDir);
 					moveableWorkers.remove(closestWorker);
 				}
 				bestDir = Pathfinding.path(closestWorker.tile(), target);
-				if (Game.canReplicate(closestWorker, bestDir))
+				if (closestWorker.canUseAbililty(bestDir))
 				{
-					Game.replicate(closestWorker, bestDir);
+					closestWorker.useAbility(bestDir);
 					if (Game.hasUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)))
 					{
 						replicatedWorkers.add(Game.senseUnitAtLocation(Utilities.offsetInDirection(closestWorker.tile(), bestDir, 1)));

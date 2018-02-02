@@ -183,9 +183,9 @@ public class Rocket
 			{
 				for (Direction dir: Game.moveDirections) 
 				{
-					if (Game.canUnload(rocket, dir)) 
+					if (rocket.canUnload(dir)) 
 					{
-						Game.unload(rocket, dir);
+						rocket.unload(dir);
 					}
 				}
 			}
@@ -201,10 +201,10 @@ public class Rocket
 					(rocket.structureGarrison().length == Constants.ROCKETMAXCAPACITY|| Game.round == 749) || 
 					Game.senseCombatUnits(rocket.tile(), Constants.attackRange(UnitType.Ranger), Game.enemy()).length * Constants.RANGERDAMAGE >= rocket.health())
 			{
-				if (Game.canLaunchRocket(rocket, landingGrid.peek())) 
+				if (rocket.canLaunchRocket(landingGrid.peek())) 
 				{
 					cleanUpRocket(rocket);
-					Game.launchRocket(rocket, landingGrid.poll());
+					rocket.launchRocket(landingGrid.poll());
 					launchedRockets++;
 				}
 				

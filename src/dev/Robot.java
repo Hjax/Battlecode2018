@@ -280,4 +280,7 @@ public class Robot {
 	public void disintegrate() {
 		Game.gc.disintegrateUnit(gcId);
 	}
+	public boolean canLaunchRocket(Tile t) {
+		return Game.gc.canLaunchRocket(gcId, t.location);
+	}
 }
