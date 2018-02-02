@@ -7,7 +7,7 @@ public class GlobalStrategy {
 	public static boolean rocketRush = false;
 	public static int COMBATLIMIT = 50;
 	public static void run() {
-		if (GameInfoCache.enemyMages.size() > 0 && rush == true) 
+		if (Game.enemyMages.size() > 0 && rush == true) 
 		{
 			rush = false;
 			if (Game.researchInfo().getLevel(UnitType.Knight) < 3)
@@ -23,7 +23,7 @@ public class GlobalStrategy {
 	        	Game.queueResearch(UnitType.Rocket);
 			}
 		}
-		if (GameInfoCache.turnsSinceLastEnemy >= 100) {
+		if (Game.turnsSinceLastEnemy >= 100) {
 			COMBATLIMIT = 20;
 			rocketRush = true;
 		} else {

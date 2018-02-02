@@ -117,7 +117,7 @@ public class Pathfinding {
 	public static Direction karbonitePath(Tile source) 
 	{
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
-		if (GameInfoCache.nearestKarbonite[sourceInt] <= 0)
+		if (Game.nearestKarbonite[sourceInt] <= 0)
 		{
 			return Direction.Center;
 		}
@@ -128,10 +128,10 @@ public class Pathfinding {
 		{
 			int test = sourceInt + directions[direction];
 			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
-				if (best == 0 && (GameInfoCache.karboniteDistance[sourceInt + best]) >= GameInfoCache.karboniteDistance[test]) {
+				if (best == 0 && (Game.karboniteDistance[sourceInt + best]) >= Game.karboniteDistance[test]) {
 					best = directions[direction];
 				}
-				else if (GameInfoCache.karboniteDistance[sourceInt + best] > GameInfoCache.karboniteDistance[test]) {
+				else if (Game.karboniteDistance[sourceInt + best] > Game.karboniteDistance[test]) {
 					best = directions[direction];
 				}
 			}
