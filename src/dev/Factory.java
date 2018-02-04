@@ -9,13 +9,13 @@ public class Factory {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
 			if (!r.isBuilt) continue;
 			if (!r.isFactoryProducing()) {
-				if (Game.round < Constants.FACTORYHALTROUND && Game.allyCombat.size() < GlobalStrategy.COMBATLIMIT) {
-					if (Game.allyWorkers.size() == 0) {
-						if (Game.canAffordRobot(UnitType.Worker)) {
-							r.produceRobot(UnitType.Worker);
-						} 
-					}
-					else if (Game.allyRangers.size() + Game.allyKnights.size() > (2 * (Game.allyHealers.size() + 1))) {
+				if (Game.allyWorkers.size() == 0) {
+					if (Game.canAffordRobot(UnitType.Worker)) {
+						r.produceRobot(UnitType.Worker);
+					} 
+				}
+				else if (Game.round < Constants.FACTORYHALTROUND && Game.allyCombat.size() < GlobalStrategy.COMBATLIMIT) {
+					if (Game.allyRangers.size() + Game.allyKnights.size() > (2 * (Game.allyHealers.size() + 1))) {
 						if (Game.canAffordRobot(UnitType.Healer)) {
 							r.produceRobot(UnitType.Healer);
 						} 

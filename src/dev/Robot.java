@@ -235,9 +235,11 @@ public class Robot {
 		switch (type) {
 			case Healer:
 				Game.gc.overcharge(gcId, r.gcId);
+				r.overcharge();
 				break;
 			case Knight:
 				Game.gc.javelin(gcId, r.gcId);
+				r.health = Math.max(Math.min(Constants.maxHealth(r.unitType()), r.health - Constants.attackDamage(type)), 0);
 				break;
 			default:
 				break;
@@ -310,5 +312,11 @@ public class Robot {
 	}
 	public boolean canLaunchRocket(Tile t) {
 		return Game.gc.canLaunchRocket(gcId, t.location);
+	}
+	public void overcharge() {
+		moveHeat = 0;
+		attackHeat = 0;
+		abilityHeat = 0;
+		canAct = true;
 	}
 }

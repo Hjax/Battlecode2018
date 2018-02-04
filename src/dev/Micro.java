@@ -77,7 +77,9 @@ public class Micro {
 				newHelpRequests.add(best.tile());
 				r.attack(best);
 				if (r.unitType() == UnitType.Knight && r.isAbilityReady()) {
-					r.useAbililty(best);
+					if (r.canUseAbililty(best)) {
+						r.useAbililty(best);
+					}
 				}
 			}
 		}
