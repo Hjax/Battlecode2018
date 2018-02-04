@@ -7,6 +7,7 @@ import bc.*;
 public class Factory {
 	public static void run() {
 		for (Robot r: Game.senseNearbyUnits(UnitType.Factory, Game.team())) {
+			if (!r.isBuilt) continue;
 			if (!r.isFactoryProducing()) {
 				if (Game.round < Constants.FACTORYHALTROUND && Game.allyCombat.size() < GlobalStrategy.COMBATLIMIT) {
 					if (Game.allyWorkers.size() == 0) {

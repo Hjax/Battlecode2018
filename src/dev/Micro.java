@@ -258,6 +258,7 @@ public class Micro {
  	
 	public static void run() {
 		for (Robot r: Game.allyCombat) {
+			if (r.inGarrison() || r.inSpace() || !r.onMap()) continue;
 			if (r.unitType() == UnitType.Healer) continue;
 			micro(r);
 		}

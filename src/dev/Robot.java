@@ -39,6 +39,7 @@ public class Robot {
 			return box[unit.id()];
 		}
 		Robot r = new Robot(unit);
+		r.update();
 		box[unit.id()] = r;
 		return r;
 	}
@@ -54,20 +55,40 @@ public class Robot {
 			tile = Tile.getInstance(u.location().mapLocation());
 		} catch (Exception e) {
 		}
-		health = u.health();
-		abilityHeat = u.abilityHeat();
-		attackHeat = u.attackHeat();
-		moveHeat = u.movementHeat();
-		canAct = u.workerHasActed() > 0;
-		isSniping = u.rangerIsSniping() > 0;
-		researchLevel = u.researchLevel();
-		isAbilityUnlocked = u.isAbilityUnlocked() > 0;
-		isBuilt = u.structureIsBuilt() > 0;
-		factoryRoundsLeft = u.factoryRoundsLeft();
-		team = u.team();
 		type = u.unitType();
-		factoryUnitType = u.factoryUnitType();
-		isFactoryProducing = u.isFactoryProducing() > 0;
+		health = u.health();
+		team = u.team();
+		
+		if (type == UnitType.Worker) {
+			canAct = u.workerHasActed() > 0;
+		}
+		if (type == UnitType.Ranger) {
+			isSniping = u.rangerIsSniping() > 0;
+		}
+		
+		researchLevel = u.researchLevel();
+		if (type != UnitType.Rocket && type != UnitType.Factory) {
+			isAbilityUnlocked = u.isAbilityUnlocked() > 0;
+			moveHeat = u.movementHeat();
+			abilityHeat = u.abilityHeat();
+			attackHeat = u.attackHeat();
+		}
+		if (type == UnitType.Rocket || type == UnitType.Factory) {
+			isBuilt = u.structureIsBuilt() > 0;
+		}
+		if (type == UnitType.Factory) {
+			if (u.isFactoryProducing() > 0) {
+				factoryRoundsLeft = u.factoryRoundsLeft();
+				factoryUnitType = u.factoryUnitType();
+			} else {
+				factoryRoundsLeft = 0;
+				factoryUnitType = null;
+			}
+
+			
+			isFactoryProducing = u.isFactoryProducing() > 0;
+		}
+		
 		try {
 			rangerTarget = Tile.getInstance(u.rangerTargetLocation());
 		} catch (Exception e) {
@@ -248,6 +269,9 @@ public class Robot {
 		return Game.gc.canBlueprint(gcId, sType, d);
 	}
 	public boolean canAttack(Robot r) {
+		if (type == UnitType.Ranger) {
+			return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && r.tile().distanceSquaredTo(tile) > Constants.RANGERMINRAGE && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
+		}
 		return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
 	}
 	public void load(Robot r) {
@@ -275,7 +299,7 @@ public class Robot {
 		return isAbilityUnlocked && abilityHeat < 10;
 	}
 	public boolean canMove(Direction d) {
-		return Game.gc.canMove(gcId, d);
+		return moveHeat < 10 && Game.gc.canMove(gcId, d);
 	}
 	public void disintegrate() {
 		Game.gc.disintegrateUnit(gcId);

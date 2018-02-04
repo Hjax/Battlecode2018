@@ -16,6 +16,7 @@ public class Constants {
 			int enemyIndex = 0;
 			startingAlliesLocation = new Tile[startingRobotLocation.length / 2];
 			startingEnemiesLocation = new Tile[startingRobotLocation.length / 2];
+			System.out.println(startingRobotLocation.length);
 			for (Tile worker:startingRobotLocation)
 			{
 				if (Game.hasUnitAtLocation(worker))
@@ -73,6 +74,7 @@ public class Constants {
 	public static final int HEALERCOST = 40;
 	
 	public static final int EMERGENCYCLOCKBUFFER = 200;
+	public static final int RANGERMINRAGE = 10;
 	
 	
 	public static final int QUADRANTSIZE = 2;

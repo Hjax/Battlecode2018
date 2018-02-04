@@ -26,7 +26,11 @@ public class Game {
 	public static int round = 1;
 	public static Random rand = new Random();
 	
-	public static ArrayList<HashSet<Tile>> karboniteDeposits = new ArrayList<HashSet<Tile>>(Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE);
+	public static int[] karboniteDistance;
+	
+	public static ArrayList<HashSet<Tile>> karboniteDeposits;
+	public static int[] nearestKarbonite;
+	public static HashSet<Integer> karboniteLocations = new HashSet<Integer>();
 	
 	static {
         gc = new GameController();
@@ -58,6 +62,10 @@ public class Game {
         }
         WIDTH = (int) STARTINGMAP.getWidth();
         HEIGHT = (int) STARTINGMAP.getHeight();
+        
+        karboniteDistance = new int[WIDTH * HEIGHT];
+        nearestKarbonite = new int[WIDTH * HEIGHT];
+        
         MAPSIZE = WIDTH * HEIGHT;
         ASTEROIDPATTERN =  gc.asteroidPattern();
         ORBITPATTERN = gc.orbitPattern();
@@ -80,6 +88,8 @@ public class Game {
                 }
             }
         }
+        
+        karboniteDeposits = new ArrayList<HashSet<Tile>>(Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE);
         
 		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
 		{
@@ -111,7 +121,6 @@ public class Game {
     }
 	
 	public static Set<Tile> factoryCache = new HashSet<>();
-	public static int[] karboniteDistance = new int[WIDTH * HEIGHT];
 	static HashSet<Integer> queuedIndices = new HashSet<Integer>();
 	static LinkedList<Integer> karboniteQueue = new LinkedList<Integer>();
 	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
@@ -142,8 +151,8 @@ public class Game {
 	public static ArrayList<Robot> allEnemies = new ArrayList<Robot>();
 	
 	public static int turnsSinceLastEnemy = 0;
-	public static HashSet<Integer> karboniteLocations = new HashSet<Integer>();
-	public static int[] nearestKarbonite = new int[WIDTH * HEIGHT];
+
+	
 	
 	public static void startTurn() 
 	{
@@ -623,6 +632,7 @@ public class Game {
 		
 		for (int i = 0; i < robots.size(); i++) {
 			Robot bot = Robot.getInstance(robots.get(i));
+			bot.update();
 			if (bot.team() == TEAM && ( bot.unitType() == UnitType.Rocket || bot.unitType() == UnitType.Factory) && !bot.structureIsBuilt())
 			{
 				currentBlueprints.add(bot);
