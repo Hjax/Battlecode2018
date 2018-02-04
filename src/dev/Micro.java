@@ -258,6 +258,23 @@ public class Micro {
 			}
 			target(r);
 		}
+		else if (r.unitType() == UnitType.Mage) {
+			Robot[] enemies = Game.senseCombatUnits(r.tile(), Constants.attackRange(UnitType.Mage), Game.enemy());
+			if (enemies.length == 0 && target != null) {
+				Direction d = Pathfinding.path(r.tile(), target);
+				if (r.canMove(d)) {
+					r.move(d);
+					target(r);
+				}
+			} else if (r.moveHeat < 10){
+				Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r)));
+				target(r);
+				if (r.canMove(d)) {
+					r.move(d);
+				}
+			}
+			target(r);
+		}
  	}
  	
 	public static void run() {

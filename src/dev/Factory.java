@@ -20,10 +20,9 @@ public class Factory {
 							r.produceRobot(UnitType.Healer);
 						} 
 					} 
-					else if (GlobalStrategy.rush)
-					{
-						if (Game.canAffordRobot(UnitType.Knight)) {
-							r.produceRobot(UnitType.Knight);
+					else if (closestEnemyFactoryDistance(r) <= Constants.KNIGHTDISTANCE) {
+						if (Game.canAffordRobot(UnitType.Mage)) {
+							r.produceRobot(UnitType.Mage);
 						} 
 					} else if (Game.canAffordRobot(UnitType.Ranger)) {
 						r.produceRobot(UnitType.Ranger);
@@ -57,5 +56,19 @@ public class Factory {
 				}
 			}
 		}
+	}
+	
+	
+	public static int closestEnemyFactoryDistance(Robot r) {
+		Robot best = null;
+		if (Game.enemyFactories.size() == 0) {
+			return 0;
+		}
+		for (Robot f: Game.enemyFactories) {
+			if (best == null || Pathfinding.pathLength(f.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile())) {
+				best = f;
+			}
+		}
+		return Pathfinding.pathLength(best.tile(), r.tile());
 	}
 }

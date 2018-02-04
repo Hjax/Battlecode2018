@@ -47,6 +47,8 @@ public class Constants {
 	public static final int RUSHTHRESHOLD = 20;
 	public static int RUSHDISTANCE = INFINITY;
 	
+	public static final int KNIGHTDISTANCE = 12;
+	
 	public static int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 3;
 	public static int WORKERHARDCAP = 50;

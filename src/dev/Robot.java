@@ -183,6 +183,13 @@ public class Robot {
 		if (type == UnitType.Healer) {
 			Game.gc.heal(gcId, target.gcId);
 		} else {
+			if (type == UnitType.Mage) {
+				for (Robot r: Game.senseNearbyUnits(target.tile(), 2)) {
+					if (r != target) {
+						r.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type)), 0);
+					}
+				}
+			}
 			Game.gc.attack(gcId, target.gcId);
 		}
 	}
