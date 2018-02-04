@@ -222,8 +222,10 @@ public class Robot {
 		switch (type) {
 			case Ranger:
 				Game.gc.beginSnipe(gcId, t.location);
+				break;
 			case Mage:
 				Game.gc.blink(gcId, tile.location);
+				break;
 			default:
 				break;
 		}
@@ -233,8 +235,10 @@ public class Robot {
 		switch (type) {
 			case Healer:
 				Game.gc.overcharge(gcId, r.gcId);
+				break;
 			case Knight:
 				Game.gc.javelin(gcId, r.gcId);
+				break;
 			default:
 				break;
 		}
