@@ -26,6 +26,12 @@ public class Game {
 	public static int round = 1;
 	public static Random rand = new Random();
 	
+	public static int[] karboniteDistance;
+	
+	public static ArrayList<HashSet<Tile>> karboniteDeposits;
+	public static int[] nearestKarbonite;
+	public static HashSet<Integer> karboniteLocations = new HashSet<Integer>();
+	
 	static {
         gc = new GameController();
         TEAM = gc.team();
@@ -56,132 +62,109 @@ public class Game {
         }
         WIDTH = (int) STARTINGMAP.getWidth();
         HEIGHT = (int) STARTINGMAP.getHeight();
+        
+        karboniteDistance = new int[WIDTH * HEIGHT];
+        nearestKarbonite = new int[WIDTH * HEIGHT];
+        
         MAPSIZE = WIDTH * HEIGHT;
         ASTEROIDPATTERN =  gc.asteroidPattern();
         ORBITPATTERN = gc.orbitPattern();
-        pathMap = new boolean[(int) (Game.WIDTH * Game.HEIGHT)];
-        for (int x = 0; x < Game.WIDTH; x++) {
-        	for (int y = 0; y < Game.HEIGHT; y++) {
+        pathMap = new boolean[(int) (WIDTH * HEIGHT)];
+        for (int x = 0; x < WIDTH; x++) {
+        	for (int y = 0; y < HEIGHT; y++) {
             	if (STARTINGMAP.isPassableTerrainAt(new MapLocation(PLANET, x, y)) > 0) {
                 	passable.add(Tile.getInstance(PLANET, x, y));
-                	pathMap[x + Game.WIDTH * y] = true;
+                	pathMap[x + WIDTH * y] = true;
                 } else {
-                	pathMap[x + Game.WIDTH * y] = false;
+                	pathMap[x + WIDTH * y] = false;
                 }
             }
         }
         
-        for (int x = 0; x < Game.STARTINGMAPOTHER.getWidth(); x++) {
-        	for (int y = 0; y < Game.STARTINGMAPOTHER.getHeight(); y++) {
+        for (int x = 0; x < STARTINGMAPOTHER.getWidth(); x++) {
+        	for (int y = 0; y < STARTINGMAPOTHER.getHeight(); y++) {
             	if (STARTINGMAPOTHER.isPassableTerrainAt(new MapLocation(OTHERPLANET, x, y)) > 0) {
                 	passableOther.add(Tile.getInstance(OTHERPLANET, x, y));
                 }
             }
         }
+        
+        karboniteDeposits = new ArrayList<HashSet<Tile>>(Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE);
+        
+		for (int x = 0; x < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE; x++)
+		{
+			karboniteDeposits.add(new HashSet<Tile>());
+		}
+		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
+		Tile checkLocation;
+		for (int x = 0; x < startingMap(planet()).getWidth(); x++)
+		{
+			for (int y = 0; y < startingMap(planet()).getHeight(); y++)
+			{
+				checkLocation = Tile.getInstance(planet(), x, y);
+				if (initialKarboniteAt(checkLocation) > 0)
+				{
+					int loc = x/Constants.QUADRANTSIZE + y/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE;
+					karboniteDeposits.get(loc).add(checkLocation);
+					for (int dir:directions)
+					{
+						int test = loc + dir;
+						if ((Math.abs(test % Constants.QUADRANTROWSIZE - loc % Constants.QUADRANTROWSIZE) <= 1 && test >= 0 && test < Constants.QUADRANTROWSIZE * Constants.QUADRANTCOLUMNSIZE && pathMap[test]))
+						{
+							karboniteDeposits.get(test).add(checkLocation);
+						}
+					}
+				}
+			}
+		}
+		initDijkstraMap();
     }
+	
+	public static Set<Tile> factoryCache = new HashSet<>();
+	static HashSet<Integer> queuedIndices = new HashSet<Integer>();
+	static LinkedList<Integer> karboniteQueue = new LinkedList<Integer>();
+	public static HashSet<Robot> currentBlueprints = new HashSet<Robot>();
+	public static ArrayList<Robot> allyWorkers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyKnights = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyRangers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyMages = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyHealers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyFactories = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyRockets = new ArrayList<Robot>();
+	public static ArrayList<Robot> allyCombat = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyWorkers = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyKnights = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyRangers = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyMages = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyHealers = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyFactories = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyRockets = new ArrayList<Robot>();
+	public static ArrayList<Robot> allWorkers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allKnights = new ArrayList<Robot>();
+	public static ArrayList<Robot> allRangers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allMages = new ArrayList<Robot>();
+	public static ArrayList<Robot> allHealers = new ArrayList<Robot>();
+	public static ArrayList<Robot> allFactories = new ArrayList<Robot>();
+	public static ArrayList<Robot> allRockets = new ArrayList<Robot>();
+	public static ArrayList<Robot> allRobots = new ArrayList<Robot>();
+	public static ArrayList<Robot> allAllies = new ArrayList<Robot>();
+	public static ArrayList<Robot> allEnemies = new ArrayList<Robot>();
+	
+	public static int turnsSinceLastEnemy = 0;
+
+	
+	
 	public static void startTurn() 
 	{
 		Timing.reset();
-		GameInfoCache.updateCache();
+		updateCache();
 		Rocket.startTurn();
 		Micro.startTurn();
 		GlobalStrategy.run();
 	}
-
-	public static VecMapLocation allLocationsWithin(Tile location, long radis_squared) {
-		return gc.allLocationsWithin(location.location, radis_squared);
-	}
 	
 	public static AsteroidPattern asteroidPattern() {
 		return ASTEROIDPATTERN;
-	}
-	
-	public static void attack(Robot robot, Robot target) {
-		if (robot.unitType() == UnitType.Healer) {
-			heal(robot, target);
-		} else {
-			gc.attack(robot.id(), target.id());
-		}
-	}
-	
-	public static void beginSnipe(Robot ranger, Tile location) {
-		gc.beginSnipe(ranger.id(), location.location);
-	}
-	
-	public static void blink(Robot mage, Tile location) {
-		gc.blink(mage.id(), location.location);
-	}
-	
-	public static void blueprint(Robot worker, UnitType structure, Direction direction) {
-		gc.blueprint(worker.id(), structure, direction);
-	}
-	
-	public static void build(Robot worker, Robot blueprint) {
-		gc.build(worker.id(), blueprint.id());
-	}
-	
-	public static boolean canAttack(Robot robot, Robot target) {
-		if (robot.unitType() == UnitType.Healer) {
-			return canHeal(robot, target);
-		} else {
-			return gc.canAttack(robot.id(), target.id());			
-		}
-	}
-	
-	public static boolean canBeginSnipe(Robot ranger, Tile location) {
-		return gc.canBeginSnipe(ranger.id(), location.location);
-	}
-	
-	public static boolean canBlink(Robot mage, Tile location) {
-		return gc.canBlink(mage.id(), location.location);
-	}
-	
-	public static boolean canBlueprint(Robot worker, UnitType structure, Direction direction) { 
-		return gc.canBlueprint(worker.id(), structure, direction);
-	}
-	
-	public static boolean canBuild(Robot worker, Robot structure) {
-		return gc.canBuild(worker.id(), structure.id());
-	}
-	
-	public static boolean canHarvest(Robot worker, Direction direction) {
-		return gc.canHarvest(worker.id(), direction);
-	}
-	
-	public static boolean canHeal(Robot healer, Robot target) {
-		return gc.canHeal(healer.id(), target.id());
-	}
-	
-	public static boolean canJavelin(Robot knight, Robot target) {
-		return gc.canJavelin(knight.id(), target.id());
-	}
-	
-	public static boolean canLaunchRocket(Robot rocket, Tile destination) {
-		return gc.canLaunchRocket(rocket.id(), destination.location);
-	}
-	
-	public static boolean canLoad(Robot structure, Robot robot) {
-		return gc.canLoad(structure.id(), robot.id());
-	}
-	
-	public static boolean canMove(Robot robot, Direction direction) {
-		return isMoveReady(robot) && gc.canMove(robot.id(), direction);
-	}
-	
-	public static boolean canOvercharge(Robot healer, Robot target) {
-		return gc.canOvercharge(healer.id(), target.id());
-	}
-	
-	public static boolean canProduceRobot(Robot factory, UnitType robotType) {
-		return gc.canProduceRobot(factory.id(), robotType);
-	}
-	
-	public static boolean canRepair(Robot worker, Robot structure) {
-		return gc.canRepair(worker.id(), structure.id());
-	}
-	
-	public static boolean canReplicate(Robot worker, Direction direction) {
-		return gc.canReplicate(worker.id(), direction);
 	}
 	
 	public static boolean canSenseLocation(Tile location) {
@@ -192,56 +175,16 @@ public class Game {
 		return gc.canSenseUnit(unit.id());
 	}
 	
-	public static boolean canUnload(Robot structure, Direction direction) {
-		return gc.canUnload(structure.id(), direction);
-	}
-	
 	public static long currentDurationOfFlight() {
 		return gc.currentDurationOfFlight();
-	}
-	
-	public static void disintegrateUnit(Robot unit) {
-		gc.disintegrateUnit(unit.id());
 	}
 	
 	public static Veci32 getTeamArray(Planet planet) {
 		return gc.getTeamArray(planet);
 	}
 	
-	public static void harvest(Robot worker, Direction direction) {
-		gc.harvest(worker.id(), direction);
-	}
-	
 	public static boolean hasUnitAtLocation(Tile location) {
 		return gc.hasUnitAtLocation(location.location);
-	}
-	
-	public static void heal(Robot healer, Robot target) {
-		gc.heal(healer.id(), target.id());
-	}
-	
-	public static boolean isAttackReady(Robot unit) {
-		return gc.isAttackReady(unit.id());
-	}
-	
-	public static boolean isBeginSnipeReady(Robot ranger) {
-		return gc.isBeginSnipeReady(ranger.id());
-	}
-	
-	public static boolean isBlinkReady(Robot mage) {
-		return gc.isBlinkReady(mage.id());
-	}
-	
-	public static boolean isHealReady(Robot healer) {
-		return gc.isHealReady(healer.id());
-	}
-	
-	public static boolean isJavelinReady(Robot knight) {
-		return gc.isJavelinReady(knight.id());
-	}
-	
-	public static boolean isMoveReady(Robot unit) {
-		return gc.isMoveReady(unit.id());
 	}
 	
 	public static short isOccupiable(Tile location) {
@@ -252,41 +195,12 @@ public class Game {
 		return gc.isOver();
 	}
 	
-	public static boolean isOverchargeReady(Robot unit) {
-		return gc.isOverchargeReady(unit.id());
-	}
-	
-	public static void javelin(Robot knight, Robot target) {
-		gc.javelin(knight.id(), target.id());
-	}
-	
 	public static long karbonite() {
 		return gc.karbonite();
 	}
 	
 	public static long karboniteAt(Tile location) {
 		return gc.karboniteAt(location.location);
-	}
-	
-	public static void launchRocket(Robot rocket, Tile location) {
-		gc.launchRocket(rocket.id(), location.location);
-	}
-	
-	public static void load(Robot structure, Robot unit) {
-		gc.load(structure.id(), unit.id());
-	}
-	
-	public static void moveRobot(Robot robot, Direction direction) {
-		gc.moveRobot(robot.id(), direction);
-	}
-	
-	public static Robot[] myUnits() {
-		VecUnit myUnits = gc.myUnits();
-		Robot[] units = new Robot[(int) myUnits.size()];
-		for (int i = 0; i < myUnits.size(); i++) {
-		}
-		free(myUnits);
-		return units;
 	}
 	
 	public static void nextTurn() {
@@ -298,28 +212,12 @@ public class Game {
 		return ORBITPATTERN;
 	}
 	
-	public static void overcharge(Robot healer, Robot target) {
-		gc.overcharge(healer.id(), target.id());
-	}
-	
 	public static Planet planet() {
 		return PLANET;
 	}
 	
-	public static void produceRobot(Robot factory, UnitType type) {
-		gc.produceRobot(factory.id(), type);
-	}
-	
 	public static short queueResearch(UnitType branch) {
 		return gc.queueResearch(branch);
-	}
-	
-	public static void repair(Robot worker, Robot structure) {
-		gc.repair(worker.id(), structure.id());
-	}
-	
-	public static void replicate(Robot worker, Direction direction) {
-		gc.replicate(worker.id(), direction);
 	}
 	
 	public static ResearchInfo researchInfo() {
@@ -339,61 +237,117 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius) {
-		VecUnit result = gc.senseNearbyUnits(location.location, radius);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
 		}
-		free(result);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, Team team) {
-		VecUnit result = gc.senseNearbyUnitsByTeam(location.location, radius, team);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		List<Robot> current;
+		if (team == team()) {
+			current = allAllies;
+		} else {
+			current = allEnemies;
 		}
-		free(result);
+		for (Robot r: current) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
+		}
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type) {
-		VecUnit result = gc.senseNearbyUnitsByType(location.location, radius, type);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		List<Robot> current;
+		switch (type) {
+			case Factory:
+				current = allFactories;
+				break;
+			case Healer:
+				current = allHealers;
+				break;
+			case Knight:
+				current = allKnights;
+				break;
+			case Mage:
+				current = allMages;
+				break;
+			case Ranger:
+				current = allRangers;
+				break;
+			case Rocket:
+				current = allRockets;
+				break;
+			case Worker:
+				current = allWorkers;
+				break;
+			default:
+				current = new ArrayList<Robot>();
+				break;
 		}
-		free(result);
+		for (Robot r: current) {
+			if (!r.onMap()) continue;
+			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
+		}
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type, Team team) {
-		VecUnit result =  gc.senseNearbyUnitsByType(location.location, radius, type);
-		List<Robot> units = new ArrayList<Robot>(); 
-		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).team().equals(team)) {
-				units.add(Robot.getInstance(result.get(i)));
+		// todo iterate over just the right robots
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
 			}
 		}
-		free(result);
-		return units.toArray(new Robot[0]);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
+		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(UnitType type, Team team) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type, team);
+		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, type, team);
 	}
 	
 	public static Robot[] senseNearbyUnits(Team team) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, team);
+		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, team);
 	}
 	
 	public static Robot[] senseNearbyUnits(UnitType type) {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, type);
+		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, type);
 	}
 	
 	public static Robot[] senseNearbyUnits() {
-		return senseNearbyUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY);
+		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY);
 	}
 	
 	public static Robot senseUnitAtLocation(Tile location) {
@@ -401,19 +355,31 @@ public class Game {
 	}
 	
 	public static Robot[] senseCombatUnits(Tile location, long radius, Team team) {
-		VecUnit result =  gc.senseNearbyUnitsByTeam(location.location, radius, team);
-		List<Robot> units = new ArrayList<Robot>(); 
-		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).unitType() != UnitType.Worker && result.get(i).unitType() != UnitType.Factory && result.get(i).unitType() != UnitType.Rocket) {
-				units.add(Robot.getInstance(result.get(i)));
+		List<Robot> current;
+		if (team == team()) {
+			current = allAllies;
+		} else {
+			current = allEnemies;
+		}
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: current) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				if (r.unitType() != UnitType.Worker && r.unitType() != UnitType.Factory && r.unitType() != UnitType.Rocket) {
+					result[total++] = r;
+				}
 			}
 		}
-		free(result);
-		return units.toArray(new Robot[0]);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
+		return units;
 	}
 	
 	public static Robot[] senseCombatUnits(Team team) {
-		return senseCombatUnits(Tile.getInstance(Game.planet(), 0, 0), INFINITY, team);
+		return senseCombatUnits(Tile.getInstance(planet(), 0, 0), INFINITY, team);
 	}
 	
 	public static PlanetMap startingMap(Planet planet) {
@@ -430,6 +396,10 @@ public class Game {
 	
 	public static Team enemy() {
 		return ENEMY;
+	}
+	
+	public static boolean canAffordRobot(UnitType r) {
+		return gc.karbonite() >= Constants.cost(r);
 	}
 	
 	public static Robot unit(int id) {
@@ -456,12 +426,6 @@ public class Game {
 		return units;
 	}
 	
-	public static void unload(Robot structure, Direction direction) {
-		Robot[] garrison = structure.structureGarrison();
-		if (garrison.length > 0) {
-			gc.unload(structure.id(), direction);		
-		}
-	}
 	
 	public static Team winningTeam() {
 		return gc.winningTeam();
@@ -526,6 +490,278 @@ public class Game {
 			u.get(i).delete();
 		}
 		u.delete();
+	}
+
+	
+
+	static void updateDijkstraMap()
+	{
+		int[] directions = {1, 1 - WIDTH, -1 * WIDTH, -1 - WIDTH, -1, WIDTH - 1, WIDTH, WIDTH + 1};
+		int infinityTimer = 0;
+		while (karboniteQueue.size() > 0)
+		{
+			if (infinityTimer++ > MAPSIZE)
+			{
+				System.out.printf("count to infinity\n");
+				break;
+			}
+			int loc = karboniteQueue.poll();
+			queuedIndices.remove(loc);
+			for (int dir:directions)
+			{
+				int test = loc + dir;
+				if ((Math.abs(test % WIDTH - loc % WIDTH) <= 1 && test >= 0 && test < WIDTH * HEIGHT && pathMap[test]))
+				{
+					if (karboniteLocations.contains(nearestKarbonite[loc]) && !karboniteLocations.contains(nearestKarbonite[test]))
+					{
+						nearestKarbonite[test] = nearestKarbonite[loc];
+						karboniteDistance[test] = karboniteDistance[loc] + 1;
+						if (!queuedIndices.contains(test))
+						{
+							karboniteQueue.add(test);
+							queuedIndices.add(test);
+						}
+						
+					}
+					else if (karboniteLocations.contains(nearestKarbonite[test]) && (!karboniteLocations.contains(nearestKarbonite[loc]) || karboniteDistance[test]+1 < karboniteDistance[loc]))
+					{
+						karboniteDistance[loc] = karboniteDistance[test] + 1;
+						nearestKarbonite[loc] = nearestKarbonite[test];
+						if (!queuedIndices.contains(loc))
+						{
+							karboniteQueue.add(loc);
+							queuedIndices.add(loc);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	static void initDijkstraMap()
+	{
+		
+		queuedIndices = new HashSet<Integer>();
+		karboniteQueue = new LinkedList<Integer>();
+		for (int x = 0; x < WIDTH; x++)
+		{
+			for (int y = 0; y < HEIGHT; y++)
+			{
+				int index = x + y * WIDTH;
+				if (initialKarboniteAt(Tile.getInstance(planet(), x, y)) > 0)
+				{
+					karboniteDistance[index] = 0;
+					nearestKarbonite[index] = index;
+					karboniteQueue.add(index);
+					queuedIndices.add(index);
+					karboniteLocations.add(index);
+				}
+				else
+				{
+					karboniteDistance[index] = Constants.INFINITY;
+					nearestKarbonite[index] = -1;
+				}
+				
+			}
+		}
+		updateDijkstraMap();
+		
+		
+	
+	}
+
+	public static void cleanUpFactories() {
+		// idk what senseUnitAtLocation returns, so im checking for null AND error
+		List<Tile> toRemove = new ArrayList<>();
+		for (Tile f: factoryCache) {
+			try {
+				if (canSenseLocation(f) && senseUnitAtLocation(f) == null) {
+					toRemove.add(f);
+				}
+			} catch (Exception e) {
+				toRemove.add(f);
+			}
+			
+		}
+		for (Tile f: toRemove) factoryCache.remove(f);
+	}
+
+	public static void updateCache()
+	{
+		cleanUpFactories();
+		
+		turnsSinceLastEnemy++;
+		
+		allyWorkers = new ArrayList<Robot>();
+		allyKnights = new ArrayList<Robot>();
+		allyRangers = new ArrayList<Robot>();
+		allyMages = new ArrayList<Robot>();
+		allyHealers = new ArrayList<Robot>();
+		allyFactories = new ArrayList<Robot>();
+		allyRockets = new ArrayList<Robot>();
+		allyCombat = new ArrayList<Robot>();
+		enemyWorkers = new ArrayList<Robot>();
+		enemyKnights = new ArrayList<Robot>();
+		enemyRangers = new ArrayList<Robot>();
+		enemyMages = new ArrayList<Robot>();
+		enemyHealers = new ArrayList<Robot>();
+		enemyFactories = new ArrayList<Robot>();
+		enemyRockets = new ArrayList<Robot>();
+		allRobots = new ArrayList<Robot>();
+		allAllies = new ArrayList<Robot>();
+		allEnemies = new ArrayList<Robot>();
+		currentBlueprints = new HashSet<Robot>();
+		
+		updateUnitTypes();
+		
+	
+		queuedIndices = new HashSet<Integer>();
+		karboniteQueue = new LinkedList<Integer>();
+		HashSet<Tile> depletedDeposits = new HashSet<Tile>();
+		
+		for (HashSet<Tile> quadrant:karboniteDeposits)
+		{
+			for (Tile deposit: quadrant)
+			{
+				if (canSenseLocation(deposit))
+				{
+					if (karboniteAt(deposit) == 0)
+					{
+						depletedDeposits.add(deposit);
+					}
+				}
+			}
+			for (Tile deposit: depletedDeposits)
+			{
+				quadrant.remove(deposit);
+				
+			}
+		}
+		for (Integer deposit:karboniteLocations)
+		{
+			Tile location = Tile.getInstance(planet(), deposit % WIDTH, deposit / WIDTH);
+			if (canSenseLocation(location) && karboniteAt(location) == 0)
+			{
+				karboniteQueue.add(deposit);
+				queuedIndices.add(deposit);
+			}
+			
+		}
+		for (Integer deposit:queuedIndices)
+		{
+			karboniteLocations.remove(deposit);
+		}
+		if (queuedIndices.size() > 0)
+		{
+			for (int x = 0; x < WIDTH * HEIGHT; x++)
+			{
+				if (nearestKarbonite[x] != -1 && !karboniteLocations.contains(nearestKarbonite[x]))
+				{
+					karboniteQueue.add(x);
+					queuedIndices.add(x);
+				}
+			}
+		}
+		
+		AsteroidStrike asteroid = null;
+		if (ASTEROIDPATTERN.hasAsteroid(round()))
+		{
+			asteroid = ASTEROIDPATTERN.asteroid(round());
+			if (PLANET == Planet.Mars)
+			{
+				int loc = asteroid.getLocation().getX() + asteroid.getLocation().getY() * WIDTH;
+				karboniteLocations.add(loc);
+				karboniteDistance[loc] = 0;
+				nearestKarbonite[loc] = loc;
+				queuedIndices.add(loc);
+				karboniteQueue.add(loc);
+			}
+		}
+		
+		if (karboniteLocations.size() > 0)
+		{
+			updateDijkstraMap();
+		}
+		
+		if (planet() == Planet.Earth && allyWorkers.size() + allyFactories.size() == 0)
+		{
+			writeTeamArray(0, 1);
+		}
+		if (planet() == Planet.Mars) {
+			writeTeamArray(1, allyWorkers.size());
+		}
+		
+	}
+
+	static void updateUnitTypes()
+	{
+		
+		VecUnit robots = gc.units();
+		
+		for (int i = 0; i < robots.size(); i++) {
+			Robot bot = Robot.getInstance(robots.get(i));
+			bot.update();
+			if (bot.team() == TEAM && ( bot.unitType() == UnitType.Rocket || bot.unitType() == UnitType.Factory) && !bot.structureIsBuilt())
+			{
+				currentBlueprints.add(bot);
+			}
+			if (bot.team() == enemy() && (bot.unitType() == UnitType.Factory)) {
+				factoryCache.add(bot.tile());
+			}
+			allRobots.add(bot);
+			if (bot.team() == enemy()) {
+				turnsSinceLastEnemy = 0;
+				allEnemies.add(bot);
+			} else {
+				allAllies.add(bot);
+			}
+			switch (bot.unitType()) {
+				case Factory:
+					if (bot.team() == team()) allyFactories.add(bot);
+					else enemyFactories.add(bot);
+					break;
+				case Rocket:
+					if (bot.team() == team()) allyRockets.add(bot);
+					else enemyRockets.add(bot);
+					break;
+				case Ranger:
+					if (bot.team() == team()) {
+						allyRangers.add(bot);
+						allyCombat.add(bot);
+					}
+					else enemyRangers.add(bot);
+					break;
+				case Knight:
+					if (bot.team() == team()) {
+						allyKnights.add(bot);
+						allyCombat.add(bot);
+					}
+					else enemyKnights.add(bot);
+					break;
+				case Healer:
+					if (bot.team() == team()) {
+						allyHealers.add(bot);
+						allyCombat.add(bot);
+					}
+					else enemyHealers.add(bot);
+					break;
+				case Mage:
+					if (bot.team() == team()) {
+						allyMages.add(bot);
+						allyCombat.add(bot);
+					}
+					else enemyMages.add(bot);
+					break;
+				case Worker:
+					if (bot.team() == team()) {
+						allyWorkers.add(bot);
+					}
+					else enemyWorkers.add(bot);
+					break;
+			}
+		}
+		
+		free(robots);
 	}
 
 }

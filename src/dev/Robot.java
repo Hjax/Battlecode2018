@@ -3,10 +3,34 @@ package dev;
 import bc.*;
 
 public class Robot {
+	
 	private int id;
 	private int gcId;
 	private static int nextId = 0;
 	private static Robot[] box;
+	
+	// properties that we cache and reuse / update every turn
+	public long health = 0;
+	public Tile tile;
+	public Tile rangerTarget;
+	public boolean isInGarrison = false;
+	public boolean isInSpace = false;
+	public boolean onMap = true;
+	public long abilityHeat = 0;
+	public long attackHeat = 0;
+	public long moveHeat = 0;
+	public boolean canAct = true;
+	public boolean isSniping = false;
+	public long researchLevel = 0;
+	public boolean isAbilityUnlocked = false;
+	public boolean isBuilt = false;
+	public boolean isFactoryProducing = false;
+	public UnitType factoryUnitType;
+	public long factoryRoundsLeft = 0;
+	public Team team;
+	public Planet p;
+	public UnitType type;
+	
 	static {
 		box = new Robot[65536];
 	}
@@ -15,6 +39,7 @@ public class Robot {
 			return box[unit.id()];
 		}
 		Robot r = new Robot(unit);
+		r.update();
 		box[unit.id()] = r;
 		return r;
 	}
@@ -24,80 +49,76 @@ public class Robot {
 		this.id = nextId++;
 	}
 	
-	long abilityCooldown()  {
+	public void update() {
 		Unit u = Game.gc.unit(gcId);
-		long result = u.abilityCooldown();
+		try {
+			tile = Tile.getInstance(u.location().mapLocation());
+		} catch (Exception e) {
+		}
+		type = u.unitType();
+		health = u.health();
+		team = u.team();
+		
+		if (type == UnitType.Worker) {
+			canAct = u.workerHasActed() > 0;
+		}
+		if (type == UnitType.Ranger) {
+			isSniping = u.rangerIsSniping() > 0;
+		}
+		
+		researchLevel = u.researchLevel();
+		if (type != UnitType.Rocket && type != UnitType.Factory) {
+			isAbilityUnlocked = u.isAbilityUnlocked() > 0;
+			moveHeat = u.movementHeat();
+			abilityHeat = u.abilityHeat();
+			attackHeat = u.attackHeat();
+		}
+		if (type == UnitType.Rocket || type == UnitType.Factory) {
+			isBuilt = u.structureIsBuilt() > 0;
+		}
+		if (type == UnitType.Factory) {
+			if (u.isFactoryProducing() > 0) {
+				factoryRoundsLeft = u.factoryRoundsLeft();
+				factoryUnitType = u.factoryUnitType();
+			} else {
+				factoryRoundsLeft = 0;
+				factoryUnitType = null;
+			}
+
+			
+			isFactoryProducing = u.isFactoryProducing() > 0;
+		}
+		
+		try {
+			rangerTarget = Tile.getInstance(u.rangerTargetLocation());
+		} catch (Exception e) {
+			
+		}
+		isInGarrison = u.location().isInGarrison();
+		isInSpace = u.location().isInSpace();
+		onMap = u.location().isOnMap();
 		u.delete();
-		return result;
+		
 	}
+	
+
 	long abilityHeat() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.abilityHeat();
-		u.delete();
-		return result;
-	}
-	long abilityRange() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.abilityRange();
-		u.delete();
-		return result;
-	}
-	long attackCooldown() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.attackCooldown();
-		u.delete();
-		return result;
+		return abilityHeat;
 	}
 	long attackHeat() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.attackHeat();
-		u.delete();
-		return result;
-	}
-	long attackRange() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.attackRange();
-		u.delete();
-		return result;
-	}
-	int damage() {
-		Unit u = Game.gc.unit(gcId);
-		int result = u.damage();
-		u.delete();
-		return result;
+		return attackHeat;
 	}
 	boolean equals(Robot other) {
 		return gcId == other.gcId;
 	}
-	long factoryMaxRoundsLeft() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.factoryMaxRoundsLeft();
-		u.delete();
-		return result;
-	}
 	long factoryRoundsLeft()  {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.factoryRoundsLeft();
-		u.delete();
-		return result;
+		return factoryRoundsLeft;
 	}
 	UnitType factoryUnitType() {
-		Unit u = Game.gc.unit(gcId);
-		UnitType result = u.factoryUnitType();
-		u.delete();
-		return result;
-	}
-	long healerSelfHealAmount() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.healerSelfHealAmount();
-		u.delete();
-		return result;
+		return factoryUnitType;
 	}
 	long health() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.health();
-		u.delete();
-		return result;
+		return health;
 	}
 	int id() {
 		return gcId;
@@ -105,107 +126,26 @@ public class Robot {
 	int predictableId() {
 		return id;
 	}
-	short isAbilityUnlocked() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.isAbilityUnlocked();
-		u.delete();
-		return result;
+	boolean isAbilityUnlocked() {
+		return isAbilityUnlocked;
 	}
-	short isFactoryProducing() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.isFactoryProducing();
-		u.delete();
-		return result;
-	}
-	long knightDefense() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.knightDefense();
-		u.delete();
-		return result;
-	}
-	Location location() {
-		Unit u = Game.gc.unit(gcId);
-		Location result = u.location();
-		u.delete();
-		return result;
+	boolean isFactoryProducing() {
+		return isFactoryProducing;
 	}
 	Tile tile() {
-		Unit u = Game.gc.unit(gcId);
-		Tile result = Tile.getInstance(u.location().mapLocation());
-		u.delete();
-		return result;
-	}
-	long maxHealth() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.maxHealth();
-		u.delete();
-		return result;
-	}
-	long movementCooldown() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.movementCooldown();
-		u.delete();
-		return result;
+		return tile;
 	}
 	long movementHeat() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.movementHeat();
-		u.delete();
-		return result;
+		return moveHeat;
 	}
-	long rangerCannotAttackRange() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.rangerCannotAttackRange();
-		u.delete();
-		return result;
-	}
-	long rangerCountdown() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.rangerCountdown();
-		u.delete();
-		return result;
-	}
-	short rangerIsSniping() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.rangerIsSniping();
-		u.delete();
-		return result;
-	}
-	long rangerMaxCountdown() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.rangerMaxCountdown();
-		u.delete();
-		return result;
+	boolean rangerIsSniping() {
+		return isSniping;
 	}
 	Tile rangerTargetLocation() {
-		Unit u = Game.gc.unit(gcId);
-		Tile result = Tile.getInstance(u.rangerTargetLocation());
-		u.delete();
-		return result;
+		return rangerTarget;
 	}
 	long researchLevel() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.researchLevel();
-		u.delete();
-		return result;
-	}
-	int rocketBlastDamage() {
-		Unit u = Game.gc.unit(gcId);
-		int result = u.rocketBlastDamage();
-		u.delete();
-		return result;
-	}
-	short rocketIsUsed() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.rocketIsUsed();
-		u.delete();
-		return result;
-	}
-	long rocketTravelTimeDecrease() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.rocketTravelTimeDecrease();
-		u.delete();
-		return result;
+		return researchLevel;
 	}
 	Robot[] structureGarrison() {
 		VecUnitID result = Game.gc.unit(gcId).structureGarrison();
@@ -216,58 +156,159 @@ public class Robot {
 		result.delete();
 		return units;
 	}
-	short structureIsBuilt() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.structureIsBuilt();
-		u.delete();
-		return result;
-	}
-	long structureMaxCapacity() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.structureMaxCapacity();
-		u.delete();
-		return result;
+	boolean structureIsBuilt() {
+		return isBuilt;
 	}
 	Team team() {
-		Unit u = Game.gc.unit(gcId);
-		Team result = u.team();
-		u.delete();
-		return result;
+		return team;
 	}
 	UnitType unitType() {
-		Unit u = Game.gc.unit(gcId);
-		UnitType result = u.unitType();
-		u.delete();
-		return result;
+		return type;
 	}
-	long visionRange() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.visionRange();
-		u.delete();
-		return result;
+	boolean workerHasActed() {
+		return canAct;
 	}
-	long workerBuildHealth() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.workerBuildHealth();
-		u.delete();
-		return result;
+	public boolean onMap() {
+		return onMap;
 	}
-	long workerHarvestAmount() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.workerHarvestAmount();
-		u.delete();
-		return result;
+	public boolean inGarrison() {
+		return isInGarrison;
 	}
-	short workerHasActed() {
-		Unit u = Game.gc.unit(gcId);
-		short result = u.workerHasActed();
-		u.delete();
-		return result;
+	public boolean inSpace() {
+		return isInSpace;
 	}
-	long workerRepairHealth() {
-		Unit u = Game.gc.unit(gcId);
-		long result = u.workerRepairHealth();
-		u.delete();
-		return result;
+	public void attack(Robot target) {
+		target.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type)), 0);
+		attackHeat += Constants.attackCooldown(type);
+		if (type == UnitType.Healer) {
+			Game.gc.heal(gcId, target.gcId);
+		} else {
+			Game.gc.attack(gcId, target.gcId);
+		}
+	}
+	public void move(Direction d) {
+		moveHeat += Constants.movementCooldown(type);
+		tile = tile.add(d);
+		Game.gc.moveRobot(gcId, d);
+	}
+	public boolean canUseAbililty(Direction d) {
+		return Game.gc.canReplicate(gcId, d);
+	}
+	public boolean canUseAbility(Tile t) {
+		switch (type) {
+			case Ranger:
+				return Game.gc.canBeginSnipe(gcId, t.location);
+			case Mage:
+				return Game.gc.canBlink(gcId, tile.location);
+			default:
+				return false;
+		}
+	}
+	public boolean canUseAbililty(Robot r) {
+		switch (type) {
+			case Healer:
+				return Game.gc.canOvercharge(gcId, r.gcId);
+			case Knight:
+				Game.gc.canJavelin(gcId, r.gcId);
+			default:
+				return false;
+		}
+	}
+	public void useAbility(Direction d) {
+		Game.gc.replicate(gcId, d);
+		abilityHeat += Constants.abilityCooldown(type);
+	}
+	public void useAbility(Tile t) {
+		switch (type) {
+			case Ranger:
+				Game.gc.beginSnipe(gcId, t.location);
+				break;
+			case Mage:
+				Game.gc.blink(gcId, tile.location);
+				break;
+			default:
+				break;
+		}
+		abilityHeat += Constants.abilityCooldown(type);
+	}
+	public void useAbililty(Robot r) {
+		switch (type) {
+			case Healer:
+				Game.gc.overcharge(gcId, r.gcId);
+				break;
+			case Knight:
+				Game.gc.javelin(gcId, r.gcId);
+				break;
+			default:
+				break;
+		}
+		abilityHeat += Constants.abilityCooldown(type);
+	}
+	public void build(Robot s) {
+		Game.gc.build(gcId, s.gcId);
+		canAct = false;
+	}
+	public boolean canBuild(Robot s) {
+		return Game.gc.canBuild(gcId, s.gcId);
+	}
+	public void repair(Robot s) {
+		Game.gc.repair(gcId, s.gcId);
+		canAct = false;
+	}
+	public boolean canRepair(Robot s) {
+		return Game.gc.canRepair(gcId, s.gcId);
+	}
+	public void harvest(Direction d) {
+		Game.gc.harvest(gcId, d);
+		canAct = false;
+	}
+	public boolean canHarvest(Direction d) {
+		return Game.gc.canHarvest(gcId, d);
+	}
+	public void blueprint(UnitType sType, Direction d) {
+		Game.gc.blueprint(gcId, sType, d);
+		canAct = false;
+	}
+	public boolean canBlueprint(UnitType sType, Direction d) {
+		return Game.gc.canBlueprint(gcId, sType, d);
+	}
+	public boolean canAttack(Robot r) {
+		if (type == UnitType.Ranger) {
+			return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && r.tile().distanceSquaredTo(tile) > Constants.RANGERMINRAGE && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
+		}
+		return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
+	}
+	public void load(Robot r) {
+		Game.gc.load(gcId, r.gcId);
+	}
+	public void unload(Direction d) {
+		Game.gc.unload(gcId, d);
+	}
+	public boolean isAttackReady() {
+		return attackHeat < 10;
+	}
+	public void produceRobot(UnitType r) {
+		Game.gc.produceRobot(gcId, r);
+	}
+	public boolean canLoad(Robot r) {
+		return Game.gc.canLoad(gcId, r.gcId);
+	}
+	public boolean canUnload(Direction d) {
+		return Game.gc.canUnload(gcId, d);
+	}
+	public void launchRocket(Tile t) {
+		Game.gc.launchRocket(gcId, t.location);
+	}
+	public boolean isAbilityReady() {
+		return isAbilityUnlocked && abilityHeat < 10;
+	}
+	public boolean canMove(Direction d) {
+		return moveHeat < 10 && Game.gc.canMove(gcId, d);
+	}
+	public void disintegrate() {
+		Game.gc.disintegrateUnit(gcId);
+	}
+	public boolean canLaunchRocket(Tile t) {
+		return Game.gc.canLaunchRocket(gcId, t.location);
 	}
 }

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import bc.Direction;
 import bc.Planet;
+import bc.UnitType;
 
 public class Rocket 
 {
@@ -120,7 +121,7 @@ public class Rocket
 		Set<Robot> toRemove = new HashSet<>();
 		for (Robot r: assignments.keySet()) {
 			try {
-				if (!assignments.get(r).location().isOnMap() || assignments.get(r).health() <= 0) {
+				if (!assignments.get(r).onMap()|| assignments.get(r).health() <= 0) {
 					toRemove.add(r);
 					assignmentCount.put(r, assignmentCount.getOrDefault(r, 0) - 1);
 				}
@@ -150,17 +151,17 @@ public class Rocket
 	
   	
 	private static void assignToRockets() {
-		for (Robot rocket: GameInfoCache.allyRockets)  {
-			if (!(rocket.structureIsBuilt() == 1)) {
+		for (Robot rocket: Game.allyRockets)  {
+			if (!(rocket.structureIsBuilt())) {
 				continue;
 			}
 			// not sure if this check is needed, but it cant hurt
-			if (!rocket.location().isOnMap() || !rocket.location().isOnPlanet(Game.planet())) {
+			if (!rocket.onMap()) {
 				continue;
 			}
-			while (assignmentCount.getOrDefault(rocket, 0) < rocket.structureMaxCapacity()) {
+			while (assignmentCount.getOrDefault(rocket, 0) < Constants.ROCKETMAXCAPACITY) {
 				Robot best = null;
-				for (Robot r: GameInfoCache.allyCombat) {
+				for (Robot r: Game.allyCombat) {
 					if (!assignments.containsKey(r) && (best == null || Pathfinding.pathLength(best.tile(), rocket.tile()) > Pathfinding.pathLength(r.tile(), rocket.tile()))) {
 						best = r;
 					}
@@ -176,15 +177,15 @@ public class Rocket
 	
 	private static void unload()
 	{
-		for (Robot rocket: GameInfoCache.allyRockets) 
+		for (Robot rocket: Game.allyRockets) 
 		{
 			if (rocket.structureGarrison().length > 0) 
 			{
 				for (Direction dir: Game.moveDirections) 
 				{
-					if (Game.canUnload(rocket, dir)) 
+					if (rocket.canUnload(dir)) 
 					{
-						Game.unload(rocket, dir);
+						rocket.unload(dir);
 					}
 				}
 			}
@@ -193,17 +194,17 @@ public class Rocket
 	
 	private static void launch()
 	{
-		for (Robot rocket: GameInfoCache.allyRockets)
+		for (Robot rocket: Game.allyRockets)
 		{
 			System.out.printf("rocket has %d units loaded\n", rocket.structureGarrison().length);
 			if ((launchedRockets == 0 && rocket.structureGarrison().length > 1) || 
-					(rocket.structureGarrison().length == rocket.structureMaxCapacity() || Game.round == 749) || 
-					Game.senseCombatUnits(rocket.tile(), Constants.RANGERRANGE, Game.enemy()).length * Constants.RANGERDAMAGE >= rocket.health())
+					(rocket.structureGarrison().length == Constants.ROCKETMAXCAPACITY|| Game.round == 749) || 
+					Game.senseCombatUnits(rocket.tile(), Constants.attackRange(UnitType.Ranger), Game.enemy()).length * Constants.RANGERDAMAGE >= rocket.health())
 			{
-				if (Game.canLaunchRocket(rocket, landingGrid.peek())) 
+				if (rocket.canLaunchRocket(landingGrid.peek())) 
 				{
 					cleanUpRocket(rocket);
-					Game.launchRocket(rocket, landingGrid.poll());
+					rocket.launchRocket(landingGrid.poll());
 					launchedRockets++;
 				}
 				
