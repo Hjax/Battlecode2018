@@ -255,7 +255,13 @@ public class Game {
 	public static Robot[] senseNearbyUnits(Tile location, long radius, Team team) {
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		for (Robot r: allRobots) {
+		List<Robot> current;
+		if (team == team()) {
+			current = allAllies;
+		} else {
+			current = allEnemies;
+		}
+		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
@@ -271,7 +277,34 @@ public class Game {
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type) {
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		for (Robot r: allRobots) {
+		List<Robot> current;
+		switch (type) {
+			case Factory:
+				current = allFactories;
+				break;
+			case Healer:
+				current = allHealers;
+				break;
+			case Knight:
+				current = allKnights;
+				break;
+			case Mage:
+				current = allMages;
+				break;
+			case Ranger:
+				current = allRangers;
+				break;
+			case Rocket:
+				current = allRockets;
+				break;
+			case Worker:
+				current = allWorkers;
+				break;
+			default:
+				current = new ArrayList<Robot>();
+				break;
+		}
+		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
@@ -285,6 +318,7 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type, Team team) {
+		// todo iterate over just the right robots
 		Robot[] result = new Robot[1024];
 		int total = 0;
 		for (Robot r: allRobots) {
@@ -321,9 +355,15 @@ public class Game {
 	}
 	
 	public static Robot[] senseCombatUnits(Tile location, long radius, Team team) {
+		List<Robot> current;
+		if (team == team()) {
+			current = allAllies;
+		} else {
+			current = allEnemies;
+		}
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		for (Robot r: allRobots) {
+		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				if (r.unitType() != UnitType.Worker && r.unitType() != UnitType.Factory && r.unitType() != UnitType.Rocket) {
