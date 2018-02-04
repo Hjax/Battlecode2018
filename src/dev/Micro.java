@@ -27,6 +27,7 @@ public class Micro {
 		if (!r.isAbilityReady()) return;
 		Robot[] chargee = Game.senseCombatUnits(r.tile(), Constants.abilityRange(r.unitType()), Game.team());
 		for (Robot t: chargee) {
+			if (t.unitType() == UnitType.Healer) continue;
 			if (Game.senseNearbyUnits(t.tile(), Constants.attackRange(r.unitType()), Game.enemy()).length > 0) {
 				r.useAbililty(t);
 				micro(t);
@@ -210,6 +211,7 @@ public class Micro {
 		}
 		if (r.unitType() == UnitType.Ranger) {
 			Robot[] enemies = Game.senseCombatUnits(r.tile(), Constants.attackRange(UnitType.Ranger), Game.enemy());
+
 			if (enemies.length == 0 && target != null) {
 				Direction d = Pathfinding.path(r.tile(), target);
 				if (r.canMove(d)) {
@@ -244,6 +246,7 @@ public class Micro {
 		}
 		else if (r.unitType() == UnitType.Knight) {
 			Robot[] enemies = Game.senseNearbyUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy());
+			
 			if (enemies.length == 0 && target != null) {
 				Direction d = Pathfinding.path(r.tile(), target);
 				if (r.canMove(d)) {

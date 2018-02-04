@@ -237,45 +237,67 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius) {
-		VecUnit result = gc.senseNearbyUnits(location.location, radius);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
 		}
-		free(result);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, Team team) {
-		VecUnit result = gc.senseNearbyUnitsByTeam(location.location, radius, team);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
 		}
-		free(result);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type) {
-		VecUnit result = gc.senseNearbyUnitsByType(location.location, radius, type);
-		Robot[] units = new Robot[(int) result.size()];
-		for (int i = 0; i < result.size(); i++) {
-			units[i] = Robot.getInstance(result.get(i));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
+			}
 		}
-		free(result);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
 		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type, Team team) {
-		VecUnit result =  gc.senseNearbyUnitsByType(location.location, radius, type);
-		List<Robot> units = new ArrayList<Robot>(); 
-		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).team().equals(team)) {
-				units.add(Robot.getInstance(result.get(i)));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				result[total++] = r;
 			}
 		}
-		free(result);
-		return units.toArray(new Robot[0]);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
+		return units;
 	}
 	
 	public static Robot[] senseNearbyUnits(UnitType type, Team team) {
@@ -299,15 +321,21 @@ public class Game {
 	}
 	
 	public static Robot[] senseCombatUnits(Tile location, long radius, Team team) {
-		VecUnit result =  gc.senseNearbyUnitsByTeam(location.location, radius, team);
-		List<Robot> units = new ArrayList<Robot>(); 
-		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).unitType() != UnitType.Worker && result.get(i).unitType() != UnitType.Factory && result.get(i).unitType() != UnitType.Rocket) {
-				units.add(Robot.getInstance(result.get(i)));
+		Robot[] result = new Robot[1024];
+		int total = 0;
+		for (Robot r: allRobots) {
+			if (!r.onMap()) continue;
+			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
+				if (r.unitType() != UnitType.Worker && r.unitType() != UnitType.Factory && r.unitType() != UnitType.Rocket) {
+					result[total++] = r;
+				}
 			}
 		}
-		free(result);
-		return units.toArray(new Robot[0]);
+		Robot[] units = new Robot[total];
+		for (int i = 0; i < total; i++) {
+			units[i] = result[i];
+		}
+		return units;
 	}
 	
 	public static Robot[] senseCombatUnits(Team team) {
