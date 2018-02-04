@@ -48,6 +48,7 @@ public class Constants {
 	public static int RUSHDISTANCE = INFINITY;
 	
 	public static final int KNIGHTDISTANCE = 12;
+	public static final int MAGERUSHDISTANCE = 6;
 	
 	public static int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 3;

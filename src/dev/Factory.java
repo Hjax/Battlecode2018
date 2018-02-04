@@ -20,7 +20,7 @@ public class Factory {
 							r.produceRobot(UnitType.Healer);
 						} 
 					} 
-					else if (closestEnemyFactoryDistance(r) <= Constants.KNIGHTDISTANCE) {
+					else if (closestEnemyFactoryDistance(r) <= Constants.MAGERUSHDISTANCE || (closestEnemyFactoryDistance(r) <= Constants.KNIGHTDISTANCE && (Game.enemyKnights.size() > (Game.enemyRangers.size() + Game.enemyMages.size())))) {
 						if (Game.canAffordRobot(UnitType.Mage)) {
 							r.produceRobot(UnitType.Mage);
 						} 

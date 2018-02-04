@@ -241,7 +241,7 @@ public class Game {
 		int total = 0;
 		for (Robot r: allRobots) {
 			if (!r.onMap()) continue;
-			if (r.health() > 0 && r.tile().distanceSquaredTo(location) < radius) {
+			if (r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
 			}
 		}
@@ -263,7 +263,7 @@ public class Game {
 		}
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
-			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) < radius) {
+			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
 			}
 		}
@@ -306,7 +306,7 @@ public class Game {
 		}
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
-			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) < radius) {
+			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
 			}
 		}
@@ -323,7 +323,7 @@ public class Game {
 		int total = 0;
 		for (Robot r: allRobots) {
 			if (!r.onMap()) continue;
-			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) < radius) {
+			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
 			}
 		}
