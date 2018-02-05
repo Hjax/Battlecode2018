@@ -188,21 +188,6 @@ public class Worker
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
 				initializeBuildGrid();
-				Game.resetResearch();
-				if (Game.karboniteDeposits.get(bestWorker.worker.getX()/Constants.QUADRANTSIZE + bestWorker.worker.getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size() > 15)
-				{
-					Game.queueResearch(UnitType.Worker);
-				}
-				Game.queueResearch(UnitType.Knight);
-				Game.queueResearch(UnitType.Knight);
-				Game.queueResearch(UnitType.Knight);
-				Game.queueResearch(UnitType.Healer);
-				Game.queueResearch(UnitType.Healer);
-				Game.queueResearch(UnitType.Healer);
-				Game.queueResearch(UnitType.Rocket);
-				Game.queueResearch(UnitType.Rocket);
-				Game.queueResearch(UnitType.Rocket);
-				
 				return;
 			}
 			

@@ -11,20 +11,6 @@ public class Player
 	
     public static void main(String[] args) {
     	System.out.println("v1.2.0");
-    	if (Game.planet() == Planet.Earth) {
-    		if (Game.karboniteLocations.size() > 30)
-    		{
-    			Game.queueResearch(UnitType.Worker);
-    		}
-        	Game.queueResearch(UnitType.Ranger);
-        	Game.queueResearch(UnitType.Healer);    	
-        	Game.queueResearch(UnitType.Healer);
-        	Game.queueResearch(UnitType.Healer);
-        	Game.queueResearch(UnitType.Rocket);
-        	Game.queueResearch(UnitType.Rocket);
-        	Game.queueResearch(UnitType.Ranger);
-        	Game.queueResearch(UnitType.Rocket);
-    	}
         while (true) 
         {
         	long start = System.nanoTime();
