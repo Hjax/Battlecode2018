@@ -321,7 +321,13 @@ public class Game {
 		// todo iterate over just the right robots
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		for (Robot r: allRobots) {
+		List<Robot> current;
+		if (team == team()) {
+			current = allAllies;
+		} else {
+			current = allEnemies;
+		}
+		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
 				result[total++] = r;
@@ -717,10 +723,12 @@ public class Game {
 				case Factory:
 					if (bot.team() == team()) allyFactories.add(bot);
 					else enemyFactories.add(bot);
+					allFactories.add(bot);
 					break;
 				case Rocket:
 					if (bot.team() == team()) allyRockets.add(bot);
 					else enemyRockets.add(bot);
+					allRockets.add(bot);
 					break;
 				case Ranger:
 					if (bot.team() == team()) {
@@ -728,6 +736,7 @@ public class Game {
 						allyCombat.add(bot);
 					}
 					else enemyRangers.add(bot);
+					allRangers.add(bot);
 					break;
 				case Knight:
 					if (bot.team() == team()) {
@@ -735,6 +744,7 @@ public class Game {
 						allyCombat.add(bot);
 					}
 					else enemyKnights.add(bot);
+					allKnights.add(bot);
 					break;
 				case Healer:
 					if (bot.team() == team()) {
@@ -742,6 +752,7 @@ public class Game {
 						allyCombat.add(bot);
 					}
 					else enemyHealers.add(bot);
+					allHealers.add(bot);
 					break;
 				case Mage:
 					if (bot.team() == team()) {
@@ -749,12 +760,14 @@ public class Game {
 						allyCombat.add(bot);
 					}
 					else enemyMages.add(bot);
+					allMages.add(bot);
 					break;
 				case Worker:
 					if (bot.team() == team()) {
 						allyWorkers.add(bot);
 					}
 					else enemyWorkers.add(bot);
+					allWorkers.add(bot);
 					break;
 			}
 		}

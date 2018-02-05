@@ -51,6 +51,13 @@ public class Player
     
     public static void regularTurn() {
     	try {
+        	Timing.start("Tech");
+        	TechManager.run();
+        	Timing.endAndPrint("Tech");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	try {
         	Timing.start("Worker");
         	Worker.run();
         	Timing.endAndPrint("Worker");
@@ -82,6 +89,13 @@ public class Player
     
     public static void cheapTurn() {
     	System.out.println("Running cheap turn");
+    	try {
+        	Timing.start("Tech");
+        	TechManager.run();
+        	Timing.endAndPrint("Tech");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     	try {
         	Timing.start("Factory");
             Factory.run();
