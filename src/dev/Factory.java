@@ -62,7 +62,7 @@ public class Factory {
 	public static int closestEnemyFactoryDistance(Robot r) {
 		Robot best = null;
 		if (Game.enemyFactories.size() == 0) {
-			return 0;
+			return Constants.INFINITY;
 		}
 		for (Robot f: Game.enemyFactories) {
 			if (best == null || Pathfinding.pathLength(f.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile())) {
