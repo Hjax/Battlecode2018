@@ -857,13 +857,11 @@ public class Worker
 		int currentDistance = 0;
 		int bestDistance = Constants.INFINITY;
 		Robot closestWorker = null;
-		int targetIndex = Game.nearestKarbonite[Constants.startingEnemiesLocation[0].getX() + Constants.startingEnemiesLocation[0].getY() * Game.WIDTH];
-		Tile target = Tile.getInstance(Game.PLANET, targetIndex % Game.WIDTH, targetIndex / Game.WIDTH);
 		for (Robot worker:actionableWorkers)
 		{
 			if (worker.abilityHeat() <= 10)
 			{
-				currentDistance = Pathfinding.pathLength(worker.tile(), target);
+				currentDistance = Pathfinding.pathLength(worker.tile(), Game.contestedKarbonite);
 				if (currentDistance < bestDistance)
 				{
 					bestDistance = currentDistance;
@@ -871,18 +869,18 @@ public class Worker
 				}
 			}
 		}
-		if (closestWorker != null && bestDistance > 5)
+		if (closestWorker != null && bestDistance > 0)
 		{
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.attackRange(UnitType.Ranger), Game.ENEMY);
 			if (nearbyEnemies.length == 0)
 			{
-				Direction bestDir = Pathfinding.path(closestWorker.tile(), target);
+				Direction bestDir = Pathfinding.path(closestWorker.tile(), Game.contestedKarbonite);
 				if (closestWorker.canMove(bestDir))
 				{
 					closestWorker.move(bestDir);
 					moveableWorkers.remove(closestWorker);
 				}
-				bestDir = Pathfinding.path(closestWorker.tile(), target);
+				bestDir = Pathfinding.path(closestWorker.tile(), Game.contestedKarbonite);
 				if (closestWorker.canUseAbililty(bestDir))
 				{
 					closestWorker.useAbility(bestDir);
@@ -920,7 +918,7 @@ public class Worker
 		}
 		while (actionableWorkers.size() > 0)
 		{
-			if (Game.round() <= Constants.AGGRESSIVEHARVESTTIMER && !GlobalStrategy.rush && Game.karboniteLocations.size() > 30)
+			if (Game.round() <= Constants.AGGRESSIVEHARVESTTIMER && !GlobalStrategy.rush && Game.karboniteLocations.size() > 30 && Game.contestedKarbonite != null)
 			{
 				aggressivelyHarvest();
 			}

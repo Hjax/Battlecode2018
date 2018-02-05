@@ -27,6 +27,7 @@ public class Game {
 	public static Random rand = new Random();
 	
 	public static int[] karboniteDistance;
+	public static Tile contestedKarbonite = null;
 	
 	public static ArrayList<HashSet<Tile>> karboniteDeposits;
 	public static int[] nearestKarbonite;
@@ -97,6 +98,7 @@ public class Game {
 		}
 		int[] directions = {1, 1 - Constants.QUADRANTROWSIZE, -1 * Constants.QUADRANTROWSIZE, -1 - Constants.QUADRANTROWSIZE, -1, Constants.QUADRANTROWSIZE - 1, Constants.QUADRANTROWSIZE, Constants.QUADRANTROWSIZE + 1};
 		Tile checkLocation;
+		int contestedKarboniteScore = Constants.INFINITY;
 		for (int x = 0; x < startingMap(planet()).getWidth(); x++)
 		{
 			for (int y = 0; y < startingMap(planet()).getHeight(); y++)
@@ -114,9 +116,31 @@ public class Game {
 							karboniteDeposits.get(test).add(checkLocation);
 						}
 					}
+					int friendlyDistance = Constants.INFINITY;
+					for (Tile start: Constants.startingAlliesLocation)
+					{
+						if (Pathfinding.pathLength(checkLocation, start) < friendlyDistance && Pathfinding.pathLength(checkLocation, start) > -1)
+						{
+							friendlyDistance = Pathfinding.pathLength(checkLocation, start);
+						}
+					}
+					int enemyDistance = Constants.INFINITY;
+					for (Tile start: Constants.startingEnemiesLocation)
+					{
+						if (Pathfinding.pathLength(checkLocation, start) < enemyDistance && Pathfinding.pathLength(checkLocation, start) > -1)
+						{
+							enemyDistance = Pathfinding.pathLength(checkLocation, start);
+						}
+					}
+					if (enemyDistance - friendlyDistance < contestedKarboniteScore && friendlyDistance != Constants.INFINITY && friendlyDistance <= enemyDistance)
+					{
+						contestedKarboniteScore = enemyDistance - friendlyDistance;
+						contestedKarbonite = checkLocation;
+					}
 				}
 			}
 		}
+		
 		initDijkstraMap();
     }
 	
@@ -670,12 +694,50 @@ public class Game {
 				karboniteQueue.add(deposit);
 				queuedIndices.add(deposit);
 			}
-			
 		}
+		
 		for (Integer deposit:queuedIndices)
 		{
 			karboniteLocations.remove(deposit);
 		}
+		
+		//assume enemy mines out his deposits
+		if (karboniteLocations.size() > 0)
+		{
+			for (Tile start: Constants.startingEnemiesLocation)
+			{
+				int deleteDeposit = nearestKarbonite[start.getX() + start.getY() * WIDTH];
+				if (!karboniteLocations.contains(deleteDeposit))
+				{
+					continue;
+				}
+				Tile location = Tile.getInstance(planet(), deleteDeposit % WIDTH, deleteDeposit / WIDTH);
+				
+				while(!canSenseLocation(location) && karboniteDistance[deleteDeposit] < (round() / 2) - 30)
+				{
+					karboniteQueue.add(deleteDeposit);
+					queuedIndices.add(deleteDeposit);
+					karboniteLocations.remove(deleteDeposit);
+					if (karboniteLocations.size() == 0)
+					{
+						break;
+					}
+					updateDijkstraMap();
+					
+					deleteDeposit = nearestKarbonite[start.getX() + start.getY() * WIDTH];
+					if (!karboniteLocations.contains(deleteDeposit))
+					{
+						break;
+					}
+					location = Tile.getInstance(planet(), deleteDeposit % WIDTH, deleteDeposit / WIDTH);
+				}
+			}
+		}
+		
+		
+			
+			
+		
 		if (queuedIndices.size() > 0)
 		{
 			for (int x = 0; x < WIDTH * HEIGHT; x++)
