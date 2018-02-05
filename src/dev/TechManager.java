@@ -19,11 +19,11 @@ public class TechManager {
 				Game.queueResearch(UnitType.Ranger);
 				return;
 			}
-			if (info.getLevel(UnitType.Mage) < 4 && ((GlobalStrategy.rush && info.getLevel(UnitType.Mage) == 0) || info.getLevel(UnitType.Healer) == 4)) {
+			if (info.getLevel(UnitType.Mage) < 4 && ((GlobalStrategy.rush && info.getLevel(UnitType.Mage) == 0) || info.getLevel(UnitType.Healer) == 3)) {
 				Game.queueResearch(UnitType.Mage);
 				return;
 			}
-			if (info.getLevel(UnitType.Healer) < 4) {
+			if (info.getLevel(UnitType.Healer) < 3) {
 				Game.queueResearch(UnitType.Healer);
 				return;
 			}

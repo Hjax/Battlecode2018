@@ -149,6 +149,7 @@ public class Game {
 	public static ArrayList<Robot> allRobots = new ArrayList<Robot>();
 	public static ArrayList<Robot> allAllies = new ArrayList<Robot>();
 	public static ArrayList<Robot> allEnemies = new ArrayList<Robot>();
+	public static ArrayList<Robot> enemyCombat = new ArrayList<Robot>();
 	
 	public static int turnsSinceLastEnemy = 0;
 
@@ -255,12 +256,7 @@ public class Game {
 	public static Robot[] senseNearbyUnits(Tile location, long radius, Team team) {
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		List<Robot> current;
-		if (team == team()) {
-			current = allAllies;
-		} else {
-			current = allEnemies;
-		}
+		Robot[] current = senseNearbyUnits(team);
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
@@ -277,33 +273,7 @@ public class Game {
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type) {
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		List<Robot> current;
-		switch (type) {
-			case Factory:
-				current = allFactories;
-				break;
-			case Healer:
-				current = allHealers;
-				break;
-			case Knight:
-				current = allKnights;
-				break;
-			case Mage:
-				current = allMages;
-				break;
-			case Ranger:
-				current = allRangers;
-				break;
-			case Rocket:
-				current = allRockets;
-				break;
-			case Worker:
-				current = allWorkers;
-				break;
-			default:
-				current = new ArrayList<Robot>();
-				break;
-		}
+		Robot[] current = senseNearbyUnits(type);
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
@@ -318,15 +288,9 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(Tile location, long radius, UnitType type, Team team) {
-		// todo iterate over just the right robots
 		Robot[] result = new Robot[1024];
 		int total = 0;
-		List<Robot> current;
-		if (team == team()) {
-			current = allAllies;
-		} else {
-			current = allEnemies;
-		}
+		Robot[] current = senseNearbyUnits(type, team);
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.unitType() == type && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
@@ -341,19 +305,73 @@ public class Game {
 	}
 	
 	public static Robot[] senseNearbyUnits(UnitType type, Team team) {
-		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, type, team);
+		if (team == team()) {
+			switch (type) {
+			case Factory:
+				return allyFactories.toArray(new Robot[allyFactories.size()]);
+			case Healer:
+				return allyHealers.toArray(new Robot[allyHealers.size()]);
+			case Knight:
+				return allyKnights.toArray(new Robot[allyKnights.size()]);
+			case Mage:
+				return allyMages.toArray(new Robot[allyMages.size()]);
+			case Ranger:
+				return allyRangers.toArray(new Robot[allyRangers.size()]);
+			case Rocket:
+				return allyRockets.toArray(new Robot[allyRockets.size()]);
+			case Worker:
+				return allyWorkers.toArray(new Robot[allyWorkers.size()]);
+			}
+		} else {
+			switch (type) {
+			case Factory:
+				return enemyFactories.toArray(new Robot[enemyFactories.size()]);
+			case Healer:
+				return enemyHealers.toArray(new Robot[enemyHealers.size()]);
+			case Knight:
+				return enemyKnights.toArray(new Robot[enemyKnights.size()]);
+			case Mage:
+				return enemyMages.toArray(new Robot[enemyMages.size()]);
+			case Ranger:
+				return enemyRangers.toArray(new Robot[enemyRangers.size()]);
+			case Rocket:
+				return enemyRockets.toArray(new Robot[enemyRockets.size()]);
+			case Worker:
+				return enemyWorkers.toArray(new Robot[enemyWorkers.size()]);
+			}
+		}
+		return null;
 	}
 	
 	public static Robot[] senseNearbyUnits(Team team) {
-		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, team);
+		if (team == team()) {
+			return allAllies.toArray(new Robot[allAllies.size()]);
+		}
+		return allEnemies.toArray(new Robot[allEnemies.size()]);
 	}
 	
 	public static Robot[] senseNearbyUnits(UnitType type) {
-		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY, type);
+		switch (type) {
+		case Factory:
+			return allFactories.toArray(new Robot[allFactories.size()]);
+		case Healer:
+			return allHealers.toArray(new Robot[allHealers.size()]);
+		case Knight:
+			return allKnights.toArray(new Robot[allKnights.size()]);
+		case Mage:
+			return allMages.toArray(new Robot[allMages.size()]);
+		case Ranger:
+			return allRangers.toArray(new Robot[allRangers.size()]);
+		case Rocket:
+			return allRockets.toArray(new Robot[allRockets.size()]);
+		case Worker:
+			return allWorkers.toArray(new Robot[allWorkers.size()]);
+		}
+		return null;
 	}
 	
 	public static Robot[] senseNearbyUnits() {
-		return senseNearbyUnits(Tile.getInstance(planet(), 0, 0), INFINITY);
+		return allRobots.toArray(new Robot[allRobots.size()]);
 	}
 	
 	public static Robot senseUnitAtLocation(Tile location) {
@@ -363,18 +381,16 @@ public class Game {
 	public static Robot[] senseCombatUnits(Tile location, long radius, Team team) {
 		List<Robot> current;
 		if (team == team()) {
-			current = allAllies;
+			current = allyCombat;
 		} else {
-			current = allEnemies;
+			current = enemyCombat;
 		}
 		Robot[] result = new Robot[1024];
 		int total = 0;
 		for (Robot r: current) {
 			if (!r.onMap()) continue;
 			if (r.team() == team && r.health() > 0 && r.tile().distanceSquaredTo(location) <= radius) {
-				if (r.unitType() != UnitType.Worker && r.unitType() != UnitType.Factory && r.unitType() != UnitType.Rocket) {
-					result[total++] = r;
-				}
+				result[total++] = r;
 			}
 		}
 		Robot[] units = new Robot[total];
@@ -385,7 +401,11 @@ public class Game {
 	}
 	
 	public static Robot[] senseCombatUnits(Team team) {
-		return senseCombatUnits(Tile.getInstance(planet(), 0, 0), INFINITY, team);
+		if (team == team()) {
+			return allyCombat.toArray(new Robot[allyCombat.size()]);
+		} else {
+			return enemyCombat.toArray(new Robot[enemyCombat.size()]);
+		}
 	}
 	
 	public static PlanetMap startingMap(Planet planet) {
@@ -615,6 +635,7 @@ public class Game {
 		allAllies = new ArrayList<Robot>();
 		allEnemies = new ArrayList<Robot>();
 		currentBlueprints = new HashSet<Robot>();
+		enemyCombat = new ArrayList<Robot>();
 		
 		updateUnitTypes();
 		
@@ -735,7 +756,10 @@ public class Game {
 						allyRangers.add(bot);
 						allyCombat.add(bot);
 					}
-					else enemyRangers.add(bot);
+					else {
+						enemyRangers.add(bot);
+						enemyCombat.add(bot);
+					}
 					allRangers.add(bot);
 					break;
 				case Knight:
@@ -743,7 +767,10 @@ public class Game {
 						allyKnights.add(bot);
 						allyCombat.add(bot);
 					}
-					else enemyKnights.add(bot);
+					else {
+						enemyKnights.add(bot);
+						enemyCombat.add(bot);
+					}
 					allKnights.add(bot);
 					break;
 				case Healer:
@@ -751,7 +778,10 @@ public class Game {
 						allyHealers.add(bot);
 						allyCombat.add(bot);
 					}
-					else enemyHealers.add(bot);
+					else {
+						enemyHealers.add(bot);
+						enemyCombat.add(bot);
+					}
 					allHealers.add(bot);
 					break;
 				case Mage:
@@ -759,14 +789,19 @@ public class Game {
 						allyMages.add(bot);
 						allyCombat.add(bot);
 					}
-					else enemyMages.add(bot);
+					else {
+						enemyMages.add(bot);
+						enemyCombat.add(bot);
+					}
 					allMages.add(bot);
 					break;
 				case Worker:
 					if (bot.team() == team()) {
 						allyWorkers.add(bot);
 					}
-					else enemyWorkers.add(bot);
+					else {
+						enemyWorkers.add(bot);
+					}
 					allWorkers.add(bot);
 					break;
 			}
