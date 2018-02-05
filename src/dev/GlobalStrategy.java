@@ -7,22 +7,6 @@ public class GlobalStrategy {
 	public static boolean rocketRush = false;
 	public static int COMBATLIMIT = 50;
 	public static void run() {
-		if (Game.enemyMages.size() > 0 && rush == true) 
-		{
-			rush = false;
-			if (Game.researchInfo().getLevel(UnitType.Knight) < 3)
-			{
-				Game.resetResearch();
-				Game.queueResearch(UnitType.Ranger);
-	        	Game.queueResearch(UnitType.Healer);    	
-	        	Game.queueResearch(UnitType.Healer);
-	        	Game.queueResearch(UnitType.Healer);
-	        	Game.queueResearch(UnitType.Rocket);
-	        	Game.queueResearch(UnitType.Rocket);
-	        	Game.queueResearch(UnitType.Ranger);
-	        	Game.queueResearch(UnitType.Rocket);
-			}
-		}
 		if (Game.turnsSinceLastEnemy >= 100) {
 			COMBATLIMIT = 20;
 			rocketRush = true;
