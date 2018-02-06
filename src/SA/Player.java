@@ -73,7 +73,7 @@ public class Player
     	}
     	try {
             Timing.start("Micro");
-            Movement.run();
+            Micro.run();
             Timing.endAndPrint("Micro");
     	} catch (Exception e) {
     		e.printStackTrace();

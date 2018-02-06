@@ -5,7 +5,7 @@ import java.util.*;
 import bc.*;
 
 public class SATarget {
-	
+	public static int retargets = 0;
 	
 	public static final int RANGER = UnitType.Ranger.ordinal();
 	public static final int WORKER = UnitType.Worker.ordinal();
@@ -36,8 +36,8 @@ public class SATarget {
 	private static int[] best = new int[8192];
 	private static int[] current = new int[8192];
 	
-	private static int score = 0;
-	private static int bestScore = -1 * Constants.INFINITY;
+	private static double score = 0;
+	private static double bestScore = -1 * Constants.INFINITY;
 	
 	// store the unit types of each predictable id, used for scoring
 	private static int[] types = new int[8192];
@@ -45,6 +45,7 @@ public class SATarget {
 	private static int[] shooters = new int[8192];
 	
 	public static void startTurn() {
+		retargets = 0;
 		hps = new int[8192];
 		best = new int[8192];
 		current = new int[8192];
@@ -71,6 +72,7 @@ public class SATarget {
 			if (!r.onMap()) continue;
 			if (r.attackHeat() >= 10) continue;
 			boolean hasTarget = false;
+			types[r.predictableId()] = r.unitType().ordinal();
 			damage[r.predictableId()] = Constants.attackDamage(r.unitType());
 			Robot[] myTargets = Game.senseNearbyUnits(r.tile(), Constants.attackRange(r.unitType()), Game.enemy());
 			targets[r.predictableId()] = new int[256];
@@ -88,9 +90,9 @@ public class SATarget {
 					}
 				}
 			}
-			if (Movement.moves.containsKey(r) && Movement.moves.get(r) != Direction.Center) {
+			if (Micro.moves.containsKey(r) && Micro.moves.get(r) != Direction.Center) {
 				hasTarget = true;
-				myTargets = Game.senseNearbyUnits(r.tile().add(Movement.moves.get(r)), Constants.attackRange(r.unitType()), Game.enemy());
+				myTargets = Game.senseNearbyUnits(r.tile().add(Micro.moves.get(r)), Constants.attackRange(r.unitType()), Game.enemy());
 				outer: for (Robot e: myTargets) {
 					for (int i = 0; i < targetsLength[r.predictableId()]; i++) {
 						if (targets[r.predictableId()][i] == e.predictableId()) continue outer;
@@ -162,6 +164,7 @@ public class SATarget {
 				}
 				hps[aoe[target][i]] -= mageDamage;
 				// if we killed something or damaged something that wasnt already dead, update score
+				
 				if (killed) {
 					score += killValue(types[aoe[target][i]]) * KILLVALUE;
 				} else if (hps[aoe[target][i]] > 0) {
@@ -216,19 +219,20 @@ public class SATarget {
 	}
 	
 	public static void mutate() {
-		int oldScore = score; 
-		int[] old = current;
-		int target = Game.rand.nextInt(shooters.length);
+		double oldScore = score; 
+		int[] old = current.clone();
+		int target = shooters[Game.rand.nextInt(shooters.length)];
 		if (targetsLength[target] == 0) return; 
 		reset(target);
 		attack(target, targets[target][Game.rand.nextInt(targetsLength[target])]);
+		retargets++;
 		if (score < oldScore) {
 			score = oldScore;
 			current = old;
 			return;
 		}
 		if (score > bestScore) {
-			best = current;
+			best = current.clone();
 			bestScore = score;
 		}
 		
@@ -240,5 +244,6 @@ public class SATarget {
 		while ((System.currentTimeMillis() - startTime) < MAXTIME) {
 			mutate();
 		}
+		System.out.println("Ran " + retargets + " iterations in " + MAXTIME + " ms");
 	}
 }

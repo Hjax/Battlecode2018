@@ -3,7 +3,7 @@ package SA;
 import java.util.*;
 import bc.*;
 
-public class Movement {
+public class Micro {
 	// TODO shoot before moving when it makes sense
 	private static Map<Robot, Tile> randomTargets = new HashMap<>();
 	private static ArrayList<Tile> targets = new ArrayList<>();

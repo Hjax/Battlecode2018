@@ -160,7 +160,7 @@ public class Game {
 		Timing.reset();
 		updateCache();
 		Rocket.startTurn();
-		Movement.startTurn();
+		Micro.startTurn();
 		GlobalStrategy.run();
 	}
 	
