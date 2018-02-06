@@ -857,7 +857,7 @@ public class Worker
 		int currentDistance = 0;
 		int bestDistance = Constants.INFINITY;
 		Robot closestWorker = null;
-		for (Robot worker:actionableWorkers)
+		for (Robot worker:Game.allyWorkers)
 		{
 			if (worker.abilityHeat() <= 10)
 			{
@@ -946,6 +946,10 @@ public class Worker
 			if (Game.karboniteLocations.size() > 0)
 			{
 				tryHarvest();
+			}
+			if (Game.round() <= Constants.AGGRESSIVEHARVESTTIMER && !GlobalStrategy.rush && Game.karboniteLocations.size() > 30 && Game.contestedKarbonite != null)
+			{
+				aggressivelyHarvest();
 			}
 			if (Game.allyWorkers.size() < Constants.WORKERHARDCAP)
 			{
