@@ -5,7 +5,7 @@ import java.util.*;
 import bc.*;
 
 public class SATarget {
-	public static int retargets = 0;
+	public static int iterations = 0;
 	
 	public static final int RANGER = UnitType.Ranger.ordinal();
 	public static final int WORKER = UnitType.Worker.ordinal();
@@ -15,13 +15,15 @@ public class SATarget {
 	public static final int FACTORY = UnitType.Factory.ordinal();
 	public static final int ROCKET = UnitType.Rocket.ordinal();
 	
-	public static final int KILLVALUE = 10;
-	public static final int DAMAGEVALUE = 10;
+	public static final int KILLVALUE = 100;
+	public static final int DAMAGEVALUE = 1;
 	
 	public static int mageDamage = 0;
 	public static int rangerDamage = 0;
 	
-	public static final long MAXTIME = 20;
+	public static int bestIteration = 0;
+	
+	public static final long MAXTIME = 5;
 	public static long startTime = 0;
 	
 	public static int[][] aoe = new int[8192][9];
@@ -45,7 +47,7 @@ public class SATarget {
 	private static int[] shooters = new int[8192];
 	
 	public static void startTurn() {
-		retargets = 0;
+		iterations = 0;
 		hps = new int[8192];
 		best = new int[8192];
 		current = new int[8192];
@@ -54,6 +56,10 @@ public class SATarget {
 		targetsLength = new int[8192];
 		aoe = new int[8192][9];
 		aoeLength = new int[8192];
+		
+		score = 0;
+		bestScore = -1 * Constants.INFINITY;
+		bestIteration = 0;
 		
 		int shootIndex = 0;
 		
@@ -146,7 +152,7 @@ public class SATarget {
 		} else if (type == MAGE) {
 			return 1.3;
 		} else if (type == WORKER) {
-			return 0.2;
+			return 0.01;
 		} else if (type == FACTORY) {
 			return 2.0;
 		} else if (type == ROCKET) {
@@ -219,21 +225,23 @@ public class SATarget {
 	}
 	
 	public static void mutate() {
-		double oldScore = score; 
-		int[] old = current.clone();
+		double oldScore = score;
 		int target = shooters[Game.rand.nextInt(shooters.length)];
 		if (targetsLength[target] == 0) return; 
+		int old = current[target];
 		reset(target);
 		attack(target, targets[target][Game.rand.nextInt(targetsLength[target])]);
-		retargets++;
+
 		if (score < oldScore) {
-			score = oldScore;
-			current = old;
+			reset(target);
+			attack(target, old);
 			return;
 		}
 		if (score > bestScore) {
+			bestIteration = iterations;
 			best = current.clone();
 			bestScore = score;
+			System.out.println("Score improved to :" + bestScore);
 		}
 		
 	}
@@ -242,8 +250,9 @@ public class SATarget {
 		if (Game.allyCombat.size() == 0) return;
 		startTime = System.currentTimeMillis();
 		while ((System.currentTimeMillis() - startTime) < MAXTIME) {
+			iterations++;
 			mutate();
 		}
-		System.out.println("Ran " + retargets + " iterations in " + MAXTIME + " ms");
+		System.out.println("Ran " + iterations + " iterations in " + MAXTIME + " ms, best was found on iteration " + bestIteration);
 	}
 }
