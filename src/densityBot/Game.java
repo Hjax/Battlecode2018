@@ -526,7 +526,6 @@ public class Game {
 
 	static void deleteDeposit(int deposit)
 	{
-		System.out.printf("deleting deposit\n");
 		karboniteLocations.remove(deposit);
 		for (int updateTile = 0; updateTile < MAPSIZE; updateTile++)
 		{
@@ -537,7 +536,6 @@ public class Game {
 			}
 			
 		}
-		System.out.printf("There are %d deposits left\n", karboniteLocations.size());
 	}
 	
 	static void createDeposit(int deposit)
@@ -662,6 +660,8 @@ public class Game {
 			deleteDeposit(deposit);
 		}
 		
+		/*
+		//print the density map
 		if (round % 20 == 0)
 		{
 			for (int y = HEIGHT - 1; y >=0; y--)
@@ -694,6 +694,7 @@ public class Game {
 				System.out.printf("\n");
 			}
 		}
+		*/
 		
 		/*
 		//assume enemy mines out his deposits
