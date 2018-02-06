@@ -51,6 +51,9 @@ public class SATarget {
 		shooters = new int[Game.allyCombat.size()];
 		targets = new int[8192][0];
 		targetsLength = new int[8192];
+		aoe = new int[8192][9];
+		aoeLength = new int[8192];
+		
 		int shootIndex = 0;
 		
 		Arrays.fill(best, -1);
@@ -65,6 +68,7 @@ public class SATarget {
 		}
 		for (Robot r: Game.allyCombat) {
 			if (r.unitType() == UnitType.Healer) continue;
+			if (!r.onMap()) continue;
 			if (r.attackHeat() >= 10) continue;
 			boolean hasTarget = false;
 			damage[r.predictableId()] = Constants.attackDamage(r.unitType());
@@ -180,6 +184,7 @@ public class SATarget {
 	
 	public static void reset(int pid) {
 		boolean revived = false;
+		if (current[pid] == -1) return;
 		if (types[pid] == MAGE) {
 			for (int i = 0; i < aoeLength[current[pid]]; i++) {
 				hps[aoe[current[pid]][i]] += mageDamage;
@@ -214,11 +219,17 @@ public class SATarget {
 		int oldScore = score; 
 		int[] old = current;
 		int target = Game.rand.nextInt(shooters.length);
+		if (targetsLength[target] == 0) return; 
 		reset(target);
 		attack(target, targets[target][Game.rand.nextInt(targetsLength[target])]);
 		if (score < oldScore) {
 			score = oldScore;
 			current = old;
+			return;
+		}
+		if (score > bestScore) {
+			best = current;
+			bestScore = score;
 		}
 		
 	}

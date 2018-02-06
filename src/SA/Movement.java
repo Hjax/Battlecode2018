@@ -22,6 +22,12 @@ public class Movement {
 		// TODO purge help requests only every few rounds 
 		helpRequests = newHelpRequests;
 		newHelpRequests = new ArrayList<>();
+		moves = new HashMap<>();
+		taken = new HashSet<>();
+		for (Robot r: Game.allRobots) {
+			taken.add(r.tile());
+		}
+		SATarget.startTurn();
 		//System.out.println("Requests: " + helpRequests.size());
 		//System.out.println("Random Targets: " + randomTargets.size());
 	}
@@ -166,13 +172,17 @@ public class Movement {
 				if (SATarget.getTarget(r) != null ) {
 					if (r.canAttack(SATarget.getTarget(r))) {
 						r.attack(SATarget.getTarget(r));
+					}
+				}
+				if (moves.containsKey(r)) {
+					if (r.canMove(moves.get(r))) {
 						r.move(moves.get(r));
-					} else {
-						
+					}
+				}
+				if (SATarget.getTarget(r) != null) {
+					if (r.canAttack(SATarget.getTarget(r))) {
 						r.attack(SATarget.getTarget(r));
 					}
-				} else {
-					r.move(moves.get(r));
 				}
 			} catch (Exception e) {
 				System.out.println("Move error");

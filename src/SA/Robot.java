@@ -103,8 +103,10 @@ public class Robot {
 	
 	public static Robot getByPredictableId(int id) {
 		for (Robot r: box) {
-			if (r.predictableId() == id) {
-				return r;
+			if (r != null) {
+				if (r.predictableId() == id) {
+					return r;
+				}
 			}
 		}
 		return null;
