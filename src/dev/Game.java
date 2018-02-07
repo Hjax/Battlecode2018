@@ -1,6 +1,7 @@
 package dev;
 
 import bc.*;
+
 import java.util.*;
 
 public class Game {
@@ -10,6 +11,34 @@ public class Game {
 	public static Set<Tile> passable = new HashSet<>();
 	public static Set<Tile> passableOther = new HashSet<>();
 	public static boolean[] pathMap;
+	
+	private static ArrayList<DepositScoreTuple> enemyKarbonite = new ArrayList<>();
+	
+	private static class DepositScoreTuple implements Comparator<DepositScoreTuple>
+	{
+		public int score;
+		public int deposit;
+		
+		DepositScoreTuple(int SCORE, int DEPOSIT)
+		{
+			score = SCORE;
+			deposit = DEPOSIT;
+		}
+
+		public int compare(DepositScoreTuple o1, DepositScoreTuple o2) 
+		{
+			//higher score is "less than" lower score for sorting purposes
+			if (o1.score < o2.score)
+			{
+				return -1;
+			}
+			if (o1.score == o2.score)
+			{
+				return 0;
+			}
+			return 1;
+		}
+	}
 	
 	public static final Planet PLANET;
 	public static final Planet OTHERPLANET;
@@ -96,10 +125,11 @@ public class Game {
 			for (int y = 0; y < startingMap(planet()).getHeight(); y++)
 			{
 				checkLocation = Tile.getInstance(planet(), x, y);
-				startingKarbonite[x + y * WIDTH] = (int) initialKarboniteAt(checkLocation);
-				if (startingKarbonite[x + y * WIDTH] > 0)
+				int intTile = x + y * WIDTH;
+				startingKarbonite[intTile] = (int) initialKarboniteAt(checkLocation);
+				if (startingKarbonite[intTile] > 0)
 				{
-					karboniteLocations.add(x + y * WIDTH);
+					karboniteLocations.add(intTile);
 					int friendlyDistance = Constants.INFINITY;
 					for (Tile start: Constants.startingAlliesLocation)
 					{
@@ -116,6 +146,7 @@ public class Game {
 							enemyDistance = Pathfinding.pathLength(checkLocation, start);
 						}
 					}
+					enemyKarbonite.add(new DepositScoreTuple(enemyDistance, intTile));
 					if (enemyDistance - friendlyDistance < contestedKarboniteScore && friendlyDistance != Constants.INFINITY && friendlyDistance <= enemyDistance)
 					{
 						contestedKarboniteScore = enemyDistance - friendlyDistance;
@@ -124,6 +155,11 @@ public class Game {
 				}
 			}
 		}
+		if (enemyKarbonite.size() > 0)
+		{
+			enemyKarbonite.sort(enemyKarbonite.get(0));
+		}
+		
 		
 		initDensityMap();
     }
@@ -700,40 +736,73 @@ public class Game {
 		}
 		*/
 		
-		/*
+		
 		//assume enemy mines out his deposits
-		if (karboniteLocations.size() > 0)
+		if (karboniteLocations.size() > 0 && PLANET == Planet.Earth)
 		{
-			for (Tile start: Constants.startingEnemiesLocation)
+			while (!karboniteLocations.contains(new Integer(enemyKarbonite.get(0).deposit)))
 			{
-				int deleteDeposit = nearestKarbonite[start.getX() + start.getY() * WIDTH];
-				if (!karboniteLocations.contains(deleteDeposit))
+				enemyKarbonite.remove(0);
+			}
+			Tile location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
+			System.out.printf("The enemy has %d deposits\n", enemyKarbonite.size());
+			System.out.printf("\tENEMY DEPOSIT SCORE = %d at (%d,%d)\n", enemyKarbonite.get(0).score, enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
+			System.out.printf("canSense: %b, scoreCheck: %b\n", !canSenseLocation(location), enemyKarbonite.get(0).score < (round() - 30) / 2);
+			while(!canSenseLocation(location) && enemyKarbonite.get(0).score < (round() - 30) / 2)
+			{
+				System.out.printf("\tDELETING ENEMY DEPOSIT\n");
+				deleteDeposit(enemyKarbonite.get(0).deposit);
+				if (karboniteLocations.size() == 0)
 				{
-					continue;
+					break;
 				}
-				Tile location = Tile.getInstance(planet(), deleteDeposit % WIDTH, deleteDeposit / WIDTH);
-				
-				while(!canSenseLocation(location) && karboniteDistance[deleteDeposit] < (round() / 2) - 30)
+				while (!karboniteLocations.contains(enemyKarbonite.get(0).deposit))
 				{
-					karboniteQueue.add(deleteDeposit);
-					queuedIndices.add(deleteDeposit);
-					karboniteLocations.remove(deleteDeposit);
-					if (karboniteLocations.size() == 0)
+					enemyKarbonite.remove(0);
+				}
+				location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
+			}
+		}
+		else
+		{
+			if (PLANET == Planet.Earth)
+			{
+				//print the density map
+				if (round % 20 == 0)
+				{
+					for (int y = HEIGHT - 1; y >=0; y--)
 					{
-						break;
+						for (int x = 0; x < WIDTH; x++)
+						{
+							System.out.printf("%d", Math.round(karboniteDensity[x + y*WIDTH] * 100));
+							if (karboniteDensity[x + y*WIDTH] < 100)
+							{
+								System.out.printf(" ");
+							}
+							if (karboniteDensity[x + y*WIDTH] < 1000)
+							{
+								System.out.printf(" ");
+							}
+							if (karboniteDensity[x + y*WIDTH] < 10)
+							{
+								System.out.printf(" ");
+							}
+							if (karboniteDensity[x + y*WIDTH] < 1)
+							{
+								System.out.printf(" ");
+							}
+							if (karboniteDensity[x + y*WIDTH] < 0.1)
+							{
+								System.out.printf(" ");
+							}
+							System.out.printf("|");
+						}
+						System.out.printf("\n");
 					}
-					updateDijkstraMap();
-					
-					deleteDeposit = nearestKarbonite[start.getX() + start.getY() * WIDTH];
-					if (!karboniteLocations.contains(deleteDeposit))
-					{
-						break;
-					}
-					location = Tile.getInstance(planet(), deleteDeposit % WIDTH, deleteDeposit / WIDTH);
 				}
 			}
 		}
-		*/
+		
 		
 		AsteroidStrike asteroid = null;
 		if (ASTEROIDPATTERN.hasAsteroid(round()))
