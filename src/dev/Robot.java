@@ -264,6 +264,7 @@ public class Robot {
 	}
 	public void build(Robot s) {
 		Game.gc.build(gcId, s.gcId);
+		s.update();
 		canAct = false;
 	}
 	public boolean canBuild(Robot s) {
