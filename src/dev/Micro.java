@@ -69,7 +69,11 @@ public class Micro {
 				if (enemy.onMap() && r.canAttack(enemy)) {
 					if (enemy.health() > 0) {
 						if (best == null || ((enemy.health() < best.health() && scoreRanger(enemy.unitType()) >= scoreRanger(best.unitType())) || scoreRanger(enemy.unitType()) > scoreRanger(best.unitType()))) {
-							best = enemy;
+							if ((enemy.type != UnitType.Worker && enemy.type != UnitType.Factory) || r.unitType() != UnitType.Mage) {
+								best = enemy;
+							} else if (enemy.tile().distanceSquaredTo(r.tile()) > 2) {
+								best = enemy;
+							}
 						}
 					}
 				}
