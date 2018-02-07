@@ -50,6 +50,8 @@ public class Constants {
 	public static final int KNIGHTDISTANCE = 12;
 	public static final int MAGERUSHDISTANCE = 6;
 	
+	public static final int TARGETFACTORYTRESHOLD = 15;
+	
 	public static int WORKERLIMIT = 4;
 	public static int WORKERLIMITWEIGHT = 3;
 	public static int WORKERHARDCAP = 50;
