@@ -769,45 +769,6 @@ public class Game {
 				location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
 			}
 		}
-		else
-		{
-			if (PLANET == Planet.Earth)
-			{
-				//print the density map
-				if (round % 20 == 0)
-				{
-					for (int y = HEIGHT - 1; y >=0; y--)
-					{
-						for (int x = 0; x < WIDTH; x++)
-						{
-							System.out.printf("%d", Math.round(karboniteDensity[x + y*WIDTH] * 100));
-							if (karboniteDensity[x + y*WIDTH] < 100)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 1000)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 10)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 1)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 0.1)
-							{
-								System.out.printf(" ");
-							}
-							System.out.printf("|");
-						}
-						System.out.printf("\n");
-					}
-				}
-			}
-		}
 		
 		
 		AsteroidStrike asteroid = null;
