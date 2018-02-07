@@ -755,12 +755,8 @@ public class Game {
 				enemyKarbonite.remove(0);
 			}
 			Tile location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
-			System.out.printf("The enemy has %d deposits\n", enemyKarbonite.size());
-			System.out.printf("\tENEMY DEPOSIT SCORE = %d at (%d,%d)\n", enemyKarbonite.get(0).score, enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
-			System.out.printf("canSense: %b, scoreCheck: %b\n", !canSenseLocation(location), enemyKarbonite.get(0).score < (round() - 30) / 2);
 			while(!canSenseLocation(location) && enemyKarbonite.get(0).score < (round() - 30) / 2)
 			{
-				System.out.printf("\tDELETING ENEMY DEPOSIT\n");
 				deleteDeposit(enemyKarbonite.get(0).deposit);
 				if (karboniteLocations.size() == 0)
 				{
@@ -771,45 +767,6 @@ public class Game {
 					enemyKarbonite.remove(0);
 				}
 				location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
-			}
-		}
-		else
-		{
-			if (PLANET == Planet.Earth)
-			{
-				//print the density map
-				if (round % 20 == 0)
-				{
-					for (int y = HEIGHT - 1; y >=0; y--)
-					{
-						for (int x = 0; x < WIDTH; x++)
-						{
-							System.out.printf("%d", Math.round(karboniteDensity[x + y*WIDTH] * 100));
-							if (karboniteDensity[x + y*WIDTH] < 100)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 1000)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 10)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 1)
-							{
-								System.out.printf(" ");
-							}
-							if (karboniteDensity[x + y*WIDTH] < 0.1)
-							{
-								System.out.printf(" ");
-							}
-							System.out.printf("|");
-						}
-						System.out.printf("\n");
-					}
-				}
 			}
 		}
 		
