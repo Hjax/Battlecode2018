@@ -199,7 +199,7 @@ public class Micro {
 			}
 		} else {
 			if (targets.size() == 0 && Game.factoryCache.size() == 0) {
-				if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2) {
+				if (randomTargets.containsKey(r) && r.tile().distanceSquaredTo(randomTargets.get(r)) > 2 && Pathfinding.pathLength(r.tile(), randomTargets.get(r)) != -1) {
 					target = randomTargets.get(r);
 				} else {
 					randomTargets.put(r, Game.getRandomLocation());
