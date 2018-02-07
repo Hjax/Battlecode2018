@@ -183,7 +183,7 @@ public class Worker
 			{
 				GlobalStrategy.rush = true;
 				Constants.FACTORYBUILDRANGE = 4;
-				Constants.FACTORYREPLICATEPRESSURE = 500;
+				Constants.FACTORYREPLICATEPRESSURE = 1000;
 				Constants.WORKERREPLICATEDEPOSITWEIGHT = 0;
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
@@ -288,9 +288,10 @@ public class Worker
 			}
 		}
 		score += Game.karbonite() / 25;
-		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * Game.karboniteDeposits.get(worker.tile().getX()/Constants.QUADRANTSIZE + worker.tile().getY()/Constants.QUADRANTSIZE * Constants.QUADRANTROWSIZE).size();
 		Robot[] nearbyWorkers = Game.senseNearbyUnits(worker.tile(), 30, UnitType.Worker, Game.TEAM);
-		score -= nearbyWorkers.length * 5;
+		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * Game.karboniteDensity[worker.tile().getX() + worker.tile().getY() * Game.WIDTH] / nearbyWorkers.length;
+		
+		score -= nearbyWorkers.length * nearbyWorkers.length * 100;
 		return score;
 		
 	}
@@ -388,18 +389,13 @@ public class Worker
 	
 	private static void harvest()
 	{
-		HashSet<Robot> removeWorkers = new HashSet<Robot>();
 		if (Game.karboniteLocations.size() == 0)
 		{
 			return;
 		}
-		worker: for (Robot worker:actionableWorkers)
+		for (Robot worker:actionableWorkers)
 		{
-			int index = worker.tile().getX() + worker.tile().getY() * Game.WIDTH;
-			if (Game.round() > Constants.HARVESTABORTROUND && !Game.canSenseLocation(Tile.getInstance(Game.PLANET, Game.nearestKarbonite[index] % Game.WIDTH, Game.nearestKarbonite[index] / Game.WIDTH)))
-			{
-				continue;
-			}
+			//TODO: continue if given up
 			Direction moveDir = Direction.Center;
 			moveDir = Pathfinding.karbonitePath(worker.tile());
 			if (worker.canMove(moveDir))
@@ -407,20 +403,6 @@ public class Worker
 				worker.move(moveDir);
 				moveableWorkers.remove(worker);
 			}
-			if (Game.karboniteDistance[index] <= 1)
-			{
-				Direction dir = worker.tile().directionTo(Tile.getInstance(Game.planet(), Game.nearestKarbonite[index] % Game.WIDTH, Game.nearestKarbonite[index] / Game.WIDTH));
-				if (worker.canHarvest(dir))
-				{
-					worker.harvest(dir);
-					removeWorkers.add(worker);
-					continue worker;
-				}
-			}
-		}
-		for (Robot worker: removeWorkers)
-		{
-			actionableWorkers.remove(worker);
 		}
 	}
 	
@@ -442,7 +424,7 @@ public class Worker
 		{
 			return true;
 		}
-		if (Game.currentBlueprints.size() > 1)
+		if (Game.currentBlueprints.size() > 2)
 		{
 			return false;
 		}
@@ -869,7 +851,7 @@ public class Worker
 				}
 			}
 		}
-		if (closestWorker != null && bestDistance > 0)
+		if (closestWorker != null && bestDistance > 3)
 		{
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.attackRange(UnitType.Ranger), Game.ENEMY);
 			if (nearbyEnemies.length == 0)

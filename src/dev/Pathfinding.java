@@ -42,6 +42,32 @@ public class Pathfinding {
 		}
 	}
 	
+	private static void bfs(int destination) {
+
+		Queue<Integer> open = new LinkedList<>();
+		Set<Integer> closed = new HashSet<>();
+		 
+		int size = Game.WIDTH * Game.HEIGHT;
+		 
+		open.add(destination);
+		closed.add(destination);
+		cache[destination][destination] = 0;
+		while (open.size() > 0) {
+			Integer current = open.poll();
+			// for each direction 
+			for (int i = 0; i < 8; i++) {
+				Integer test = current + directions[i];
+				if (!closed.contains(test) && !open.contains(test)) {
+					if (Math.abs(test % Game.WIDTH - current % Game.WIDTH) <= 1 && test >= 0 && test < size && Game.pathMap[test]) {
+						 open.add(test);
+						 cache[destination][test] = cache[destination][current] + 1;
+					}
+				}
+				closed.add(current);
+			}
+		}
+	}
+	
 	public static Direction path(Tile source, Tile dest) 
 	{
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
@@ -117,7 +143,7 @@ public class Pathfinding {
 	public static Direction karbonitePath(Tile source) 
 	{
 		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
-		if (Game.nearestKarbonite[sourceInt] <= 0)
+		if (Game.karboniteDensity[sourceInt] == 0)
 		{
 			return Direction.Center;
 		}
@@ -128,10 +154,10 @@ public class Pathfinding {
 		{
 			int test = sourceInt + directions[direction];
 			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
-				if (best == 0 && (Game.karboniteDistance[sourceInt + best]) >= Game.karboniteDistance[test]) {
+				if (best == 0 && (Game.karboniteDensity[sourceInt + best]) <= Game.karboniteDensity[test]) {
 					best = directions[direction];
 				}
-				else if (Game.karboniteDistance[sourceInt + best] > Game.karboniteDistance[test]) {
+				else if (Game.karboniteDensity[sourceInt + best] < Game.karboniteDensity[test]) {
 					best = directions[direction];
 				}
 			}
@@ -270,11 +296,29 @@ public class Pathfinding {
 	}
 	
 	public static int pathLength(Tile source, Tile dest) {
-		Integer sourceInt = source.getX() + source.getY() * Game.WIDTH;
-		Integer destInt = dest.getX() + dest.getY() * Game.WIDTH;
+		int sourceInt = source.getX() + source.getY() * Game.WIDTH;
+		int destInt = dest.getX() + dest.getY() * Game.WIDTH;
 		if (!(cache[destInt][destInt] != -1 || cache[sourceInt][sourceInt] != -1)) {
 		//if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
 			bfs(dest);
+		}
+		if (cache[destInt][destInt] != -1) {
+			if (cache[destInt][sourceInt] == -1) {
+				return -1;
+			}
+			return cache[destInt][sourceInt];
+		} else {
+			if (cache[sourceInt][destInt] == -1) {
+				return -1;
+			}
+			return cache[sourceInt][destInt];
+		}
+	}
+	
+	public static int pathLength(int sourceInt, int destInt) {
+		if (!(cache[destInt][destInt] != -1 || cache[sourceInt][sourceInt] != -1)) {
+		//if (!((cache.containsKey(destInt) && cache.get(destInt).containsKey(sourceInt)) || (cache.containsKey(sourceInt) && cache.get(sourceInt).containsKey(destInt)))) {
+			bfs(destInt);
 		}
 		if (cache[destInt][destInt] != -1) {
 			if (cache[destInt][sourceInt] == -1) {

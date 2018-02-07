@@ -11,7 +11,7 @@ public class TechManager {
 				Game.queueResearch(UnitType.Rocket);
 				return;
 			}
-			if (info.getLevel(UnitType.Worker) == 0 && Game.karboniteDeposits.size() >= 30) {
+			if (info.getLevel(UnitType.Worker) == 0 && Game.karboniteLocations.size() >= 30) {
 				Game.queueResearch(UnitType.Worker);
 				return;
 			}
