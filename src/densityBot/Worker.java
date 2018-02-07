@@ -183,7 +183,7 @@ public class Worker
 			{
 				GlobalStrategy.rush = true;
 				Constants.FACTORYBUILDRANGE = 4;
-				Constants.FACTORYREPLICATEPRESSURE = 500;
+				Constants.FACTORYREPLICATEPRESSURE = 1000;
 				Constants.WORKERREPLICATEDEPOSITWEIGHT = 0;
 				Constants.WORKERLIMIT = 0;
 				factoryGridCenter = nearestEnemy;
@@ -291,7 +291,7 @@ public class Worker
 		Robot[] nearbyWorkers = Game.senseNearbyUnits(worker.tile(), 30, UnitType.Worker, Game.TEAM);
 		score += Constants.WORKERREPLICATEDEPOSITWEIGHT * Game.karboniteDensity[worker.tile().getX() + worker.tile().getY() * Game.WIDTH] / nearbyWorkers.length;
 		
-		score -= nearbyWorkers.length * 15;
+		score -= nearbyWorkers.length * nearbyWorkers.length * 100;
 		return score;
 		
 	}
@@ -424,7 +424,7 @@ public class Worker
 		{
 			return true;
 		}
-		if (Game.currentBlueprints.size() > 1)
+		if (Game.currentBlueprints.size() > 2)
 		{
 			return false;
 		}
@@ -851,7 +851,7 @@ public class Worker
 				}
 			}
 		}
-		if (closestWorker != null && bestDistance > 0)
+		if (closestWorker != null && bestDistance > 3)
 		{
 			Robot[] nearbyEnemies = Game.senseCombatUnits(closestWorker.tile(), Constants.attackRange(UnitType.Ranger), Game.ENEMY);
 			if (nearbyEnemies.length == 0)

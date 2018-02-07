@@ -657,6 +657,10 @@ public class Game {
 		}
 		for (int deposit:depositsToDelete)
 		{
+			if (contestedKarbonite != null && contestedKarbonite.getX() == deposit % WIDTH && contestedKarbonite.getY() == deposit / WIDTH)
+			{
+				contestedKarbonite = null;
+			}
 			deleteDeposit(deposit);
 		}
 		

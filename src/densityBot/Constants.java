@@ -51,18 +51,18 @@ public class Constants {
 	public static final int MAGERUSHDISTANCE = 6;
 	
 	public static int WORKERLIMIT = 4;
-	public static int WORKERLIMITWEIGHT = 3;
+	public static int WORKERLIMITWEIGHT = 10;
 	public static int WORKERHARDCAP = 50;
-	public static int WORKERREPLICATEDEPOSITWEIGHT = 3;
+	public static int WORKERREPLICATEDEPOSITWEIGHT = 4;
 	public static final int FACTORYLIMIT = 9;
-	public static final int FACTORYGOAL = 4;
+	public static final int FACTORYGOAL = 5;
 	public static int FACTORYBUILDRANGE = 3;
-	public static int FACTORYREPLICATEPRESSURE = 300;
+	public static int FACTORYREPLICATEPRESSURE = 600;
 	public static final int ROCKETBUILDRANGE = 50;
 	public static final int FACTORYHALTROUND = 700;
 	public static final int TIMELOW = 1000;
 	
-	public static final int AGGRESSIVEHARVESTTIMER = 50;
+	public static final int AGGRESSIVEHARVESTTIMER = 40;
 	public static final int HARVESTABORTROUND = 300;
 	
 	// if we are below this amount of time, skip turn
