@@ -86,7 +86,12 @@ public class Constants {
 	public static final int RANGERDAMAGE = 30;
 	public static final int ROCKETBUILDLIMIT = 4;
 	
-	public static final int ROCKETMAXCAPACITY = 6;
+	public static int rocketCapacity() {
+		if (Game.researchInfo().getLevel(UnitType.Rocket) == 3) {
+			return 10;
+		}
+		return 6;
+	}
 	
 	public static final int attackRange(UnitType u) {
 		switch (u) {
@@ -136,7 +141,10 @@ public class Constants {
 	public static final int visionRange(UnitType  u) {
 		switch (u) {
 			case Ranger:
-				return 70 + Game.researchInfo().getLevel(UnitType.Ranger) >= 2 ? 30 : 0;
+				if (Game.researchInfo().getLevel(UnitType.Ranger) >= 2) {
+					return 100;
+				}
+				return 70;
 			case Knight: 
 				return 50;
 			case Mage:
@@ -151,7 +159,10 @@ public class Constants {
 	public static final int movementCooldown(UnitType u) {
 		switch (u) {
 			case Ranger:
-				return 30 - Game.researchInfo().getLevel(UnitType.Ranger) >= 1 ? 5 : 0;
+				if (Game.researchInfo().getLevel(UnitType.Ranger) >= 1) {
+					return 25;
+				}
+				return 30;
 			case Knight: 
 				return 15;
 			case Mage:
