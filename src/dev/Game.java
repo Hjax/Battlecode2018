@@ -681,6 +681,16 @@ public class Game {
 		
 		updateUnitTypes();
 		
+		outer: for (Robot e: allEnemies) {
+			if (!e.onMap()) continue;
+			for (Robot f: allyFactories) {
+				if (Pathfinding.pathLength(f.tile(), e.tile()) > -1) {
+					turnsSinceLastEnemy = 0;
+					break outer;
+				}
+			}
+		}
+		
 	
 		HashSet<Integer> depositsToDelete = new HashSet<>();
 		for (int deposit:karboniteLocations)
@@ -840,7 +850,6 @@ public class Game {
 			}
 			allRobots.add(bot);
 			if (bot.team() == enemy()) {
-				turnsSinceLastEnemy = 0;
 				allEnemies.add(bot);
 			} else {
 				allAllies.add(bot);

@@ -933,7 +933,7 @@ public class Worker
 			{
 				aggressivelyHarvest();
 			}
-			if (Game.allyWorkers.size() < Constants.WORKERHARDCAP)
+			if (Game.allyWorkers.size() < Constants.WORKERHARDCAP || Game.planet() == Planet.Mars)
 			{
 				replicateWorkers();
 			}

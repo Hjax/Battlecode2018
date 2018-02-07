@@ -8,7 +8,7 @@ public class GlobalStrategy {
 	public static int COMBATLIMIT = 50;
 	public static void run() {
 		if (Game.turnsSinceLastEnemy >= 100) {
-			COMBATLIMIT = 20;
+			COMBATLIMIT = 10;
 			rocketRush = true;
 		} else {
 			COMBATLIMIT = 50;
