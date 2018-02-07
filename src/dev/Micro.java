@@ -233,10 +233,13 @@ public class Micro {
 					target(r);
 				}
 			} else if (enemies.length * Constants.RANGERDAMAGE >= r.health() || (Game.enemyKnights.size() > 0 && Game.senseNearbyUnits(r.tile(), Constants.attackRange(r.unitType()), UnitType.Knight, Game.enemy()).length > 0)){
-				Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, Game.senseCombatUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy()))));
-				target(r);
-				if (r.canMove(d)) {
-					r.move(d);
+				enemies = Game.senseCombatUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy());
+				if (enemies.length > 0) {
+					Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, enemies)));
+					target(r);
+					if (r.canMove(d)) {
+						r.move(d);
+					}
 				}
 			}
 			target(r);
@@ -249,7 +252,7 @@ public class Micro {
 					r.move(d);
 				}
 			} else if (enemies.length != 0) {
-				Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, Game.senseCombatUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy()))));
+				Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, enemies)));
 				if (r.canMove(d)) {
 					heal(r);
 					r.move(d);
@@ -280,12 +283,15 @@ public class Micro {
 					target(r);
 				}
 			} if (r.moveHeat < 10){
-				Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, Game.senseNearbyUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy()))));
-				if (tooClose.length == 0) {
-					target(r);
-				}
-				if (r.canMove(d)) {
-					r.move(d);
+				enemies = Game.senseNearbyUnits(r.tile(), Constants.visionRange(UnitType.Ranger), Game.enemy());
+				if (enemies.length > 0 ) {
+					Direction d = Utilities.findNearestOccupiableDir(r.tile(), Utilities.oppositeDir(getAverageEnemyDirection(r, enemies)));
+					if (tooClose.length == 0) {
+						target(r);
+					}
+					if (r.canMove(d)) {
+						r.move(d);
+					}
 				}
 			}
 			target(r);
@@ -294,6 +300,7 @@ public class Micro {
  	
 	public static void run() {
 		for (Robot r: Game.allyHealers) {
+			if (r.inGarrison() || r.inSpace() || !r.onMap()) continue;
 			micro(r);
 		}
 		for (Robot r: Game.allyCombat) {
@@ -302,6 +309,7 @@ public class Micro {
 			micro(r); 
 		}
 		for (Robot r: Game.allyHealers) {
+			if (r.inGarrison() || r.inSpace() || !r.onMap()) continue;
 			heal(r);
 			overchargeTarget(r);
 		}

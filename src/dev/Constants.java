@@ -125,7 +125,7 @@ public class Constants {
 			case Knight: 
 				return 80;
 			case Mage:
-				return 60; // todo account for upgrades
+				return (int) (60 + Math.min(Game.researchInfo().getLevel(UnitType.Mage), 3) * 15);
 			case Healer:
 				return -10;
 			default:
@@ -136,7 +136,7 @@ public class Constants {
 	public static final int visionRange(UnitType  u) {
 		switch (u) {
 			case Ranger:
-				return 70; // todo account for upgrades
+				return 70 + Game.researchInfo().getLevel(UnitType.Ranger) >= 2 ? 30 : 0;
 			case Knight: 
 				return 50;
 			case Mage:
@@ -151,7 +151,7 @@ public class Constants {
 	public static final int movementCooldown(UnitType u) {
 		switch (u) {
 			case Ranger:
-				return 30;// todo account for upgrades
+				return 30 - Game.researchInfo().getLevel(UnitType.Ranger) >= 1 ? 5 : 0;
 			case Knight: 
 				return 15;
 			case Mage:

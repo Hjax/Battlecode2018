@@ -178,7 +178,12 @@ public class Robot {
 		return isInSpace;
 	}
 	public void attack(Robot target) {
-		target.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type)), 0);
+		if (target.type != UnitType.Knight) {
+			target.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type)), 0);
+		} else {
+			target.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type) + Math.min(target.researchLevel, 2) * 10), 0);
+		}
+		
 		attackHeat += Constants.attackCooldown(type);
 		if (type == UnitType.Healer) {
 			Game.gc.heal(gcId, target.gcId);
@@ -186,7 +191,11 @@ public class Robot {
 			if (type == UnitType.Mage) {
 				for (Robot r: Game.senseNearbyUnits(target.tile(), 2)) {
 					if (r != target) {
-						r.health = Math.max(Math.min(Constants.maxHealth(target.unitType()), target.health - Constants.attackDamage(type)), 0);
+						if (target.type != UnitType.Knight) {
+							r.health = Math.max(Math.min(Constants.maxHealth(r.unitType()), r.health - Constants.attackDamage(type)), 0);
+						} else {
+							r.health = Math.max(Math.min(Constants.maxHealth(r.unitType()), r.health - Constants.attackDamage(type) + Math.min(r.researchLevel, 2) * 10), 0);
+						}
 					}
 				}
 			}
