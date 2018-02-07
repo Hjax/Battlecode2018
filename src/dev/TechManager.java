@@ -7,7 +7,7 @@ public class TechManager {
 	public static void run() {
 		ResearchInfo info = Game.researchInfo();
 		if (!info.hasNextInQueue()) {
-			if (GlobalStrategy.rocketRush && info.getLevel(UnitType.Rocket) == 0) {
+			if (GlobalStrategy.rocketRush && info.getLevel(UnitType.Rocket) < 3) {
 				Game.queueResearch(UnitType.Rocket);
 				return;
 			}

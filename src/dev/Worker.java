@@ -712,11 +712,12 @@ public class Worker
 		{
 			return false;
 		}
-		
 		if (Game.allyRockets.size() > Constants.ROCKETBUILDLIMIT && Game.round() < Constants.FACTORYHALTROUND) {
 			return false;
 		}
-		
+		if (GlobalStrategy.rocketRush == true && Game.allyFactories.size() >= 2) {
+			return true;
+		}
 		if (Game.round >= 650)
 		{
 			return true;

@@ -66,8 +66,13 @@ public class Factory {
 		}
 		for (Robot f: Game.enemyFactories) {
 			if (best == null || Pathfinding.pathLength(f.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile())) {
-				best = f;
+				if (Pathfinding.pathLength(f.tile(), r.tile()) != -1) {
+					best = f;
+				}
 			}
+		}
+		if (best == null) {
+			return Constants.INFINITY;
 		}
 		return Pathfinding.pathLength(best.tile(), r.tile());
 	}

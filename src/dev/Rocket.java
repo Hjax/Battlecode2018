@@ -159,9 +159,10 @@ public class Rocket
 			if (!rocket.onMap()) {
 				continue;
 			}
-			while (assignmentCount.getOrDefault(rocket, 0) < Constants.ROCKETMAXCAPACITY) {
+			while (assignmentCount.getOrDefault(rocket, 0) < Constants.rocketCapacity()) {
 				Robot best = null;
 				for (Robot r: Game.allyCombat) {
+					if (!r.onMap()) continue;
 					if (!assignments.containsKey(r) && (best == null || Pathfinding.pathLength(best.tile(), rocket.tile()) > Pathfinding.pathLength(r.tile(), rocket.tile()))) {
 						best = r;
 					}
@@ -198,7 +199,7 @@ public class Rocket
 		{
 			System.out.printf("rocket has %d units loaded\n", rocket.structureGarrison().length);
 			if ((launchedRockets == 0 && rocket.structureGarrison().length > 1) || 
-					(rocket.structureGarrison().length == Constants.ROCKETMAXCAPACITY|| Game.round == 749) || 
+					(rocket.structureGarrison().length == Constants.rocketCapacity()|| Game.round == 749) || 
 					Game.senseCombatUnits(rocket.tile(), Constants.attackRange(UnitType.Ranger), Game.enemy()).length * Constants.RANGERDAMAGE >= rocket.health())
 			{
 				if (rocket.canLaunchRocket(landingGrid.peek())) 

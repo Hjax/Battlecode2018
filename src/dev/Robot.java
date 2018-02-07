@@ -292,9 +292,9 @@ public class Robot {
 	}
 	public boolean canAttack(Robot r) {
 		if (type == UnitType.Ranger) {
-			return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && r.tile().distanceSquaredTo(tile) > Constants.RANGERMINRAGE && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
+			return r.onMap() && attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && r.tile().distanceSquaredTo(tile) > Constants.RANGERMINRAGE && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
 		}
-		return attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
+		return r.onMap() && attackHeat < 10 && r.tile().distanceSquaredTo(tile) < Constants.attackRange(type) && (r.health() > 0 || (r.team() == Game.team() && r.health < Constants.maxHealth(r.unitType())));
 	}
 	public void load(Robot r) {
 		Game.gc.load(gcId, r.gcId);

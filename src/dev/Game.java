@@ -845,6 +845,9 @@ public class Game {
 		for (int i = 0; i < robots.size(); i++) {
 			Robot bot = Robot.getInstance(robots.get(i));
 			bot.update();
+			if (!bot.onMap()) {
+				continue;
+			}
 			if (bot.team() == TEAM && ( bot.unitType() == UnitType.Rocket || bot.unitType() == UnitType.Factory) && !bot.structureIsBuilt())
 			{
 				currentBlueprints.add(bot);
