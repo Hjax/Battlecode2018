@@ -151,7 +151,7 @@ public class Robot {
 		VecUnitID result = Game.gc.unit(gcId).structureGarrison();
 		Robot[] units = new Robot[(int) result.size()];
 		for (int i = 0; i < result.size(); i++) {
-			units[i] = new Robot(Game.gc.unit(result.get(i)));
+			units[i] = Robot.getInstance(Game.gc.unit(result.get(i)));
 		}
 		result.delete();
 		return units;

@@ -29,29 +29,121 @@ public class Factory {
 					}
 				}
 			}
-			if (r.structureGarrison().length > 0) {
-				for (Direction d: Game.moveDirections) {
-					if (r.canUnload(d)) {
-						r.unload(d);
-					}
-				}
-			}
+			
 			if (r.structureGarrison().length > 0)
 			{
-				for (Direction d: Game.moveDirections) {
-					Tile targetTile = Utilities.offsetInDirection(r.tile(), d, 1);
-					if (Game.hasUnitAtLocation(targetTile))
+				boolean unload = true;
+				Robot best = null;
+				Robot[] nearbyEnemies = Game.senseCombatUnits(r.tile(), 30, Game.ENEMY);
+				System.out.printf("\t\t\tTHERE ARE %d enemies nearby\n", nearbyEnemies.length);
+				if (Game.enemyFactories.size() > 0 && r.structureGarrison().length < 2 && nearbyEnemies.length == 0) 
+				{
+					for (Robot f: Game.enemyFactories) 
 					{
-						Robot blockingUnit = Game.senseUnitAtLocation(targetTile);
-						if (blockingUnit.unitType() == UnitType.Worker && blockingUnit.team() == Game.TEAM && r.canLoad(blockingUnit))
+						if (best == null || Pathfinding.pathLength(f.tile(), r.tile()) < Pathfinding.pathLength(best.tile(), r.tile())) 
 						{
-							r.load(blockingUnit);
-							if (r.canUnload(d)) {
-								r.unload(d);
+							best = f;
+						}
+					}
+					if (best.structureIsBuilt())
+					{
+						if (r.tile().distanceSquaredTo(best.tile()) < 50)
+						{
+							unload = false;
+						}
+					}
+				}
+				if (unload)
+				{
+					for (Direction d: Game.moveDirections) {
+						if (r.canUnload(d)) {
+							Robot unloadedUnit = r.structureGarrison()[0];
+
+							Game.allAllies.add(unloadedUnit);
+							switch (unloadedUnit.unitType())
+							{
+								case Worker:
+									Game.allyWorkers.add(unloadedUnit);
+									break;
+								case Ranger:
+									Game.allyRangers.add(unloadedUnit);
+									Game.allyCombat.add(unloadedUnit);
+									break;
+								case Mage:
+									Game.allyMages.add(unloadedUnit);
+									Game.allyCombat.add(unloadedUnit);
+									break;
+								case Knight:
+									Game.allyKnights.add(unloadedUnit);
+									Game.allyCombat.add(unloadedUnit);
+									break;
+								case Healer:
+									Game.allyHealers.add(unloadedUnit);
+									Game.allyCombat.add(unloadedUnit);
+									break;
+								default:
+									break;
+							}
+							r.unload(d);
+							unloadedUnit.update();
+							if (r.structureGarrison().length == 0)
+							{
 								break;
 							}
+							
 						}
-						
+					}
+					if (r.structureGarrison().length > 0)
+					{
+						for (Direction d: Game.moveDirections) {
+							Tile targetTile = Utilities.offsetInDirection(r.tile(), d, 1);
+							if (Game.hasUnitAtLocation(targetTile))
+							{
+								Robot blockingUnit = Game.senseUnitAtLocation(targetTile);
+								if (blockingUnit.unitType() == UnitType.Worker && blockingUnit.team() == Game.TEAM && r.canLoad(blockingUnit))
+								{
+									r.load(blockingUnit);
+									if (r.canUnload(d)) {
+										Robot unloadedUnit = r.structureGarrison()[0];
+
+										Game.allAllies.add(unloadedUnit);
+										
+										switch (unloadedUnit.unitType())
+										{
+											case Worker:
+												Game.allyWorkers.add(unloadedUnit);
+												break;
+											case Ranger:
+												Game.allyRangers.add(unloadedUnit);
+												Game.allyCombat.add(unloadedUnit);
+												break;
+											case Mage:
+												Game.allyMages.add(unloadedUnit);
+												Game.allyCombat.add(unloadedUnit);
+												System.out.printf("\t\t\tspawned a mage\n");
+												break;
+											case Knight:
+												Game.allyKnights.add(unloadedUnit);
+												Game.allyCombat.add(unloadedUnit);
+												break;
+											case Healer:
+												Game.allyHealers.add(unloadedUnit);
+												Game.allyCombat.add(unloadedUnit);
+												break;
+											default:
+												break;
+										}
+										r.unload(d);
+										unloadedUnit.update();
+										if (r.structureGarrison().length == 0)
+										{
+											break;
+										}
+										
+									}
+								}
+							}
+						}
 					}
 				}
 			}
