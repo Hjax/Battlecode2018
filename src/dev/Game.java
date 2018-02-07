@@ -745,12 +745,8 @@ public class Game {
 				enemyKarbonite.remove(0);
 			}
 			Tile location = Tile.getInstance(planet(), enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
-			System.out.printf("The enemy has %d deposits\n", enemyKarbonite.size());
-			System.out.printf("\tENEMY DEPOSIT SCORE = %d at (%d,%d)\n", enemyKarbonite.get(0).score, enemyKarbonite.get(0).deposit % WIDTH, enemyKarbonite.get(0).deposit / WIDTH);
-			System.out.printf("canSense: %b, scoreCheck: %b\n", !canSenseLocation(location), enemyKarbonite.get(0).score < (round() - 30) / 2);
 			while(!canSenseLocation(location) && enemyKarbonite.get(0).score < (round() - 30) / 2)
 			{
-				System.out.printf("\tDELETING ENEMY DEPOSIT\n");
 				deleteDeposit(enemyKarbonite.get(0).deposit);
 				if (karboniteLocations.size() == 0)
 				{
