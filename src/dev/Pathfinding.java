@@ -82,7 +82,7 @@ public class Pathfinding {
 		for (int direction: directions) {
 			int test = sourceInt + direction;
 			
-			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
+			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.canSenseLocation(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
 				if (best == 0 && (cache[destInt][sourceInt + best]) >= cache[destInt][test]) {
 					best = direction;
 				}
@@ -153,7 +153,7 @@ public class Pathfinding {
 		do
 		{
 			int test = sourceInt + directions[direction];
-			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
+			if (Math.abs(test % Game.WIDTH - sourceInt % Game.WIDTH) <= 1 && test >= 0 && test < Game.WIDTH * Game.HEIGHT &&Game.pathMap[test] && Game.canSenseLocation(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) && Game.isOccupiable(Tile.getInstance(Game.planet(), (test) % Game.WIDTH, (test)/Game.WIDTH)) > 0) {
 				if (best == 0 && (Game.karboniteDensity[sourceInt + best]) <= Game.karboniteDensity[test]) {
 					best = directions[direction];
 				}

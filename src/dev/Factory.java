@@ -15,7 +15,7 @@ public class Factory {
 					} 
 				}
 				else if (Game.round < Constants.FACTORYHALTROUND && Game.allyCombat.size() < GlobalStrategy.COMBATLIMIT) {
-					if (Game.allyRangers.size() + Game.allyKnights.size() > (2 * (Game.allyHealers.size() + 1))) {
+					if (Game.allyRangers.size() + Game.allyKnights.size() > (GlobalStrategy.HEALERRATIO * (Game.allyHealers.size() + 1))) {
 						if (Game.canAffordRobot(UnitType.Healer)) {
 							r.produceRobot(UnitType.Healer);
 						} 
